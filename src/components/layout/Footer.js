@@ -95,7 +95,7 @@ const Footer = () => {
                 236 448 9575
               </a>
             </Typography>
-            <Typography variant="body2" data-test="contact-email">
+            {/* <Typography variant="body2" data-test="contact-email">
               <IconButton 
                 component="a" 
                 href="mailto:hola@andirestaurante.com.ar" 
@@ -107,7 +107,7 @@ const Footer = () => {
               <a href="mailto:hola@andirestaurante.com.ar" data-test="email-link">
                 contacto@andirestaurante.com.ar
               </a>
-            </Typography>
+            </Typography> */}
             <Typography variant="body2" data-test="contact-address">
               <IconButton 
                 component="a" 
