@@ -134,7 +134,7 @@ const Cart = ({ onClose }) => {
           borderColor: 'black', // Borde gris al hacer hover
         },
         '&.Mui-focused fieldset': {
-          borderColor: 'black', // Borde negro cuando está enfocado
+          borderColor: '#DD98AD', // Borde negro cuando está enfocado
         },
       },
       '& .MuiInputLabel-root': {

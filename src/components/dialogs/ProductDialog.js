@@ -4,6 +4,7 @@ import { styled } from '@mui/system';
 import { useCart } from '../../contexts/CartContext'; // Usar el contexto de carrito
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close'; // Importamos el icono de cerrar
 
 // Estilos personalizados
 const ProductImage = styled('img')(({ theme }) => ({
@@ -30,14 +31,18 @@ const CustomDialog = styled(Dialog)(({ theme }) => ({
     borderTopLeftRadius: '20px', // Bordes redondeados
     borderTopRightRadius: '20px', // Bordes redondeados
     backgroundColor: '#000000',  // Fondo negro en el título
+    position: 'relative', // Para posicionar el botón de cerrar
   },
   '& .MuiDialogContent-root': {
     backgroundColor: '#9b8c8d', // Fondo gris para el contenido
-    color: 'black',           // Color de texto rosa
+    color: '#3b3b3bfa',           // Color de texto rosa
     textAlign: 'center',        // Centrar el texto del contenido
   },
   '& .MuiDialogActions-root': {
     backgroundColor: '#000000', // Fondo negro para las acciones
+    display: 'flex',
+    justifyContent: 'center',   // Centrar los botones
+    gap: '10px',                // Espacio entre los botones
   }
 }));
 
@@ -54,7 +59,7 @@ const CustomIconButton = styled(Button)(({ theme }) => ({
   minWidth: '30px',
   padding: '6px',
   color: 'black',             // Color de icono rosa
-  borderColor: 'black',         // Color de borde negro
+  borderColor: 'white',         // Color de borde negro
   '&:hover': {
     backgroundColor: 'white',   // Fondo negro en estado hover
     borderColor: 'black',       // Borde negro en estado hover
@@ -91,7 +96,21 @@ const ProductDialog = ({ open, onClose, product }) => {
 
   return (
     <CustomDialog open={open} onClose={onClose} TransitionComponent={Transition}>
-      <DialogTitle>{product?.nombre}</DialogTitle>
+      <DialogTitle>
+        {product?.nombre}
+        {/* Botón de cerrar en la parte superior derecha */}
+        <CustomIconButton
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            color: '#DD98AD',  
+          }}
+        >
+          <CloseIcon />
+        </CustomIconButton>
+      </DialogTitle>
       <DialogContent>
         {product?.imagen && (
           <ProductImage src={product.imagen} alt={product.nombre} />
@@ -118,9 +137,6 @@ const ProductDialog = ({ open, onClose, product }) => {
         <Divider sx={{ my: 2 }} />
       </DialogContent>
       <DialogActions>
-        <CustomButton onClick={onClose} variant="outlined">
-          Cancelar
-        </CustomButton>
         <CustomButton onClick={handleAddToCart} variant="outlined">
           Añadir al Pedido
         </CustomButton>
