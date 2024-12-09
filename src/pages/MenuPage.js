@@ -13,14 +13,14 @@ import CombinedDialog from '../components/dialogs/CombinedDialog';
 const MainContainer = styled(Box)(({ theme }) => ({
   flex: 1,
   backgroundColor: '#d9c9a3',
-  position: 'relative', // Para que el pseudo-elemento se posicione correctamente
+  position: 'relative',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
   padding: theme.spacing(4),
-  minHeight: '100vh', // Hace que el MainContainer ocupe al menos toda la altura de la ventana
+  minHeight: '100vh',
   boxSizing: 'border-box',
-  overflow: 'hidden', // Asegura que no se desborden elementos
+  overflow: 'hidden',
   [theme.breakpoints.down('sm')]: {
     padding: theme.spacing(2),
   },
@@ -31,19 +31,18 @@ const MainContainer = styled(Box)(({ theme }) => ({
     left: 0,
     width: '100%',
     height: '100%',
-    backgroundImage: `url(${backgroundImage})`, // Usa la imagen de fondo pasada como prop
+    backgroundImage: `url(${backgroundImage})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundAttachment: 'fixed', // Mantiene el fondo fijo al desplazarse
-    filter: 'blur(6px)', // Aplica el desenfoque
-    zIndex: 0, // Asegura que esté detrás del contenido
+    backgroundAttachment: 'fixed',
+    filter: 'blur(6px)',
+    zIndex: 0,
   },
   '& > *': {
-    position: 'relative', // Asegura que el contenido esté por encima del fondo
+    position: 'relative',
     zIndex: 1,
   },
 }));
-
 
 const MenuContainer = styled(Container)(({ theme }) => ({
   borderRadius: '12px',
@@ -60,12 +59,21 @@ const HighlightedText = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  padding: '12px 16px',
+  padding: '8px 24px',
   backgroundColor: 'rgba(0, 0, 0, 0.8)',
   color: '#fff',
   borderRadius: '8px',
   marginBottom: theme.spacing(4),
   textAlign: 'center',
+  width: '100%', // Asegura que ocupe todo el ancho disponible
+}));
+
+const TitleTypography = styled(Typography)(({ theme }) => ({
+  fontSize: '1.8rem',
+  margin: 0, // Elimina márgenes predeterminados del Typography
+  [theme.breakpoints.down('sm')]: {
+    fontSize: '1.5rem',
+  },
 }));
 
 const InfoBox = styled(Box)(({ theme }) => ({
@@ -74,19 +82,22 @@ const InfoBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
   boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
   marginTop: theme.spacing(4),
-  display: 'flex', // Flexbox para centrar contenido
-  flexDirection: 'column', // Asegura que los ítems estén en columna
-  alignItems: 'center', // Centra horizontalmente
-  justifyContent: 'center', // Centra verticalmente
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
 }));
 
 const IconContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center', // Centra horizontalmente
+  justifyContent: 'center',
+  textAlign: 'center',
   marginBottom: theme.spacing(2),
+  [theme.breakpoints.down('sm')]: {
+    justifyContent: 'flex-start',
+  },
 }));
-
 
 const Icon = styled('img')(({ theme }) => ({
   width: 30,
@@ -114,9 +125,9 @@ const MenuPage = () => {
     <MainContainer>
       <MenuContainer>
         <HighlightedText>
-          <Typography variant="h4" gutterBottom>
-           NUESTRO MENÚ
-          </Typography>
+          <TitleTypography variant="h4" gutterBottom>
+            NUESTRO MENÚ
+          </TitleTypography>
         </HighlightedText>
         <InfoBox>
           <Grid container spacing={2}>

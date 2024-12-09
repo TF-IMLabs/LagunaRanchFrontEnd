@@ -12,7 +12,6 @@ import ProductDialog from '../dialogs/ProductDialog';
 const BlinkText = styled(Typography)(({ theme }) => ({
     color: '#DD98AD', // Color principal
     fontSize: '0.9rem', // Tamaño de fuente ajustado para mejorar la legibilidad
-    marginLeft: theme.spacing(1), // Espacio más equilibrado a la izquierda
     animation: 'blink-animation 1.5s ease-in-out infinite', // Animación más suave
     padding: theme.spacing(0.3, 0.8), // Espaciado interno más balanceado
     border: '1px solid rgba(0, 0, 0, 0.2)', // Borde negro más suave
@@ -22,7 +21,9 @@ const BlinkText = styled(Typography)(({ theme }) => ({
     textTransform: 'uppercase', // Mayúsculas para dar estilo
     fontWeight: 'bold', // Texto más destacado
     letterSpacing: '0.05em', // Espaciado entre letras para mejorar la legibilidad
-    display: 'inline-block', // Asegura que se ajusta al contenido sin ocupar demasiado espacio
+    display: 'inline-block', // Hace que el fondo se ajuste al tamaño del texto
+    justifyContent: 'flex-end', // Alineación a la derecha
+    marginLeft: 'auto', // Asegura que se coloque a la derecha sin ocupar espacio extra
     '@keyframes blink-animation': {
         '0%': { opacity: 1 },
         '50%': { opacity: 0.3 }, // Más suave en el parpadeo
@@ -33,6 +34,7 @@ const BlinkText = styled(Typography)(({ theme }) => ({
         padding: theme.spacing(0.2, 0.5), // Espaciado reducido en pantallas pequeñas
     },
 }));
+
 
 const StyledListItem = styled(ListItem)(({ theme }) => ({
     backgroundColor: '#9b8c8d',
@@ -50,7 +52,9 @@ const StyledListItemText = styled(ListItemText)(({ theme }) => ({
         fontWeight: 'bold',
         fontSize: '1.2rem',
         display: 'flex',
-        alignItems: 'center',
+        justifyContent: 'space-between', // Para separar iconos y nombre
+        textAlign: 'justify', // Justifica el texto
+        width: '100%', // Aseguramos que ocupe todo el ancho
         [theme.breakpoints.down('sm')]: {
             fontSize: '1rem', // Reducir tamaño de fuente en móviles
         },
@@ -61,11 +65,13 @@ const StyledListItemText = styled(ListItemText)(({ theme }) => ({
         color: '#000000',
         fontWeight: 'bold',
         width: '100%',
+        textAlign: 'justify', // Justificar la descripción
         [theme.breakpoints.down('sm')]: {
             fontSize: '0.9rem', // Reducir tamaño de fuente en móviles
         },
     },
 }));
+
 
 const ProductList = React.memo(({ subcategoryId, products, onAddToCart }) => {
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -112,31 +118,65 @@ const ProductList = React.memo(({ subcategoryId, products, onAddToCart }) => {
 
     return (
         <>
-            <List>
-                {productList.length > 0 ? (
-                    productList.map((product) => (
-                        <StyledListItem key={product.id_producto} onClick={() => handleClick(product)}>
-                            <StyledListItemText
-                                primary={
-                                    <Typography component="span" variant="body1" style={{ display: 'flex', alignItems: 'center' }}>
-                                        {renderIcons(product)}
-                                        <span style={{ marginLeft: 8 }}>{product.nombre}</span>
-                                        {product.plato_del_dia === 1 && <BlinkText>Plato del Día!</BlinkText>} {/* Etiqueta después del nombre */}
-                                    </Typography>
-                                }
-                                secondary={
-                                    <Typography component="span" variant="body2" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                                        <span></span>
-                                        <span>${product.precio}</span>
-                                    </Typography>
-                                }
-                            />
-                        </StyledListItem>
-                    ))
-                ) : (
-                    <Typography>No hay productos para esta subcategoría.</Typography>
-                )}
-            </List>
+         <List>
+  {productList.length > 0 ? (
+    productList.map((product) => (
+
+     <StyledListItem key={product.id_producto} onClick={() => handleClick(product)}>
+  <StyledListItemText
+    primary={
+      <Typography
+        component="span"
+        variant="body1"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%' }}
+      >
+        {/* Nombre del producto primero */}
+        {product.nombre}
+
+        {/* Ahora los iconos */}
+        {renderIcons(product)} {/* Iconos alineados después del nombre */}
+
+        {/* Condicional para mostrar "Plato del Día" */}
+        {product.plato_del_dia === 1 && <BlinkText>Plato del Día!</BlinkText>}
+      </Typography>
+    }
+    secondary={
+      <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+        {/* Descripción del producto */}
+        <Typography
+          variant="body2"
+          style={{
+            color: '#3b3b3bfa',
+            marginBottom: 4,
+            textAlign: 'justify', // Justifica la descripción
+          }}
+        >
+          {product.descripcion || ''}
+        </Typography>
+        {/* Precio en negrita */}
+        <Typography
+          variant="body2"
+          style={{
+            fontWeight: 'bold',
+            display: 'flex',
+            justifyContent: 'flex-end', // Alinea el precio a la derecha
+          }}
+        >
+          <span>${product.precio}</span>
+        </Typography>
+      </div>
+    }
+  />
+</StyledListItem>
+
+
+    ))
+  ) : (
+    <Typography>No hay productos para esta subcategoría.</Typography>
+  )}
+</List>
+
+
             {selectedProduct && (
                 <ProductDialog
                     open={dialogOpen}

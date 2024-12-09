@@ -5,9 +5,10 @@ import { styled } from '@mui/system';
 import logo from '../../assets/amelie-logo-rosa.png';
 import CartIcon from '@mui/icons-material/ShoppingCart';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import AuthDialog from '..//dialogs/AuthDialog';
-import { useCart } from '../../contexts/CartContext'; 
-import AuthContext from '../../contexts/AuthContext'; 
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import AuthDialog from '../dialogs/AuthDialog';
+import { useCart } from '../../contexts/CartContext';
+import AuthContext from '../../contexts/AuthContext';
 import CombinedDialog from '../dialogs/CombinedDialog';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
@@ -31,7 +32,7 @@ const NavButton = styled(Button)(({ theme }) => ({
   color: '#DD98AD',
   fontSize: '20px',
   textTransform: 'none',
-  padding: '0 10px',  // Ajusta el padding horizontal para reducir el espacio
+  padding: '0 10px',
   '&:hover': {
     backgroundColor: 'black',
   },
@@ -45,8 +46,8 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   width: '100%',
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'center', // Esto asegura que los elementos estén alineados de manera correcta
-  padding: '0 10px', // Ajuste adicional de padding
+  alignItems: 'center',
+  padding: '0 10px',
 }));
 
 const Title = styled('div')(({ theme }) => ({
@@ -66,10 +67,9 @@ const CustomBadge = styled(Badge)(({ theme }) => ({
 }));
 
 const Header = () => {
-  const { cart, combinedDialogOpen, openCombinedDialog, closeCombinedDialog } = useCart(); 
-  const { auth } = useContext(AuthContext); 
+  const { cart, combinedDialogOpen, openCombinedDialog, closeCombinedDialog } = useCart();
+  const { auth } = useContext(AuthContext);
 
-  // Estado para manejar la apertura/cierre del diálogo de autenticación
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   const totalItems = cart.reduce((total, item) => total + item.cantidad, 0);
@@ -90,11 +90,14 @@ const Header = () => {
             <Logo src={logo} alt="Logo" data-test="logo" />
           </IconButton>
         </Title>
-        <div data-test="nav-buttons" style={{ display: 'flex', alignItems: 'center' }}> 
-          <NavButton component={Link} to="/" data-test="nav-button-inicio">Inicio</NavButton>
-          <NavButton component={Link} to="/menu" data-test="nav-button-menu">Menú</NavButton>
+        <div data-test="nav-buttons" style={{ display: 'flex', alignItems: 'center' }}>
+          <NavButton component={Link} to="/menu" data-test="nav-button-menu">
+            <MenuBookIcon fontSize="small" data-test="menu-icon" />
+          </NavButton>
           {auth.isAdmin && (
-            <NavButton component={Link} to="/admin" data-test="nav-button-admin">Admin</NavButton>
+            <NavButton component={Link} to="/admin" data-test="nav-button-admin">
+              Admin
+            </NavButton>
           )}
           <NavButton color="inherit" onClick={openCombinedDialog} data-test="cart-button">
             <CustomBadge badgeContent={totalItems} color="secondary" data-test="cart-badge">
