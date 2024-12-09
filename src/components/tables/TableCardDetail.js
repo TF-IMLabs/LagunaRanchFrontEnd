@@ -8,12 +8,17 @@ import { updateNotifications } from '../../services/waiterService';
 import { putProductsAsOld } from '../../services/cartService';
 import { updateOrderAndTableStatus } from '../../services/tableService';
 
+// Función para formatear la fecha sin convertirla a la zona horaria local (usando UTC)
+const formatDate = (dateString) => {
+  const date = new Date(dateString); // Convertimos la fecha ISO a un objeto Date
+  return date.toISOString().slice(0, 19).replace('T', ' '); // Formato: 2024-12-09 16:20:09
+};
+
 const TableCardDetail = ({
   table, order = [], handleReceiveOrder, handleUpdateTableStatus, handleOrderInProgress, handleOpenDialog,
 }) => {
   const [inProgressDisabled, setInProgressDisabled] = useState(false);
   const validOrder = Array.isArray(order) ? order : [];
-  const formatDate = (dateString) => new Date(dateString).toLocaleString();
 
   const handleOrderInProgressClick = () => {
     handleOrderInProgress(table.ultimo_id_pedido, table.n_mesa);
@@ -80,7 +85,11 @@ const TableCardDetail = ({
           <CardContent sx={{ p: 2 }}>
             <Typography variant="body2" sx={{ mb: 1 }}>Estado de la mesa: <strong>{table.estado}</strong></Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>Mozo: <strong>{table.nombre_mozo}</strong></Typography>
-            {validOrder[0] && <Typography variant="body2" sx={{ mb: 1 }}>Fecha y hora: <strong>{formatDate(validOrder[0].fecha_pedido)}</strong></Typography>}
+            {validOrder[0] && (
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Fecha y hora: <strong>{formatDate(validOrder[0].fecha_pedido)}</strong>
+              </Typography>
+            )}
             <Divider sx={{ my: 2 }} />
 
             {table.nota && <Typography variant="body2" sx={{ mb: 1, color: 'black' }}>Nota: <strong>{table.nota}</strong></Typography>}
