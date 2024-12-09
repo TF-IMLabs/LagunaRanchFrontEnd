@@ -150,8 +150,7 @@ const MenuSection = () => {
                 <Button variant="contained" sx={{ width: '300px', height: '50px', ml: 2, backgroundColor: 'black', color: '#DD98AD', '&:hover': { backgroundColor: 'grey' } }} onClick={() => setOpenSubcategoriesDialog(true)} startIcon={<AddIcon />}>Agregar/Eliminar Subcategoría</Button>
             </Box>
 
-            <TextField fullWidth label="Buscar en todo el menú" variant="outlined" value={searchTerm} onChange={handleSearchTermChange} sx={{ mb: 4 }} />
-
+            <TextField fullWidth label="Buscar en todo el menú" variant="outlined" value={searchTerm} onChange={handleSearchTermChange} sx={{ mb: 4, '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'black' }, '&:hover fieldset': { borderColor: 'black' }, '&.Mui-focused fieldset': { borderColor: '#DD98AD' } }, '& .MuiInputLabel-root': { color: 'black' }, '& .MuiInputLabel-root.Mui-focused': { color: 'black' } }} />
             <FormControl fullWidth sx={{ mb: 4 }}>
                 <InputLabel id="category-select-label">Filtrar por categoría</InputLabel>
                 <Select labelId="category-select-label" value={selectedCategory} onChange={handleCategoryChange}>

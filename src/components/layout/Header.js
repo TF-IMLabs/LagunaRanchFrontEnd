@@ -31,6 +31,7 @@ const NavButton = styled(Button)(({ theme }) => ({
   color: '#DD98AD',
   fontSize: '20px',
   textTransform: 'none',
+  padding: '0 10px',  // Ajusta el padding horizontal para reducir el espacio
   '&:hover': {
     backgroundColor: 'black',
   },
@@ -44,6 +45,8 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   width: '100%',
   display: 'flex',
   justifyContent: 'space-between',
+  alignItems: 'center', // Esto asegura que los elementos estén alineados de manera correcta
+  padding: '0 10px', // Ajuste adicional de padding
 }));
 
 const Title = styled('div')(({ theme }) => ({
@@ -73,46 +76,45 @@ const Header = () => {
 
   return (
     <StyledAppBar position="static" data-test="app-bar">
-  <StyledToolbar data-test="toolbar">
-    <div data-test="empty-div-left"></div>
-    <Title data-test="title">
-      <IconButton
-        edge="start"
-        color="inherit"
-        aria-label="logo"
-        component={Link}
-        to="/"
-        data-test="logo-button"
-      >
-        <Logo src={logo} alt="Logo" data-test="logo" />
-      </IconButton>
-    </Title>
-    <div data-test="nav-buttons">
-      <NavButton component={Link} to="/" data-test="nav-button-inicio">Inicio</NavButton>
-      <NavButton component={Link} to="/menu" data-test="nav-button-menu">Menú</NavButton>
-      {auth.isAdmin && (
-        <NavButton component={Link} to="/admin" data-test="nav-button-admin">Admin</NavButton>
-      )}
-      <NavButton color="inherit" onClick={openCombinedDialog} data-test="cart-button">
-        <CustomBadge badgeContent={totalItems} color="secondary" data-test="cart-badge">
-          <CartIcon data-test="cart-icon" />
-        </CustomBadge>
-      </NavButton>
-      {!auth.isAdmin && (
-        <NavButton
-          color="inherit"
-          onClick={() => setAuthDialogOpen(true)}
-          data-test="admin-settings-button"
-        >
-          <AdminPanelSettingsIcon data-test="admin-settings-icon" />
-        </NavButton>
-      )}
-    </div>
-  </StyledToolbar>
-  <CombinedDialog open={combinedDialogOpen} onClose={closeCombinedDialog} data-test="combined-dialog" />
-  <AuthDialog open={authDialogOpen} onClose={() => setAuthDialogOpen(false)} data-test="auth-dialog" />
-</StyledAppBar>
-
+      <StyledToolbar data-test="toolbar">
+        <div data-test="empty-div-left"></div>
+        <Title data-test="title">
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="logo"
+            component={Link}
+            to="/"
+            data-test="logo-button"
+          >
+            <Logo src={logo} alt="Logo" data-test="logo" />
+          </IconButton>
+        </Title>
+        <div data-test="nav-buttons" style={{ display: 'flex', alignItems: 'center' }}> 
+          <NavButton component={Link} to="/" data-test="nav-button-inicio">Inicio</NavButton>
+          <NavButton component={Link} to="/menu" data-test="nav-button-menu">Menú</NavButton>
+          {auth.isAdmin && (
+            <NavButton component={Link} to="/admin" data-test="nav-button-admin">Admin</NavButton>
+          )}
+          <NavButton color="inherit" onClick={openCombinedDialog} data-test="cart-button">
+            <CustomBadge badgeContent={totalItems} color="secondary" data-test="cart-badge">
+              <CartIcon fontSize="small" data-test="cart-icon" />
+            </CustomBadge>
+          </NavButton>
+          {!auth.isAdmin && (
+            <NavButton
+              color="inherit"
+              onClick={() => setAuthDialogOpen(true)}
+              data-test="admin-settings-button"
+            >
+              <AdminPanelSettingsIcon fontSize="small" data-test="admin-settings-icon" />
+            </NavButton>
+          )}
+        </div>
+      </StyledToolbar>
+      <CombinedDialog open={combinedDialogOpen} onClose={closeCombinedDialog} data-test="combined-dialog" />
+      <AuthDialog open={authDialogOpen} onClose={() => setAuthDialogOpen(false)} data-test="auth-dialog" />
+    </StyledAppBar>
   );
 };
 

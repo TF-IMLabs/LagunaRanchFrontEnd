@@ -56,18 +56,18 @@ export const CartProvider = ({ children }) => {
 
   const fetchCurrentOrder = async () => {
     if (tableId) {
-      console.log("Buscando orden actual para la mesa con ID:", tableId);
+     
       const existingOrder = await GetOrderByTable(tableId);
-      console.log("Resultado de GetOrderByTable:", existingOrder);
+     
       
       if (existingOrder && existingOrder.result.length > 0) {
         const firstResult = existingOrder.result[0];
         if (firstResult.mensaje === "La mesa no está ocupada.") {
-          console.log("La mesa no está ocupada.");
+         
           return null;
         } else {
           const orderId = firstResult.id_pedido;
-          console.log("Orden actual encontrada con ID:", orderId);
+          
           return orderId;
         }
       }
@@ -77,20 +77,20 @@ export const CartProvider = ({ children }) => {
 
   const sendOrder = async () => {
     if (cart.length === 0 || !tableId || !clientId) {
-      console.log("No se puede enviar el pedido: carrito vacío o faltan datos de mesa/cliente");
+      
       return;
     }
   
     setLoading(true);
     try {
-      console.log("Enviando pedido...");
+      
       const existingOrderId = await fetchCurrentOrder();
       let orderId = existingOrderId;
   
       let isNewOrder = false; // Variable para determinar si estamos creando una nueva orden
   
       if (!orderId) {
-        console.log("No se encontró una orden existente, creando nueva orden...");
+        
         // Crear nueva orden si no existe
         const orderData = {
           id_cliente: parseInt(clientId, 10),
@@ -98,11 +98,11 @@ export const CartProvider = ({ children }) => {
         };
   
         const response = await createOrder(orderData);
-        console.log("Respuesta de createOrder:", response);
+       
         if (response && response.orderId) {
           orderId = response.orderId;
           isNewOrder = true; // Marcamos que se ha creado una nueva orden
-          console.log("Nueva orden creada con ID:", orderId);
+          
         } else {
           throw new Error('No se pudo obtener el orderId después de crear la orden');
         }
@@ -112,20 +112,20 @@ export const CartProvider = ({ children }) => {
         throw new Error('No se pudo obtener un ID de orden válido');
       }
   
-      console.log("Obteniendo detalles de la orden existente...");
+      
       const existingOrderDetails = await GetOrderByTable(tableId);
-      console.log("Detalles de la orden existente:", existingOrderDetails);
+      
       
       let itemsUpdated = false;  // Flag para verificar si se han agregado nuevos elementos
   
       for (const item of cart) {
-        console.log("Procesando producto:", item.product.id_producto);
+        
         const existingDetail = existingOrderDetails.result.find(
           detail => detail.id_producto === item.product.id_producto && detail.nuevo === 0
         );
   
         if (existingDetail) {
-          console.log("Actualizando cantidad para el producto existente:", item.product.id_producto);
+          
           await updateOrderDetail({
             id_pedido: orderId,
             id_producto: item.product.id_producto,
@@ -134,7 +134,7 @@ export const CartProvider = ({ children }) => {
           
           itemsUpdated = true;
         } else {
-          console.log("Agregando nuevo producto a la orden:", item.product.id_producto);
+         
           const productData = {
             orderId: parseInt(orderId, 10),
             id_producto: parseInt(item.product.id_producto, 10),
@@ -147,7 +147,7 @@ export const CartProvider = ({ children }) => {
       }
   
       if (orderId && itemsUpdated && !isNewOrder) {
-        console.log("Actualizando el estado de la orden a 'Actualizado'...");
+       
         await updateOrderStatus({ id_pedido: orderId, estado: 'Actualizado' });
       }
   
@@ -164,10 +164,10 @@ export const CartProvider = ({ children }) => {
         return null;
       }));
   
-      console.log("Vaciando carrito...");
+   
       emptyCart();
       setSuccessDialogOpen(true);
-      console.log("Pedido enviado con éxito.");
+      
     } catch (error) {
       console.error('Error al enviar el pedido:', error.response ? error.response.data : error.message);
       alert('Error al enviar el pedido: ' + (error.response ? error.response.data : error.message));

@@ -22,9 +22,6 @@ const TableContainerComponent = ({
     setProductToDelete, 
     setOpenDialog 
 }) => {
-    // Log de depuración para ver qué categorías se están filtrando y cómo están relacionadas
-    console.log('Categories:', categories);
-    console.log('Filtered Products:', filteredProducts);
 
     return (
         <TableContainer component={Paper}>
@@ -43,7 +40,6 @@ const TableContainerComponent = ({
                 <TableBody>
                     {filteredProducts.length ? (
                         filteredProducts.map((product) => {
-                            console.log(`Producto ID: ${product.id_producto}, Categoria ID: ${product.id_categoria}`); // Log adicional para depuración
 
                             return (
                                 <TableRow key={product.id_producto}>

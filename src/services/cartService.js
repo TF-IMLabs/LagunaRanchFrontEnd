@@ -13,7 +13,7 @@ export const createOrder = async (orderData) => {
 
 export const addProductToOrder = async (productData) => {
   try {
-    console.log('Datos que se envían al backend:', productData);
+
 
     const response = await apiClient.post('/cart/add', {
       orderId: productData.orderId, // Incluye orderId
@@ -22,7 +22,7 @@ export const addProductToOrder = async (productData) => {
       // No envíes `p_del_dia` si no es necesario
     });
 
-    console.log('Respuesta del servidor:', response.data);
+   
     return response.data; // Retorna los datos de la respuesta
   } catch (error) {
     console.error('Error al agregar el producto a la orden:', error);
