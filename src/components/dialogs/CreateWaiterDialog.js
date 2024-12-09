@@ -8,6 +8,11 @@ import {
     Button,
     Snackbar,
     Alert,
+    MenuItem,
+    Select,
+    InputLabel,
+    FormControl,
+    FormHelperText,
 } from '@mui/material';
 import { styled } from '@mui/system';
 import { createWaiter } from '../../services/waiterService';
@@ -19,7 +24,7 @@ const CustomDialog = styled(Dialog)(({ theme }) => ({
     },
     '& .MuiPaper-root': {
         borderRadius: '20px',
-        boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)',
+        boxShadow: 'none',
         backgroundColor: 'black',
     },
     '& .MuiDialogTitle-root': {
@@ -27,21 +32,40 @@ const CustomDialog = styled(Dialog)(({ theme }) => ({
         color: '#DD98AD',
         fontWeight: 'bold',
         borderRadius: '20px 20px 0px 0px',
-        boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)',
-        textAlign: 'center', // Centramos el título
+        textAlign: 'center',
     },
     '& .MuiDialogContent-root': {
-        backgroundColor: '#9b8c8d',
+        backgroundColor: 'rgb(155, 140, 141)',
         color: 'black',
     },
 }));
 
 const CustomButton = styled(Button)(({ theme }) => ({
     color: '#DD98AD',
-    borderColor: 'white',
+    borderColor: 'rgb(155, 140, 141)',
     '&:hover': {
         backgroundColor: 'grey',
         borderColor: 'grey',
+    },
+}));
+
+const CustomFormControl = styled(FormControl)(({ theme }) => ({
+    '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+            borderColor: 'black',
+        },
+        '&:hover fieldset': {
+            borderColor: 'grey',
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: '#DD98AD',
+        },
+    },
+    '& .MuiInputLabel-root': {
+        color: 'black',
+    },
+    '& .MuiFormHelperText-root': {
+        color: 'red',
     },
 }));
 
@@ -51,8 +75,14 @@ const CreateWaiterDialog = ({ open, onClose }) => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+    const [error, setError] = useState(false);
 
     const handleSubmit = async () => {
+        if (!turno) {
+            setError(true);
+            return;
+        }
+
         try {
             const { message } = await createWaiter(nombre, turno);
             setSnackbarMessage(message);
@@ -61,6 +91,7 @@ const CreateWaiterDialog = ({ open, onClose }) => {
             onClose();
             setNombre('');
             setTurno('');
+            setError(false);
         } catch (error) {
             setSnackbarMessage(error.message);
             setSnackbarSeverity('error');
@@ -77,77 +108,50 @@ const CreateWaiterDialog = ({ open, onClose }) => {
             <CustomDialog open={open} onClose={onClose}>
                 <DialogTitle>Crear Nuevo Mozo</DialogTitle>
                 <DialogContent>
-                <TextField
-    autoFocus
-    margin="dense"
-    label="Nombre"
-    type="text"
-    fullWidth
-    variant="outlined"
-    value={nombre}
-    onChange={(e) => setNombre(e.target.value)}
-    InputProps={{
-        style: {
-            color: 'black',
-            borderRadius: '8px',
-        },
-    }}
-    InputLabelProps={{
-        style: {
-            color: 'black', // Color del label
-        },
-    }}
-    sx={{
-        '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-                borderColor: 'black', // Color del borde por defecto
-            },
-            '&:hover fieldset': {
-                borderColor: 'black', // Color del borde al pasar el mouse
-            },
-            '&.Mui-focused fieldset': {
-                borderColor: '#DD98AD', // Color del borde al enfocar
-            },
-        },
-    }}
-/>
-<TextField
-    margin="dense"
-    label="Turno"
-    type="text"
-    fullWidth
-    variant="outlined"
-    value={turno}
-    onChange={(e) => setTurno(e.target.value)}
-    InputProps={{
-        style: {
-            color: 'black',
-            borderRadius: '8px',
-        },
-    }}
-    InputLabelProps={{
-        style: {
-            color: 'black', // Color del label
-        },
-    }}
-    sx={{
-        '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-                borderColor: 'black', // Color del borde por defecto
-            },
-            '&:hover fieldset': {
-                borderColor: 'black', // Color del borde al pasar el mouse
-            },
-            '&.Mui-focused fieldset': {
-                borderColor: '#DD98AD', // Color del borde al enfocar
-            },
-        },
-    }}
-/>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Nombre"
+                        type="text"
+                        fullWidth
+                        variant="outlined"
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        InputLabelProps={{
+                            style: { color: 'black' },
+                        }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: 'black' },
+                                '&:hover fieldset': { borderColor: 'grey' },
+                                '&.Mui-focused fieldset': { borderColor: '#DD98AD' },
+                            },
+                        }}
+                    />
+                    <CustomFormControl fullWidth margin="dense" variant="outlined" error={error}>
+                        <InputLabel id="turno-select-label">Turno</InputLabel>
+                        <Select
+                            labelId="turno-select-label"
+                            value={turno}
+                            onChange={(e) => {
+                                setTurno(e.target.value);
+                                setError(false);
+                            }}
+                        >
+                            <MenuItem value="Mañana">Mañana</MenuItem>
+                            <MenuItem value="Tarde">Tarde</MenuItem>
+                            <MenuItem value="Noche">Noche</MenuItem>
+                        </Select>
+                        {error && <FormHelperText>Seleccionar un turno es obligatorio</FormHelperText>}
+                    </CustomFormControl>
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
-                    <CustomButton onClick={onClose}>Cancelar</CustomButton>
-                    <CustomButton onClick={handleSubmit}>Crear</CustomButton>
+                    <CustomButton onClick={onClose} variant="outlined">
+                        Cancelar
+                    </CustomButton>
+                    <CustomButton onClick={handleSubmit} variant="outlined">
+                        Crear
+                    </CustomButton>
                 </DialogActions>
             </CustomDialog>
 

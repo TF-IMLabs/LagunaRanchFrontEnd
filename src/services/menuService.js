@@ -65,7 +65,6 @@ export const updateProduct = async (productId, productData) => {
     throw error;
   }
 };
-
 // Eliminar un producto
 export const deleteProduct = async (productId) => {
   try {
@@ -80,7 +79,7 @@ export const deleteProduct = async (productId) => {
 // Crear una categoría
 export const createCategory = async (categoryData) => {
   try {
-    const response = await apiClient.post('/menu/categories', categoryData);
+    const response = await apiClient.post('/menu/category', categoryData);
     return response.data;
   } catch (error) {
     console.error('Error al crear categoría:', error);
@@ -91,7 +90,7 @@ export const createCategory = async (categoryData) => {
 // Eliminar una categoría
 export const deleteCategory = async (categoryId) => {
   try {
-    const response = await apiClient.delete(`/menu/categories/${categoryId}`);
+    const response = await apiClient.delete(`/menu/category/${categoryId}`);
     return response.data;
   } catch (error) {
     console.error(`Error al eliminar la categoría con ID ${categoryId}:`, error);
@@ -116,6 +115,50 @@ export const updatePlatoDelDia = async (id_producto, p_del_dia) => {
     return response.data;
   } catch (error) {
     console.error('Error al actualizar el estado de plato del día:', error);
+    throw error;
+  }
+};
+
+// Crear una subcategoría
+export const createSubCategory = async (subCategoryData) => {
+  try {
+    const response = await apiClient.post('/menu/subCategory', subCategoryData);
+    return response.data;
+  } catch (error) {
+    console.error('Error al crear subcategoría:', error);
+    throw error;
+  }
+};
+
+// Actualizar una categoría
+export const updateCategory = async (categoryId, categoryData) => {
+  try {
+    const response = await apiClient.put('/menu/category', { id: categoryId, ...categoryData });
+    return response.data;
+  } catch (error) {
+    console.error(`Error al actualizar la categoría con ID ${categoryId}:`, error);
+    throw error;
+  }
+};
+
+// Actualizar una subcategoría
+export const updateSubCategory = async (subCategoryId, subCategoryData) => {
+  try {
+    const response = await apiClient.put('/menu/subCategory', { id: subCategoryId, ...subCategoryData });
+    return response.data;
+  } catch (error) {
+    console.error(`Error al actualizar la subcategoría con ID ${subCategoryId}:`, error);
+    throw error;
+  }
+};
+
+// Eliminar una subcategoría
+export const deleteSubCategory = async (subCategoryId) => {
+  try {
+    const response = await apiClient.delete(`/menu/subCategory/${subCategoryId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al eliminar la subcategoría con ID ${subCategoryId}:`, error);
     throw error;
   }
 };

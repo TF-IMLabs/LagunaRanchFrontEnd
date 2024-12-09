@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { getSubcategoriesByCategoryId, getAllProducts } from '../../services/menuService';
 import ProductList from './ProductList';
 import { styled } from '@mui/material/styles';
-import latabernaImage from '../../assets/lataberna.jpg'; // Asegúrate de que la ruta sea correcta
 
 const CustomAccordion = styled(Accordion)(({ theme }) => ({
     borderRadius: '12px',
@@ -111,43 +110,21 @@ const SubcategoryAccordion = ({ categoryId }) => {
                                 aria-controls={`${panelId}-content`}
                                 id={`${panelId}-header`}
                             >
-<Typography
-    variant="h5"
-    sx={{
-        fontSize: {
-            xs: '1rem',
-            sm: '1.2rem',
-            md: '1.5rem',
-            lg: '1.7rem',
-        },
-        display: 'flex',
-        alignItems: 'center',
-    }}
->
-    {subcategory.nombre} {/* Muestra el nombre primero */}
-    {subcategory.id_subcategoria === 4 && (
-        <div style={{
-            width: '105px',
-            height: '35px',
-            borderRadius: '15px', 
-            overflow: 'hidden',
-            marginLeft: '10px', 
-            display: 'flex',
-            justifyContent: 'center', 
-            alignItems: 'center', 
-        }}>
-            <img 
-                src={latabernaImage} 
-                alt="Imagen especial" 
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                }} 
-            />
-        </div>
-    )}
-</Typography>
+                                <Typography
+                                    variant="h5"
+                                    sx={{
+                                        fontSize: {
+                                            xs: '1rem',
+                                            sm: '1.2rem',
+                                            md: '1.5rem',
+                                            lg: '1.7rem',
+                                        },
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    {subcategory.nombre} {/* Solo muestra el nombre */}
+                                </Typography>
                             </CustomAccordionSummary>
                             <CustomAccordionDetails>
                                 {/* Renderizar la lista de productos dentro de las subcategorías filtradas */}

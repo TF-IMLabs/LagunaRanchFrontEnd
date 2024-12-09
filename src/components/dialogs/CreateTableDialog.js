@@ -10,6 +10,7 @@ import {
     Select,
     InputLabel,
     FormControl,
+    FormHelperText,
 } from '@mui/material';
 import { styled } from '@mui/system';
 import { createTable } from '../../services/tableService';
@@ -21,7 +22,7 @@ const CustomDialog = styled(Dialog)(({ theme }) => ({
     },
     '& .MuiPaper-root': {
         borderRadius: '20px',
-        boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)',
+        boxShadow: 'none',
         backgroundColor: 'black',
     },
     '& .MuiDialogTitle-root': {
@@ -29,34 +30,77 @@ const CustomDialog = styled(Dialog)(({ theme }) => ({
         color: '#DD98AD',
         fontWeight: 'bold',
         borderRadius: '20px 20px 0px 0px',
-        boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)',
-        textAlign: 'center', // Centramos el título
+        textAlign: 'center',
     },
     '& .MuiDialogContent-root': {
-        backgroundColor: '#9b8c8d',
+        backgroundColor: 'rgb(155, 140, 141)',
         color: 'black',
     },
 }));
 
 const CustomButton = styled(Button)(({ theme }) => ({
     color: '#DD98AD',
-    borderColor: 'white',
+    borderColor: 'rgb(155, 140, 141)',
     '&:hover': {
         backgroundColor: 'grey',
         borderColor: 'grey',
     },
 }));
 
+const CustomTextField = styled(TextField)(({ theme }) => ({
+    '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+            borderColor: 'black',
+        },
+        '&:hover fieldset': {
+            borderColor: 'grey',
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: '#DD98AD',
+        },
+    },
+    '& .MuiInputLabel-root': {
+        color: 'black',
+    },
+}));
+
+const CustomFormControl = styled(FormControl)(({ theme }) => ({
+    '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+            borderColor: 'black',
+        },
+        '&:hover fieldset': {
+            borderColor: 'grey',
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: '#DD98AD',
+        },
+    },
+    '& .MuiInputLabel-root': {
+        color: 'black',
+    },
+    '& .MuiFormHelperText-root': {
+        color: 'red',
+    },
+}));
+
 const CreateTableDialog = ({ open, onClose, waiters = [] }) => {
     const [capacidad, setCapacidad] = useState('');
     const [id_mozo, setIdMozo] = useState('');
+    const [error, setError] = useState(false);
 
     const handleSubmit = async () => {
+        if (!id_mozo) {
+            setError(true);
+            return;
+        }
+
         try {
             await createTable({ capacidad, id_mozo });
             onClose();
             setCapacidad('');
             setIdMozo('');
+            setError(false);
         } catch (error) {
             console.error('Error al crear la mesa:', error);
         }
@@ -66,7 +110,7 @@ const CreateTableDialog = ({ open, onClose, waiters = [] }) => {
         <CustomDialog open={open} onClose={onClose}>
             <DialogTitle>Crea una Nueva Mesa</DialogTitle>
             <DialogContent>
-                <TextField
+                <CustomTextField
                     autoFocus
                     margin="dense"
                     label="Capacidad"
@@ -76,12 +120,15 @@ const CreateTableDialog = ({ open, onClose, waiters = [] }) => {
                     value={capacidad}
                     onChange={(e) => setCapacidad(e.target.value)}
                 />
-                <FormControl fullWidth margin="dense" variant="outlined">
+                <CustomFormControl fullWidth margin="dense" variant="outlined" error={error}>
                     <InputLabel id="mozo-select-label">Seleccionar Mozo</InputLabel>
                     <Select
                         labelId="mozo-select-label"
                         value={id_mozo}
-                        onChange={(e) => setIdMozo(e.target.value)}
+                        onChange={(e) => {
+                            setIdMozo(e.target.value);
+                            setError(false);
+                        }}
                     >
                         {waiters.length > 0 ? (
                             waiters.map((waiter) => (
@@ -93,11 +140,16 @@ const CreateTableDialog = ({ open, onClose, waiters = [] }) => {
                             <MenuItem disabled>No hay mozos disponibles</MenuItem>
                         )}
                     </Select>
-                </FormControl>
+                    {error && <FormHelperText>Seleccionar un mozo es obligatorio</FormHelperText>}
+                </CustomFormControl>
             </DialogContent>
-            <DialogActions sx={{ justifyContent: 'center', gap: 2 }}> {/* Centramos los botones */}
-                <CustomButton onClick={onClose}>Cancelar</CustomButton>
-                <CustomButton onClick={handleSubmit}>Crear</CustomButton>
+            <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
+                <CustomButton onClick={onClose} variant="outlined">
+                    Cancelar
+                </CustomButton>
+                <CustomButton onClick={handleSubmit} variant="outlined">
+                    Crear
+                </CustomButton>
             </DialogActions>
         </CustomDialog>
     );

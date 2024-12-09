@@ -8,6 +8,8 @@ import {
   TextField,
   IconButton,
   Slide,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import AuthContext from "../../contexts/AuthContext";
@@ -23,37 +25,39 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const CustomDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-container": {
     backdropFilter: "blur(10px)", // Añadir desenfoque de fondo
+    overflow: "visible", // Permitir crecimiento dinámico del diálogo
   },
   "& .MuiPaper-root": {
-    borderRadius: "20px", // Bordes redondeados
-    boxShadow: "none", // Eliminar sombra para evitar el borde visible
-    backgroundColor: "rgba(0, 0, 0, 0.9)", // Fondo uniforme para todo el diálogo
+    borderRadius: "20px",
+    boxShadow: "none",
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    overflow: "visible", // Evitar scroll interno
   },
   "& .MuiDialogTitle-root": {
-    color: "#DD98AD", // Cambiar color de fuente a blanco
-    textAlign: "center", // Centrar el texto del título
-    borderTopLeftRadius: "20px", // Bordes redondeados
-    borderTopRightRadius: "20px", // Bordes redondeados
+    color: "#DD98AD",
+    textAlign: "center",
+    borderTopLeftRadius: "20px",
+    borderTopRightRadius: "20px",
   },
   "& .MuiDialogContent-root": {
-    backgroundColor: "rgb(155, 140, 141)", // Hacer coincidir el color de fondo del contenido
-    color: "#DD98AD", // Cambiar color de fuente a blanco
-    textAlign: "center", // Centrar el texto del contenido
+    backgroundColor: "rgb(155, 140, 141)",
+    color: "#DD98AD",
+    textAlign: "center",
+    padding: theme.spacing(2),
   },
   "& .MuiDialogActions-root": {
-    justifyContent: "center", // Centrar los botones en el diálogo
-    //
-    borderBottomLeftRadius: "20px", // Bordes redondeados
-    borderBottomRightRadius: "20px", // Bordes redondeados
+    justifyContent: "center",
+    borderBottomLeftRadius: "20px",
+    borderBottomRightRadius: "20px",
   },
 }));
 
 const CustomButton = styled(Button)(({ theme }) => ({
-  color: "#DD98AD", // Cambiar color de fuente a blanco
-  borderColor: "rgb(155, 140, 141)", // Cambiar color de borde a blanco
+  color: "#DD98AD",
+  borderColor: "rgb(155, 140, 141)",
   "&:hover": {
     backgroundColor: "black",
-    borderColor: "black", // Borde blanco en estado hover
+    borderColor: "black",
   },
 }));
 
@@ -62,6 +66,9 @@ const AuthDialog = ({ open, onClose }) => {
   const [password, setPassword] = useState("");
   const { loginAsAdmin } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // Efecto para manejar el foco al abrir el diálogo
   useEffect(() => {
@@ -83,23 +90,24 @@ const AuthDialog = ({ open, onClose }) => {
   };
 
   const handleClose = () => {
-    onClose(); // Cierra el diálogo
-    navigate("/"); // Redirige a la página de inicio
+    onClose();
+    navigate("/");
   };
 
   return (
     <CustomDialog
       open={open}
-      onClose={handleClose} // Redirige al cerrar el diálogo
+      onClose={handleClose}
       fullWidth
       maxWidth="sm"
-      aria-labelledby="auth-dialog-title" // Etiqueta aria para accesibilidad
-      TransitionComponent={Transition} // Añadir la transición
+      fullScreen={isMobile} // Pantalla completa en dispositivos móviles
+      aria-labelledby="auth-dialog-title"
+      TransitionComponent={Transition}
     >
       <DialogTitle id="auth-dialog-title">
         Iniciar Sesión
         <IconButton
-          onClick={handleClose} // Redirige a la página de inicio al hacer clic en la "X"
+          onClick={handleClose}
           sx={{ position: "absolute", right: 8, top: 8 }}
           aria-label="cerrar"
         >
@@ -118,22 +126,22 @@ const AuthDialog = ({ open, onClose }) => {
           onChange={(e) => setUsername(e.target.value)}
           sx={{
             "& .MuiInputBase-root": {
-              backgroundColor: "transparent", // Fondo transparente
+              backgroundColor: "transparent",
             },
             "& .MuiInput-underline:before": {
-              borderBottomColor: "black", // Borde inferior negro en estado normal
+              borderBottomColor: "black",
             },
             "& .MuiInput-underline:hover:before": {
-              borderBottomColor: "black", // Borde inferior negro al pasar el cursor
+              borderBottomColor: "black",
             },
             "& .MuiInput-underline:after": {
-              borderBottomColor: "black", // Borde inferior negro al hacer focus
+              borderBottomColor: "black",
             },
             "& .MuiInputLabel-root": {
-              color: "black", // Label en negro
+              color: "black",
             },
             "& .MuiInputLabel-root.Mui-focused": {
-              color: "black", // Label negro al hacer focus
+              color: "black",
             },
           }}
         />
@@ -147,22 +155,22 @@ const AuthDialog = ({ open, onClose }) => {
           onChange={(e) => setPassword(e.target.value)}
           sx={{
             "& .MuiInputBase-root": {
-              backgroundColor: "transparent", // Fondo transparente
+              backgroundColor: "transparent",
             },
             "& .MuiInput-underline:before": {
-              borderBottomColor: "black", // Borde inferior negro en estado normal
+              borderBottomColor: "black",
             },
             "& .MuiInput-underline:hover:before": {
-              borderBottomColor: "black", // Borde inferior negro al pasar el cursor
+              borderBottomColor: "black",
             },
             "& .MuiInput-underline:after": {
-              borderBottomColor: "black", // Borde inferior negro al hacer focus
+              borderBottomColor: "black",
             },
             "& .MuiInputLabel-root": {
-              color: "black", // Label en negro
+              color: "black",
             },
             "& .MuiInputLabel-root.Mui-focused": {
-              color: "black", // Label negro al hacer focus
+              color: "black",
             },
           }}
         />

@@ -9,37 +9,52 @@ const CustomDialog = styled(Dialog)(({ theme }) => ({
     },
     '& .MuiPaper-root': {
         borderRadius: '20px', // Bordes redondeados
-        boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)', // Sombra sutil
-        backgroundColor: '#fff', // Color de fondo blanco para mayor elegancia
+        boxShadow: 'none', // Sin sombra
+        backgroundColor: 'black', // Fondo personalizado
     },
     '& .MuiDialogTitle-root': {
-        backgroundColor: '#d9c9a3',
-        color: '#3e2d1f',
+        backgroundColor: 'black', // Fondo negro para el título
+        color: '#DD98AD', // Color rosa para el texto
         fontWeight: 'bold',
         borderRadius: '20px 20px 0px 0px', // Bordes redondeados
-        boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)', // Sombra sutil
+        textAlign: 'center', // Centramos el título
     },
     '& .MuiDialogContent-root': {
-        backgroundColor: '#ffffff',
-        color: '#3e2d1f',
+        backgroundColor: 'rgb(155, 140, 141)', // Fondo de contenido
+        color: 'black',
     },
 }));
 
 const CustomButton = styled(Button)(({ theme }) => ({
-    color: '#3e2d1f',
-    borderColor: '#3e2d1f',
+    color: '#DD98AD', // Color de texto de los botones
+    borderColor: 'rgb(155, 140, 141)', // Borde gris
     '&:hover': {
-        backgroundColor: '#f5f5dc',
-        borderColor: '#3e2d1f',
+        backgroundColor: 'grey', // Fondo gris al pasar el ratón
     },
 }));
 
 const WaiterDialog = ({ open, onClose, waiters, selectedWaiter, setSelectedWaiter, handleUpdateWaiter }) => {
     return (
         <CustomDialog open={open} onClose={onClose}>
-            <DialogTitle variant='h5'>Seleccionar Mozo</DialogTitle>
+            <DialogTitle>Seleccionar Mozo</DialogTitle>
             <DialogContent>
-                <FormControl fullWidth variant="outlined">
+                {/* Aquí aplicamos los estilos correctamente */}
+                <FormControl fullWidth variant="outlined" sx={{
+                    '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                            borderColor: 'black', // Borde por defecto
+                        },
+                        '&:hover fieldset': {
+                            borderColor: 'grey', // Borde al pasar el ratón
+                        },
+                        '&.Mui-focused fieldset': {
+                            borderColor: '#DD98AD', // Borde rosa al enfocar
+                        },
+                    },
+                    '& .MuiInputLabel-root': {
+                        color: 'black', // Color del label
+                    }
+                }}>
                     <InputLabel id="select-waiter-label">Mozo</InputLabel>
                     <Select
                         labelId="select-waiter-label"
@@ -55,7 +70,7 @@ const WaiterDialog = ({ open, onClose, waiters, selectedWaiter, setSelectedWaite
                     </Select>
                 </FormControl>
             </DialogContent>
-            <DialogActions>
+            <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
                 <CustomButton onClick={onClose}>Cancelar</CustomButton>
                 <CustomButton onClick={() => handleUpdateWaiter(selectedWaiter)}>Asignar Mozo</CustomButton>
             </DialogActions>

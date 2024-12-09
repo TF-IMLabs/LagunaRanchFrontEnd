@@ -76,7 +76,7 @@ const ContentWrapper = styled(Box)(({ theme }) => ({
 }));
 
 const LogoContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: 'rgba(155, 140, 141, 0.9)', // Gris traslúcido
+  backgroundColor: 'rgba(59, 59, 59, 0.85)', // Gris traslúcido
   width: '250px', // Tamaño del contenedor igual al logo
   height: '250px', // Tamaño igual al ancho para mantener circularidad
   borderRadius: '50%', // Contenedor circular

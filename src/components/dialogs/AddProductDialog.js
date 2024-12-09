@@ -1,352 +1,188 @@
 import React, { useEffect, useState } from 'react';
-import { 
-    Dialog, 
-    DialogActions, 
-    DialogContent, 
-    DialogTitle, 
-    Button, 
-    TextField, 
-    FormControl, 
-    InputLabel, 
-    Select, 
-    MenuItem, 
-    FormControlLabel, 
-    Checkbox, 
-    Box 
+import {
+  Dialog, DialogActions, DialogContent, DialogTitle,
+  Button, TextField, FormControl, InputLabel, Select,
+  MenuItem, FormControlLabel, Checkbox, Box
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { getSubcategoriesByCategoryId } from '../../services/menuService';
 
-// Estilos personalizados para el diálogo y el botón
-const CustomDialog = styled(Dialog)(({ theme }) => ({
-  '& .MuiDialog-container': {
-    backdropFilter: 'blur(10px)', // Añadir desenfoque de fondo
-  },
+// Estilos personalizados
+const CustomDialog = styled(Dialog)({
+  '& .MuiDialog-container': { backdropFilter: 'blur(10px)' },
   '& .MuiPaper-root': {
-    borderRadius: '20px', // Bordes redondeados
-    boxShadow: 'none', // Eliminar sombra para evitar el borde visible
-    backgroundColor: 'rgb(155, 140, 141)', // Fondo uniforme para todo el diálogo
+    borderRadius: '20px', boxShadow: 'none', backgroundColor: 'rgb(155, 140, 141)'
   },
   '& .MuiDialogTitle-root': {
-    backgroundColor: 'black',
-    color: '#DD98AD', // Cambiar color de fuente a blanco
-    textAlign: 'center', // Centrar el texto del título
-    borderTopLeftRadius: '20px', // Bordes redondeados
-    borderTopRightRadius: '20px', // Bordes redondeados
+    backgroundColor: 'black', color: '#DD98AD', textAlign: 'center'
   },
-  '& .MuiDialogContent-root': {
-    backgroundColor: 'rgb(155, 140, 141)', // Hacer coincidir el color de fondo del contenido
-    color: 'black', // Cambiar color de fuente a blanco
-    textAlign: 'center', // Centrar el texto del contenido
+  '& .MuiDialogContent-root': { backgroundColor: 'rgb(155, 140, 141)', color: 'black' },
+  '& .MuiDialogActions-root': { justifyContent: 'center', backgroundColor: 'black' }
+});
+
+const CustomButton = styled(Button)({
+  color: '#DD98AD', borderColor: 'rgb(155, 140, 141)',
+  '&:hover': { backgroundColor: 'grey', borderColor: 'grey' }
+});
+
+// Estilos de los campos de entrada (TextField y Select)
+const CustomTextField = styled(TextField)(() => ({
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': { borderColor: 'black' },
+    '&:hover fieldset': { borderColor: 'grey' },
+    '&.Mui-focused fieldset': { borderColor: '#DD98AD' },
   },
-  '& .MuiDialogActions-root': {
-    justifyContent: 'center', // Centrar los botones en el diálogo
-    backgroundColor: 'black',
-    borderBottomLeftRadius: '20px', // Bordes redondeados
-    borderBottomRightRadius: '20px', // Bordes redondeados
+  '& .MuiInputLabel-root': {
+    color: 'black',
+    '&.Mui-focused': { color: 'black' }
   },
 }));
 
-const CustomButton = styled(Button)(({ theme }) => ({
-  color: '#DD98AD', // Cambiar color de fuente a blanco
-  borderColor: 'rgb(155, 140, 141)', // Cambiar color de borde a negro
-  '&:hover': {
-    backgroundColor: 'grey',
-    borderColor: 'grey', // Borde negro en estado hover
+const CustomFormControl = styled(FormControl)(() => ({
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': { borderColor: 'black' },
+    '&:hover fieldset': { borderColor: 'grey' },
+    '&.Mui-focused fieldset': { borderColor: '#DD98AD' },
+  },
+  '& .MuiInputLabel-root': {
+    color: 'black',
+    '&.Mui-focused': { color: 'black' }
+  },
+  '& .MuiSelect-select': {
+    color: 'black',
   },
 }));
+
+// Estilos personalizados para el Checkbox
+const CustomCheckbox = styled(Checkbox)(() => ({
+  color: 'black',
+  '&.Mui-checked': {
+    color: '#DD98AD',
+  },
+}));
+
+const initialProductData = {
+  nombre: '', precio: '', descripcion: '',
+  id_categoria: '', id_subcategoria: null,
+  vegano: false, celiaco: false, vegetariano: false
+};
+
 const AddProductDialog = ({ open, onClose, categories, onAddProduct }) => {
-  const [newProductData, setNewProductData] = useState({
-    nombre: '',
-    precio: '',
-    descripcion: '',
-    id_categoria: '',
-    id_subcategoria: null,
-    vegano: false,
-    celiaco: false,
-    vegetariano: false,
-  });
-
+  const [newProductData, setNewProductData] = useState(initialProductData);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
   const [formErrors, setFormErrors] = useState({});
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setNewProductData({
-        nombre: '',
-        precio: '',
-        descripcion: '',
-        id_categoria: '',
-        id_subcategoria: null,
-        vegano: false,
-        celiaco: false,
-        vegetariano: false,
-      });
+      setNewProductData(initialProductData);
       setFilteredSubcategories([]);
     }
   }, [open]);
 
   const handleNewProductChange = async (e) => {
     const { name, value, type, checked } = e.target;
-    setNewProductData((prevData) => ({
-      ...prevData,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    const newValue = type === 'checkbox' ? checked : value;
+
+    setNewProductData((prevData) => ({ ...prevData, [name]: newValue }));
 
     if (name === 'id_categoria') {
-      const selectedCategoryId = value;
       try {
-        const subcats = await getSubcategoriesByCategoryId(selectedCategoryId);
-        const subcategoriesArray = Object.values(subcats);
-        setFilteredSubcategories(subcategoriesArray);
-      } catch (error) {
-        console.error("Error al obtener subcategorías:", error);
+        const subcats = await getSubcategoriesByCategoryId(value);
+        setFilteredSubcategories(Object.values(subcats));
+        setNewProductData((prevData) => ({ ...prevData, id_subcategoria: null }));
+      } catch {
         setFilteredSubcategories([]);
       }
-      setNewProductData((prevData) => ({
-        ...prevData,
-        id_subcategoria: null,
-      }));
-    }
-
-    if (name === 'id_subcategoria' && value === '') {
-      setNewProductData((prevData) => ({
-        ...prevData,
-        id_subcategoria: null,
-      }));
     }
   };
 
   const validateForm = () => {
     const errors = {};
-    if (!newProductData.nombre) {
-      errors.nombre = 'El nombre del producto es requerido.';
-    }
-    if (!newProductData.precio) {
-      errors.precio = 'El precio es requerido.';
-    }
+    if (!newProductData.nombre) errors.nombre = 'El nombre es requerido.';
+    if (!newProductData.precio) errors.precio = 'El precio es requerido.';
     return errors;
   };
 
   const handleAddProduct = () => {
     const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-    setConfirmationOpen(true); // Abre el diálogo de confirmación
+    if (Object.keys(errors).length) return setFormErrors(errors);
+    setConfirmationOpen(true);
   };
 
   const handleConfirmAddProduct = () => {
-    const productDataToSend = {
+    onAddProduct({
       ...newProductData,
       precio: Number(newProductData.precio),
       vegano: newProductData.vegano ? 1 : 0,
       celiaco: newProductData.celiaco ? 1 : 0,
-      vegetariano: newProductData.vegetariano ? 1 : 0,
-    };
-
-    onAddProduct(productDataToSend);
-    setNewProductData({
-      nombre: '',
-      precio: '',
-      descripcion: '',
-      id_categoria: '',
-      id_subcategoria: null,
-      vegano: false,
-      celiaco: false,
-      vegetariano: false,
+      vegetariano: newProductData.vegetariano ? 1 : 0
     });
-    setFilteredSubcategories([]);
-    setFormErrors({});
     setConfirmationOpen(false);
-    alert('Producto agregado exitosamente!');
+    onClose();
   };
 
   return (
     <>
       <CustomDialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle align='center'>Agregar un nuevo producto al menú</DialogTitle>
+        <DialogTitle>Agregar un nuevo producto al menú</DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-  autoFocus
-  margin="dense"
-  label="Nombre del producto"
-  name="nombre"
-  fullWidth
-  value={newProductData.nombre}
-  onChange={handleNewProductChange}
-  variant="outlined"
-  error={!!formErrors.nombre}
-  helperText={formErrors.nombre}
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      backgroundColor: 'transparent', // Fondo transparente
-    },
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'black', // Borde negro
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'black', // Borde negro al pasar el cursor
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'black', // Borde negro al hacer focus
-    },
-    '& .MuiInputLabel-root': {
-      color: 'black', // Label en negro
-    },
-    '& .MuiInputLabel-root.Mui-focused': {
-      color: 'black', // Label negro al hacer focus
-    },
-  }}
-/>
-<TextField
-  margin="dense"
-  label="Precio"
-  name="precio"
-  type="number"
-  fullWidth
-  value={newProductData.precio}
-  onChange={handleNewProductChange}
-  variant="outlined"
-  error={!!formErrors.precio}
-  helperText={formErrors.precio}
-  inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }}
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      backgroundColor: 'transparent', // Fondo transparente
-    },
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'black', // Borde negro
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'black', // Borde negro al pasar el cursor
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'black', // Borde negro al hacer focus
-    },
-    '& .MuiInputLabel-root': {
-      color: 'black', // Label en negro
-    },
-    '& .MuiInputLabel-root.Mui-focused': {
-      color: 'black', // Label negro al hacer focus
-    },
-  }}
-/>
-<TextField
-  margin="dense"
-  label="Descripción"
-  name="descripcion"
-  fullWidth
-  multiline
-  rows={3}
-  value={newProductData.descripcion}
-  onChange={handleNewProductChange}
-  variant="outlined"
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      backgroundColor: 'transparent', // Fondo transparente
-    },
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'black', // Borde negro
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'black', // Borde negro al pasar el cursor
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'black', // Borde negro al hacer focus
-    },
-    '& .MuiInputLabel-root': {
-      color: 'black', // Label en negro
-    },
-    '& .MuiInputLabel-root.Mui-focused': {
-      color: 'black', // Label negro al hacer focus
-    },
-  }}
-/>
+            <CustomTextField label="Nombre del producto" name="nombre" value={newProductData.nombre}
+              error={!!formErrors.nombre} helperText={formErrors.nombre} fullWidth
+              variant="outlined" margin="dense" onChange={handleNewProductChange} />
+            <CustomTextField label="Precio" name="precio" type="number" value={newProductData.precio}
+              error={!!formErrors.precio} helperText={formErrors.precio} fullWidth
+              variant="outlined" margin="dense" onChange={handleNewProductChange} />
+            <CustomTextField label="Descripción" name="descripcion" multiline rows={3}
+              value={newProductData.descripcion} fullWidth variant="outlined" margin="dense"
+              onChange={handleNewProductChange} />
 
-            <FormControl fullWidth>
-              <InputLabel id="new-category-select-label">Categoría</InputLabel>
+            <CustomFormControl fullWidth margin="dense" variant="outlined">
+              <InputLabel id="categoria-select-label">Categoría</InputLabel>
               <Select
-                labelId="new-category-select-label"
+                labelId="categoria-select-label"
                 name="id_categoria"
                 value={newProductData.id_categoria}
                 onChange={handleNewProductChange}
-                variant="outlined"
               >
-                {categories.map((category) => (
-                  <MenuItem key={category.id_categoria} value={category.id_categoria}>
-                    {category.nombre}
+                {categories.map((cat) => (
+                  <MenuItem key={cat.id_categoria} value={cat.id_categoria}>
+                    {cat.nombre}
                   </MenuItem>
                 ))}
               </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel id="new-subcategory-select-label">Subcategoría</InputLabel>
+            </CustomFormControl>
+
+            <CustomFormControl fullWidth margin="dense" variant="outlined">
+              <InputLabel id="subcategoria-select-label">Subcategoría</InputLabel>
               <Select
-                labelId="new-subcategory-select-label"
+                labelId="subcategoria-select-label"
                 name="id_subcategoria"
                 value={newProductData.id_subcategoria || ''}
                 onChange={handleNewProductChange}
-                variant="outlined"
               >
                 <MenuItem value={null}>Sin subcategoría</MenuItem>
-                {filteredSubcategories.length > 0 ? (
-                  filteredSubcategories.map((subcategory) => (
-                    <MenuItem key={subcategory.id_subcategoria} value={subcategory.id_subcategoria}>
-                      {subcategory.nombre}
-                    </MenuItem>
-                  ))
-                ) : (
-                  <MenuItem disabled>No hay subcategorías disponibles</MenuItem>
-                )}
+                {filteredSubcategories.map((sub) => (
+                  <MenuItem key={sub.id_subcategoria} value={sub.id_subcategoria}>
+                    {sub.nombre}
+                  </MenuItem>
+                ))}
               </Select>
-            </FormControl>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={newProductData.vegano}
-                  onChange={handleNewProductChange}
-                  name="vegano"
-                />
-              }
-              label="Vegano"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={newProductData.celiaco}
-                  onChange={handleNewProductChange}
-                  name="celiaco"
-                />
-              }
-              label="Celiaco"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={newProductData.vegetariano}
-                  onChange={handleNewProductChange}
-                  name="vegetariano"
-                />
-              }
-              label="Vegetariano"
-            />
+            </CustomFormControl>
+
+            {['vegano', 'celiaco', 'vegetariano'].map((attr) => (
+              <FormControlLabel key={attr} control={<CustomCheckbox checked={newProductData[attr]} name={attr} onChange={handleNewProductChange} />} label={attr.charAt(0).toUpperCase() + attr.slice(1)} />
+            ))}
           </Box>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', gap: 2 }}>
-          <CustomButton onClick={onClose} color="secondary" variant="outlined">
-            Cancelar
-          </CustomButton>
-          <CustomButton onClick={handleAddProduct} color="" variant="outlined">
-            Agregar
-          </CustomButton>
+        <DialogActions>
+          <CustomButton onClick={onClose}>Cancelar</CustomButton>
+          <CustomButton onClick={handleAddProduct}>Agregar</CustomButton>
         </DialogActions>
       </CustomDialog>
 
-      {/* Diálogo de Confirmación */}
+      {/* Diálogo de confirmación */}
       <CustomDialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Confirmar Nuevo Producto</DialogTitle>
         <DialogContent>
@@ -355,19 +191,15 @@ const AddProductDialog = ({ open, onClose, categories, onAddProduct }) => {
             <p><strong>Precio:</strong> ${newProductData.precio}</p>
             <p><strong>Descripción:</strong> {newProductData.descripcion}</p>
             <p><strong>Categoría:</strong> {categories.find(cat => cat.id_categoria === newProductData.id_categoria)?.nombre || 'Sin categoría'}</p>
-            <p><strong>Subcategoría:</strong> {filteredSubcategories.find(subcat => subcat.id_subcategoria === newProductData.id_subcategoria)?.nombre || 'Sin subcategoría'}</p>
+            <p><strong>Subcategoría:</strong> {filteredSubcategories.find(sub => sub.id_subcategoria === newProductData.id_subcategoria)?.nombre || 'Sin subcategoría'}</p>
             <p><strong>Vegano:</strong> {newProductData.vegano ? 'Sí' : 'No'}</p>
             <p><strong>Celiaco:</strong> {newProductData.celiaco ? 'Sí' : 'No'}</p>
             <p><strong>Vegetariano:</strong> {newProductData.vegetariano ? 'Sí' : 'No'}</p>
           </Box>
         </DialogContent>
         <DialogActions>
-          <CustomButton onClick={() => setConfirmationOpen(false)} color="secondary" variant="outlined">
-            Cancelar
-          </CustomButton>
-          <CustomButton onClick={handleConfirmAddProduct} color="" variant="outlined">
-            Confirmar
-          </CustomButton>
+          <CustomButton onClick={() => setConfirmationOpen(false)}>Cancelar</CustomButton>
+          <CustomButton onClick={handleConfirmAddProduct}>Confirmar</CustomButton>
         </DialogActions>
       </CustomDialog>
     </>

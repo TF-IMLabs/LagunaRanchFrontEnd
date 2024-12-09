@@ -246,11 +246,13 @@ const TablesSection = () => {
       <CreateTableDialog
         open={openCreateTableDialog}
         onClose={() => setOpenCreateTableDialog(false)}
+        waiters={waiters}
       />
 
       <CreateWaiterDialog
         open={openCreateWaiterDialog}
         onClose={() => setOpenCreateWaiterDialog(false)}
+       
       />
     </div>
   );
