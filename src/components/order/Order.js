@@ -112,7 +112,7 @@ const Order = ({ onClose }) => {
     <Box>
       <Box display="flex" justifyContent="center" alignItems="center" mb={2}>
         <Typography variant="h6b" sx={{ flexGrow: 1, textAlign: 'center' }}>
-          Estás pidiendo en la mesa {tableId}
+          Estás pidiendo en la Mesa {tableId}
         </Typography>
       </Box>
     

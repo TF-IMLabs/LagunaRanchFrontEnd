@@ -2,114 +2,85 @@ import React, { useState } from 'react';
 import { Button, Typography, Divider, Box, IconButton, TextField } from '@mui/material';
 import { styled } from '@mui/system';
 import { useCart } from '../../contexts/CartContext';
-import RemoveIcon from '@mui/icons-material/Remove';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { updateTableNote } from '../../services/tableService'; // Asegúrate de que la ruta sea correcta
+import { updateTableNote } from '../../services/tableService';
+import { Remove as RemoveIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import ConfirmOrderDialog from './ConfirmOrderDialog';
 
-// Estilo personalizado para botones
-const CustomButton = styled(Button)(({ theme }) => ({
+// Estilos personalizados
+const CustomButton = styled(Button)({
   color: '#DD98AD',
+  backgroundColor: 'black',
   borderColor: '#9b8c8d',
-  backgroundColor:'black',
-  '&:hover': {
-    borderColor: 'black',
-  },
-}));
+  '&:hover': { borderColor: 'black' },
+});
 
-const CustomIconButton = styled(IconButton)(({ theme }) => ({
+const CustomIconButton = styled(IconButton)({
   color: 'black',
-  borderColor: '#3e2d1f',
-  '&:hover': {
-    backgroundColor: 'white',
-    borderColor: 'grey',
-  },
-}));
+  '&:hover': { backgroundColor: 'white', borderColor: 'grey' },
+});
 
 const Cart = ({ onClose }) => {
-  const { auth } = useAuth(); 
+  const { auth } = useAuth();
   const { cart, updateItemQuantity, removeItem, sendOrder } = useCart();
-  const maxQuantity = 10;
-  const navigate = useNavigate(); 
-
-  // Estado para la nota del pedido
   const [note, setNote] = useState('');
+  const [openDialog, setOpenDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Estado de envío
+  const navigate = useNavigate();
+  const maxQuantity = 10;
 
-  const handleUpdateQuantity = (productId, newQuantity) => {
-    if (newQuantity <= maxQuantity) {
-      updateItemQuantity(productId, newQuantity);
-    }
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
   };
 
-  const handleRemoveItem = (productId) => {
-    removeItem(productId);
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
   };
 
   const handleSendOrder = async () => {
+    setIsSubmitting(true); // Activar el estado de "enviando"
     try {
-      // Actualizar la nota de la mesa
-      await updateTableNote(auth.tableId, note); // Asegúrate de que auth.tableId contenga el ID correcto de la mesa
-
-      // Enviar el pedido
-      await sendOrder();
-      onClose();
+      await updateTableNote(auth.tableId, note);  // Actualiza la nota de la mesa
+      await sendOrder();  // Envia el pedido
+      onClose();  // Cierra el modal
     } catch (error) {
       console.error('Error al enviar el pedido:', error);
       alert('Ocurrió un error al enviar tu pedido. Inténtalo de nuevo.');
+    } finally {
+      setIsSubmitting(false); // Desactivar el estado de "enviando"
     }
   };
 
-  const handleGoToMenu = () => {
-    onClose();
-    navigate('/menu');
-  };
-
-  const isSendDisabled = !auth?.tableId || cart.length === 0;
+  const isSendDisabled = !auth?.tableId || cart.length === 0 || isSubmitting; // Deshabilitar si está enviando
 
   return (
     <Box sx={{ p: 2 }}>
       {cart.length === 0 ? (
-        <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" mt={2}>
-          <CustomButton
-            variant="outlined"
-            onClick={handleGoToMenu}
-          >
+        <Box display="flex" justifyContent="center" mt={2}>
+          <CustomButton variant="outlined" sx={{ width: 200 }} onClick={() => { onClose(); navigate('/menu'); }}>
             ¡Agregá más productos!
           </CustomButton>
         </Box>
       ) : (
         <>
-          <Box display="flex" justifyContent="center" mb={2}>
-            <Typography variant="h6b">Agregarás lo siguiente:</Typography>
-          </Box>
-          {cart.map(item => (
-            <Box key={item.product.id_producto} mb={2} display="flex" flexDirection="column">
-              <Typography variant="body1">{item.product.nombre}</Typography>
-              <Box display="flex" alignItems="center" justifyContent="space-between" mt={1}>
-                <Typography variant="body1">
-                  ${item.product.precio} x {item.cantidad}
-                </Typography>
+          <Typography variant="h6" color="black" align="center" mb={2}>
+            Agregarás lo siguiente:
+          </Typography>
+          {cart.map(({ product, cantidad }) => (
+            <Box key={product.id_producto} mb={2}>
+              <Typography variant="body1">{product.nombre}</Typography>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mt={1}>
+                <Typography variant="body1">${product.precio} x {cantidad}</Typography>
                 <Box display="flex" alignItems="center">
-                  <CustomIconButton
-                    onClick={() => handleUpdateQuantity(item.product.id_producto, item.cantidad - 1)}
-                    disabled={item.cantidad <= 1}
-                  >
+                  <CustomIconButton onClick={() => updateItemQuantity(product.id_producto, cantidad - 1)} disabled={cantidad <= 1}>
                     <RemoveIcon />
                   </CustomIconButton>
-                  <Typography variant="body1" mx={1}>
-                    {item.cantidad}
-                  </Typography>
-                  <CustomIconButton
-                    onClick={() => handleUpdateQuantity(item.product.id_producto, item.cantidad + 1)}
-                    disabled={item.cantidad >= maxQuantity}
-                  >
+                  <Typography variant="body1" mx={1}>{cantidad}</Typography>
+                  <CustomIconButton onClick={() => updateItemQuantity(product.id_producto, cantidad + 1)} disabled={cantidad >= maxQuantity}>
                     <AddIcon />
                   </CustomIconButton>
-                  <CustomIconButton
-                    onClick={() => handleRemoveItem(item.product.id_producto)}
-                  >
+                  <CustomIconButton onClick={() => removeItem(product.id_producto)}>
                     <DeleteIcon />
                   </CustomIconButton>
                 </Box>
@@ -117,51 +88,49 @@ const Cart = ({ onClose }) => {
               <Divider sx={{ my: 1 }} />
             </Box>
           ))}
-          {/* Campo para agregar una nota */}
-          <Box mt={2}>
-  <TextField
-    label="Nota del Pedido"
-    variant="outlined"
-    fullWidth
-    value={note}
-    onChange={(e) => setNote(e.target.value)}
-    sx={{
-      '& .MuiOutlinedInput-root': {
-        '& fieldset': {
-          borderColor: 'gray', // Borde gris por defecto
-        },
-        '&:hover fieldset': {
-          borderColor: 'black', // Borde gris al hacer hover
-        },
-        '&.Mui-focused fieldset': {
-          borderColor: '#DD98AD', // Borde negro cuando está enfocado
-        },
-      },
-      '& .MuiInputLabel-root': {
-        color: 'black', // Color del label por defecto
-      },
-      '& .MuiInputLabel-root.Mui-focused': {
-        color: 'black', // Color del label cuando está enfocado
-      },
-    }}
-  />
-</Box>
+
+          <TextField
+            label="Nota del Pedido"
+            variant="outlined"
+            fullWidth
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: 'gray' },
+                '&:hover fieldset': { borderColor: 'black' },
+                '&.Mui-focused fieldset': { borderColor: '#DD98AD' },
+              },
+              '& .MuiInputLabel-root': { color: 'black' },
+              '& .MuiInputLabel-root.Mui-focused': { color: 'black' },
+            }}
+            margin="normal"
+          />
 
           <Box display="flex" justifyContent="space-between" mt={2}>
-            <CustomButton
-              variant="outlined"
-              onClick={handleGoToMenu}
-            >
+            <CustomButton variant="outlined" sx={{ width: 200 }} onClick={() => { onClose(); navigate('/menu'); }}>
               Seguir Pidiendo!
             </CustomButton>
+
             <CustomButton
               variant="outlined"
-              onClick={handleSendOrder}
+              sx={{ width: 200 }}
+              onClick={handleOpenDialog}
               disabled={isSendDisabled}
             >
               Enviar Pedido
             </CustomButton>
           </Box>
+
+          {/* Uso del componente ConfirmOrderDialog */}
+          <ConfirmOrderDialog
+            open={openDialog}
+            onClose={handleCloseDialog}
+            onSendOrder={handleSendOrder}
+            cart={cart}
+            note={note}
+            isSubmitting={isSubmitting} // Pasar el estado de "enviando"
+          />
         </>
       )}
     </Box>

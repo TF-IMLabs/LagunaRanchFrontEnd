@@ -35,12 +35,28 @@ const CenteredDialogTitle = styled(DialogTitle)(({ theme }) => ({
 
 const CustomButton = styled(Button)(({ theme }) => ({
   color: '#DD98AD',
-  backgroundColor:'black',
+  backgroundColor: 'black',
   borderColor: '#3e2d1f',
   '&:hover': {
     backgroundColor: 'grey',
     borderColor: '#3e2d1f',
   },
+}));
+
+// Centramos el contenido de DialogContent y DialogActions
+const CenteredDialogContent = styled(DialogContent)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  textAlign: 'center',
+}));
+
+const CenteredDialogActions = styled(DialogActions)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '100%',
 }));
 
 const SuccessDialog = ({ open, onClose }) => {
@@ -75,15 +91,15 @@ const SuccessDialog = ({ open, onClose }) => {
           <CloseIcon />
         </IconButton>
       </CenteredDialogTitle>
-      <DialogContent>
+      <CenteredDialogContent>
         <Typography variant="body1" paragraph>
           El pedido fue enviado exitosamente.
         </Typography>
         <Typography variant="body1">
           Podrás ver el estado del mismo haciendo clic en "Ver Pedido".
         </Typography>
-      </DialogContent>
-      <DialogActions>
+      </CenteredDialogContent>
+      <CenteredDialogActions>
         <CustomButton onClick={onClose} variant="outlined">
           Cerrar
         </CustomButton>
@@ -93,7 +109,7 @@ const SuccessDialog = ({ open, onClose }) => {
         }} variant="outlined">
           Ver Pedido
         </CustomButton>
-      </DialogActions>
+      </CenteredDialogActions>
     </CustomDialog>
   );
 };
