@@ -3,6 +3,7 @@ import {
   Accordion, AccordionSummary, AccordionDetails, Typography, Button, Card,
   CardContent, CardActions, IconButton, List, ListItem, Divider
 } from '@mui/material';
+import { Print as PrintIcon } from '@mui/icons-material';
 import { ExpandMore as ExpandMoreIcon, PersonAdd as PersonAddIcon, NotificationsOff as NotificationsOffIcon } from '@mui/icons-material';
 import { updateNotifications } from '../../services/waiterService';
 import { putProductsAsOld } from '../../services/cartService';
@@ -44,6 +45,196 @@ const TableCardDetail = ({
       console.error('Error al finalizar el pedido y liberar la mesa:', error);
     }
   };
+  const handlePrintNewProducts = () => {
+    const newProducts = validOrder.filter(({ nuevo }) => nuevo === 1);
+  
+    if (newProducts.length === 0) {
+      alert("No hay productos nuevos para imprimir.");
+      return;
+    }
+  
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString();
+    const formattedTime = now.toLocaleTimeString();
+  
+    const printContent = `
+      <html>
+        <head>
+          <style>
+            @media print {
+              body {
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                margin: 0;
+                padding: 5px;
+                width: 80mm;
+              }
+              h2, p {
+                margin: 5px 0;
+                text-align: center;
+              }
+              .line {
+                border-top: 2px solid black;
+                margin: 5px 0;
+              }
+              .dashed-line {
+                border-top: 1px dashed black;
+                margin: 5px 0;
+              }
+              .order-item {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+              }
+              .name {
+                flex-grow: 1;
+                text-align: left;
+              }
+              .price {
+                white-space: nowrap;
+                text-align: right;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div>
+           <div style="display: flex; justify-content: space-between; font-weight: bold;">
+              <span>${formattedDate}</span>
+              <span>${formattedTime}</span>
+            </div>
+            <h2>Mesa ${table.n_mesa}</h2>
+            <p style="font-weight: bold;">Mozo: ${table.nombre_mozo}</p>
+           
+            <div class="line"></div>
+            <ul style="list-style-type: none; padding: 0;">
+              ${newProducts.map(p => `
+                <li class="order-item">
+                  <span class="name">${p.nombre}</span>
+                  <span class="price">${p.cantidad}x</span>
+                </li>
+              `).join("")}
+            </ul>
+            <div class="line"></div>
+            ${table.nota ? `<p style="font-weight: bold;">Nota: ${table.nota}</p>` : ""}
+            <div class="dashed-line"></div>
+            <p style="font-size: 12px; font-weight: bold;">Ticket no válido como factura</p>
+          </div>
+        </body>
+      </html>
+    `;
+  
+    // Crear ventana para impresión optimizada para comandera
+    const printWindow = window.open("", "PRINT", "width=300");
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+  
+    // Imprimir
+    printWindow.print();
+  
+    // Cerrar la ventana después de imprimir
+    printWindow.close();
+  };
+  
+  
+  const handlePrintFullOrder = () => {
+    if (validOrder.length === 0) {
+      alert("No hay productos en el pedido para imprimir.");
+      return;
+    }
+  
+    const formattedDate = formatDate(validOrder[0].fecha_pedido); // Fecha original del pedido
+  
+    const printContent = `
+      <html>
+        <head>
+          <style>
+            @media print {
+              body {
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                margin: 0;
+                padding: 5px;
+                width: 80mm;
+              }
+              h2, p {
+                margin: 5px 0;
+                text-align: center;
+              }
+              .line {
+                border-top: 2px solid black;
+                margin: 5px 0;
+              }
+              .dashed-line {
+                border-top: 1px dashed black;
+                margin: 5px 0;
+              }
+              .order-item {
+                display: flex;
+                width: 100%;
+                align-items: center;
+              }
+              .name {
+                white-space: nowrap;
+                text-align: left;
+              }
+              .dots {
+                flex-grow: 1;
+                text-align: center;
+                border-bottom: 1px dotted black;
+                margin: 0 5px;
+              }
+              .quantity-price {
+                white-space: nowrap;
+                text-align: right;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div>
+          <div style="display: flex; justify-content: space-between; font-weight: bold;">
+              <span>${formattedDate.split(" ")[0]}</span>
+              <span>${formattedDate.split(" ")[1]}</span>
+            </div>
+            <h2>Mesa ${table.n_mesa}</h2>
+            <p style="font-weight: bold;">Mozo: ${table.nombre_mozo}</p>
+            
+            <div class="line"></div>
+            <ul style="list-style-type: none; padding: 0;">
+              ${validOrder.map(p => `
+                <li class="order-item">
+                  <span class="name">${p.nombre}</span>
+                  <span class="dots"></span>
+                  <span class="quantity-price">${p.cantidad}x $${Number(p.precio)}</span>
+                </li>
+              `).join("")}
+            </ul>
+            <div class="line"></div>
+            ${table.nota ? `<div class="dashed-line"></div><p style="font-weight: bold;">Nota: ${table.nota}</p>` : ""}
+            <div class="dashed-line"></div>
+            <p style="font-weight: bold;">Total: $${validOrder.reduce((acc, p) => acc + (Number(p.cantidad) * Number(p.precio)), 0)}</p>
+            <div class="dashed-line"></div>
+            <p style="font-size: 12px; font-weight: bold;">Ticket no válido como factura</p>
+          </div>
+        </body>
+      </html>
+    `;
+  
+    // Crear ventana para impresión optimizada para comandera
+    const printWindow = window.open("", "PRINT", "width=300");
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+  
+    // Imprimir
+    printWindow.print();
+  
+    // Cerrar la ventana después de imprimir
+    printWindow.close();
+  };
+  
 
   const currentProducts = validOrder.filter(({ nuevo }) => nuevo === 1);
   const oldProducts = validOrder.filter(({ nuevo }) => nuevo === 0);
@@ -97,9 +288,11 @@ const TableCardDetail = ({
             <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>Pedido Actual:</Typography>
             <List>
               {oldProducts.map(({ id_producto, nombre, cantidad, precio }) => (
-                <ListItem key={id_producto} sx={{ justifyContent: 'space-between' }}>
-                  <Typography variant="body2">{nombre} - Cantidad: {cantidad} - Precio: ${precio}</Typography>
-                </ListItem>
+               <ListItem key={id_producto} sx={{ display: 'flex', justifyContent: 'space-between', px: 1 }}>
+               <Typography variant="body2" sx={{ flex: 2, textAlign: 'left' }}>{nombre}</Typography>
+               <Typography variant="body2" sx={{ flex: 1, textAlign: 'center' }}>{cantidad}x</Typography>
+               <Typography variant="body2" sx={{ flex: 1, textAlign: 'right' }}>${precio}</Typography>
+             </ListItem>
               ))}
               <Divider />
             </List>
@@ -109,11 +302,13 @@ const TableCardDetail = ({
                 <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>Productos Agregados:</Typography>
                 <List>
                   {currentProducts.map(({ id_producto, nombre, cantidad, precio }) => (
-                    <ListItem key={id_producto} sx={{ justifyContent: 'space-between' }}>
-                      <Typography variant="body2" color="green">
-                        {nombre} - Cantidad: {cantidad} - Precio: ${precio} <span style={{ color: 'orange', marginLeft: 10 }}>Nuevo!</span>
-                      </Typography>
-                    </ListItem>
+                  <ListItem key={id_producto} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1 }}>
+                  <Typography variant="body2" sx={{ flex: 2, textAlign: 'left', color: 'green' }}>{nombre}</Typography>
+                  <Typography variant="body2" sx={{ flex: 1, textAlign: 'center', color: 'green' }}>{cantidad}x</Typography>
+                  <Typography variant="body2" sx={{ flex: 1, textAlign: 'right', color: 'green' }}>${precio}</Typography>
+                  <Typography variant="caption" sx={{ color: 'orange', fontWeight: 'bold', ml: 1 }}>Nuevo!</Typography>
+                </ListItem>
+                
                   ))}
                   <Divider />
                 </List>
@@ -122,44 +317,55 @@ const TableCardDetail = ({
           </CardContent>
 
           <CardActions sx={{ justifyContent: 'space-between', px: 2 }}>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={() => handleReceiveOrderClick()}
-              disabled={isReceiveButtonDisabled}
-            >
-              Confirmar
-            </Button>
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: (order[0]?.estado_pedido === 'En curso' || inProgressDisabled) ? 'grey' : 'orange',
-                color: '#fff'
-              }}
-              onClick={handleOrderInProgressClick}
-              disabled={isActionButtonsDisabled || inProgressDisabled || order[0]?.estado_pedido === 'En curso'}
-            >
-              En Curso
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={handleFinalizeOrderClick}
-              disabled={isActionButtonsDisabled}
-            >
-              Finalizar Pedido
-            </Button>
-            <IconButton
-              onClick={handleClearNotifications}
-              disabled={isClearNotificationsDisabled}
-              sx={{ color: isClearNotificationsDisabled ? 'grey' : 'red' }}
-            >
-              <NotificationsOffIcon />
-            </IconButton>
-            <IconButton onClick={() => handleOpenDialog(table)}>
-              <PersonAddIcon />
-            </IconButton>
-          </CardActions>
+  <Button
+    variant="contained"
+    color="success"
+    onClick={() => {
+      handleReceiveOrderClick();
+      handlePrintNewProducts();
+    }}
+    disabled={isReceiveButtonDisabled}
+  >
+    Confirmar
+  </Button>
+
+  <Button
+    variant="contained"
+    sx={{
+      backgroundColor: (order[0]?.estado_pedido === 'En curso' || inProgressDisabled) ? 'grey' : 'orange',
+      color: '#fff'
+    }}
+    onClick={handleOrderInProgressClick}
+    disabled={isActionButtonsDisabled || inProgressDisabled || order[0]?.estado_pedido === 'En curso'}
+  >
+    En Curso
+  </Button>
+
+  <Button
+    variant="contained"
+    color="error"
+    onClick={handleFinalizeOrderClick}
+    disabled={isActionButtonsDisabled}
+  >
+    Finalizar Pedido
+  </Button>
+
+  <IconButton onClick={handlePrintFullOrder} sx={{ color: 'black' }}>
+    <PrintIcon />
+  </IconButton>
+
+  <IconButton
+    onClick={handleClearNotifications}
+    disabled={isClearNotificationsDisabled}
+    sx={{ color: isClearNotificationsDisabled ? 'grey' : 'red' }}
+  >
+    <NotificationsOffIcon />
+  </IconButton>
+
+  <IconButton onClick={() => handleOpenDialog(table)}>
+    <PersonAddIcon />
+  </IconButton>
+</CardActions>
         </AccordionDetails>
       </Accordion>
     </Card>
