@@ -123,7 +123,7 @@ const SubcategoryAccordion = ({ categoryId }) => {
                                         alignItems: 'center',
                                     }}
                                 >
-                                   
+                                  {subcategory.nombre}  
                                 </Typography>
                             </CustomAccordionSummary>
                             <CustomAccordionDetails>
