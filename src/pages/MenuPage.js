@@ -4,8 +4,8 @@ import { styled } from '@mui/system';
 import CategoryAccordion from '../components/menu/CategoryAccordion';
 import ProductDialog from '../components/dialogs/ProductDialog';
 import vegetarianoIcon from '../assets/vegetariano.png';
-import celiacoIcon from '../assets/celiaco.png';
-import veganoIcon from '../assets/vegano.png';
+/*import celiacoIcon from '../assets/celiaco.png'; */
+/*import veganoIcon from '../assets/vegano.png'; */
 import backgroundImage from '../assets/background8.jpg';
 import { useCart } from '../contexts/CartContext';
 import CombinedDialog from '../components/dialogs/CombinedDialog';
@@ -65,12 +65,12 @@ const HighlightedText = styled(Box)(({ theme }) => ({
   borderRadius: '8px',
   marginBottom: theme.spacing(4),
   textAlign: 'center',
-  width: '100%', // Asegura que ocupe todo el ancho disponible
+  width: '100%', 
 }));
 
 const TitleTypography = styled(Typography)(({ theme }) => ({
   fontSize: '1.8rem',
-  margin: 0, // Elimina márgenes predeterminados del Typography
+  margin: 0, 
   [theme.breakpoints.down('sm')]: {
     fontSize: '1.5rem',
   },
@@ -130,21 +130,20 @@ const MenuPage = () => {
           </TitleTypography>
         </HighlightedText>
         <InfoBox>
-          <Grid container spacing={2}>
-            {[
-              { src: vegetarianoIcon, alt: 'Vegetariano', text: 'Apto vegetarianos' },
-              { src: veganoIcon, alt: 'Vegano', text: 'Apto veganos' },
-              { src: celiacoIcon, alt: 'Celiaco', text: 'Apto celíacos' },
-            ].map((icon, index) => (
-              <Grid item xs={12} sm={4} key={index}>
-                <IconContainer>
-                  <Icon src={icon.src} alt={icon.alt} />
-                  <Typography>{icon.text}</Typography>
-                </IconContainer>
-              </Grid>
-            ))}
-          </Grid>
-        </InfoBox>
+  <Grid container spacing={2} justifyContent="center" textAlign="center">
+    {[
+      { src: vegetarianoIcon, alt: 'Vegetariano', text: 'Apto vegetarianos' },
+    ].map((icon, index) => (
+      <Grid item xs={12} sm={4} key={index} display="flex" justifyContent="center">
+        <IconContainer>
+          <Icon src={icon.src} alt={icon.alt} />
+          <Typography>{icon.text}</Typography>
+        </IconContainer>
+      </Grid>
+    ))}
+  </Grid>
+</InfoBox>
+
         <CategoryAccordion onProductClick={handleOpenDialog} />
         {selectedProduct && (
           <ProductDialog

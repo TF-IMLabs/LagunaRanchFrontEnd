@@ -65,6 +65,7 @@ const TableCardDetail = ({
               body {
                 font-family: 'Courier New', monospace;
                 font-size: 14px;
+                size: auto;  
                 margin: 0;
                 padding: 5px;
                 width: 80mm;
@@ -118,22 +119,21 @@ const TableCardDetail = ({
             <div class="line"></div>
             ${table.nota ? `<p style="font-weight: bold;">Nota: ${table.nota}</p>` : ""}
             <div class="dashed-line"></div>
-            <p style="font-size: 12px; font-weight: bold;">Ticket no válido como factura</p>
           </div>
         </body>
       </html>
     `;
   
-    // Crear ventana para impresión optimizada para comandera
-    const printWindow = window.open("", "PRINT", "width=300");
+   
+    const printWindow = window.open("", "PRINT");
     printWindow.document.write(printContent);
     printWindow.document.close();
     printWindow.focus();
   
-    // Imprimir
+    
     printWindow.print();
   
-    // Cerrar la ventana después de imprimir
+    
     printWindow.close();
   };
   
@@ -144,7 +144,7 @@ const TableCardDetail = ({
       return;
     }
   
-    const formattedDate = formatDate(validOrder[0].fecha_pedido); // Fecha original del pedido
+    const formattedDate = formatDate(validOrder[0].fecha_pedido); 
   
     const printContent = `
       <html>
@@ -154,6 +154,7 @@ const TableCardDetail = ({
               body {
                 font-family: 'Courier New', monospace;
                 font-size: 14px;
+                size: auto; 
                 margin: 0;
                 padding: 5px;
                 width: 80mm;
@@ -222,16 +223,16 @@ const TableCardDetail = ({
       </html>
     `;
   
-    // Crear ventana para impresión optimizada para comandera
-    const printWindow = window.open("", "PRINT", "width=300");
+    
+    const printWindow = window.open("", "PRINT");
     printWindow.document.write(printContent);
     printWindow.document.close();
     printWindow.focus();
   
-    // Imprimir
+    
     printWindow.print();
   
-    // Cerrar la ventana después de imprimir
+   
     printWindow.close();
   };
   
@@ -316,7 +317,7 @@ const TableCardDetail = ({
             )}
           </CardContent>
 
-          <CardActions sx={{ justifyContent: 'space-between', px: 2 }}>
+          <CardActions sx={{ justifyContent: 'space-between', px: 1 }}>
   <Button
     variant="contained"
     color="success"
@@ -342,13 +343,16 @@ const TableCardDetail = ({
   </Button>
 
   <Button
-    variant="contained"
-    color="error"
-    onClick={handleFinalizeOrderClick}
-    disabled={isActionButtonsDisabled}
-  >
-    Finalizar Pedido
-  </Button>
+  variant="contained"
+  color="error"
+  onClick={() => {
+    handleFinalizeOrderClick(); 
+    handlePrintFullOrder(); 
+  }}
+  disabled={isActionButtonsDisabled}
+>
+  Finalizar
+</Button>
 
   <IconButton onClick={handlePrintFullOrder} sx={{ color: 'black' }}>
     <PrintIcon />
