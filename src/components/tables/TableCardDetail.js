@@ -8,6 +8,8 @@ import { ExpandMore as ExpandMoreIcon, PersonAdd as PersonAddIcon, Notifications
 import { updateNotifications } from '../../services/waiterService';
 import { putProductsAsOld } from '../../services/cartService';
 import { updateOrderAndTableStatus } from '../../services/tableService';
+import { useEffect } from 'react';
+
 
 // Función para formatear la fecha sin convertirla a la zona horaria local (usando UTC)
 const formatDate = (dateString) => {
@@ -15,9 +17,15 @@ const formatDate = (dateString) => {
   return date.toISOString().slice(0, 19).replace('T', ' '); // Formato: 2024-12-09 16:20:09
 };
 
+const playNotificationSound = () => {
+  const audio = new Audio('/notification.mp3');
+  audio.play().catch((err) => console.error('Error reproduciendo sonido:', err));
+};
+
 const TableCardDetail = ({
   table, order = [], handleReceiveOrder, handleUpdateTableStatus, handleOrderInProgress, handleOpenDialog,
 }) => {
+  
   const [inProgressDisabled, setInProgressDisabled] = useState(false);
   const validOrder = Array.isArray(order) ? order : [];
 
@@ -213,7 +221,7 @@ const TableCardDetail = ({
               `).join("")}
             </ul>
             <div class="line"></div>
-            ${table.nota ? `<div class="dashed-line"></div><p style="font-weight: bold;">Nota: ${table.nota}</p>` : ""}
+            ${table.nota ? `<div ></div><p style="font-weight: bold;">Nota: ${table.nota}</p>` : ""}
             <div class="dashed-line"></div>
             <p style="font-weight: bold;">Total: $${validOrder.reduce((acc, p) => acc + (Number(p.cantidad) * Number(p.precio)), 0)}</p>
             <div class="dashed-line"></div>
@@ -243,7 +251,15 @@ const TableCardDetail = ({
   const isActionButtonsDisabled = validOrder.length === 0;
   const isClearNotificationsDisabled = table.callw === 0 && table.bill === 0;
 
+  useEffect(() => {
+    if (table.callw === 1 || table.bill === 1 || currentProducts.length > 0) {
+      playNotificationSound();
+    }
+  }, [table.callw, table.bill, currentProducts.length]);
+
   return (
+
+    
     <Card
       sx={{
         m: 1,
@@ -369,6 +385,8 @@ const TableCardDetail = ({
   <IconButton onClick={() => handleOpenDialog(table)}>
     <PersonAddIcon />
   </IconButton>
+
+  
 </CardActions>
         </AccordionDetails>
       </Accordion>

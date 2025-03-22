@@ -71,21 +71,21 @@ const Order = ({ onClose }) => {
 
   const handleCallWaiter = async () => {
     try {
-      const { message } = await callWaiter(tableId); // Obtener el mensaje de éxito
-      setNotification({ open: true, message }); // Mostrar la notificación con el mensaje
+      const { message } = await callWaiter(tableId); 
+      setNotification({ open: true, message }); 
     } catch (error) {
       console.error('Error al llamar al mozo:', error);
-      setNotification({ open: true, message: 'Error al llamar al mozo. Intenta nuevamente. ❌' }); // Mensaje de error
+      setNotification({ open: true, message: 'Error al llamar al mozo. Intenta nuevamente. ❌' }); 
     }
   };
 
   const handleRequestBill = async () => {
     try {
-      const { message } = await requestBill(tableId); // Obtener el mensaje de éxito
-      setNotification({ open: true, message }); // Mostrar la notificación con el mensaje
+      const { message } = await requestBill(tableId); 
+      setNotification({ open: true, message }); 
     } catch (error) {
       console.error('Error al solicitar la cuenta:', error);
-      setNotification({ open: true, message: 'Error al solicitar la cuenta. Intenta nuevamente. ❌' }); // Mensaje de error
+      setNotification({ open: true, message: 'Error al solicitar la cuenta. Intenta nuevamente. ❌' }); 
     }
   };
 
@@ -96,13 +96,13 @@ const Order = ({ onClose }) => {
   const getStatusMessage = () => {
     switch (orderStatus) {
       case 'Actualizado':
-        return 'Agregaste algo nuevo al pedido!';
+        return 'Actualizado';
       case 'iniciado':
-        return 'El pedido se encuentra pendiente de confirmación';
+        return 'Pendiente';
       case 'Recibido':
-        return 'El pedido fue confirmado';
+        return 'Confirmado';
       case 'En curso':
-        return 'Estamos preparando tu pedido!';
+        return 'En preparación';
       default:
         return '';
     }
@@ -163,7 +163,7 @@ const Order = ({ onClose }) => {
             <strong>Estado:</strong> {getStatusMessage()}
           </Typography>
     
-          {/* Timeline responsiva (siempre horizontal) */}
+         
           <Timeline
     sx={{
         display: 'flex',
@@ -175,13 +175,13 @@ const Order = ({ onClose }) => {
         whiteSpace: 'nowrap',
     }}
 >
-    {/* Timeline Items */}
+    
     <TimelineItem
         sx={{
             display: 'flex',
             justifyContent: 'center',
             width: 'auto',
-            paddingX: isMobile ? '2px' : '4px', // Ajuste de espaciado horizontal
+            paddingX: isMobile ? '2px' : '4px', 
         }}
     >
         <TimelineSeparator>
@@ -191,7 +191,7 @@ const Order = ({ onClose }) => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     backgroundColor: 'white',
-                    opacity: 1, // Mantener la opacidad siempre
+                    opacity: 1, 
                     boxShadow: orderStatus === 'iniciado' || orderStatus === 'Actualizado' ? '0 0 20px black' : 'none',
                     transition: 'all 0.3s ease-in-out',
                 }}
@@ -220,14 +220,14 @@ const Order = ({ onClose }) => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     backgroundColor: 'white',
-                    opacity: 1, // Mantener la opacidad siempre
+                    opacity: 1, 
                     boxShadow: orderStatus === 'Recibido' ? '0 0 20px black' : 'none',
                     transition: 'all 0.3s ease-in-out',
                 }}
             >
                 <CheckCircleIcon
                     sx={{
-                        color: orderStatus === 'Recibido' ? 'black' : 'grey.500', // Cambiar color del ícono
+                        color: orderStatus === 'Recibido' ? 'black' : 'grey.500', 
                     }}
                 />
             </TimelineDot>
@@ -249,14 +249,14 @@ const Order = ({ onClose }) => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     backgroundColor: 'white',
-                    opacity: 1, // Mantener la opacidad siempre
+                    opacity: 1, 
                     boxShadow: orderStatus === 'En curso' ? '0 0 20px black' : 'none',
                     transition: 'all 0.3s ease-in-out',
                 }}
             >
                 <RestaurantIcon
                     sx={{
-                        color: orderStatus === 'En curso' ? 'black' : 'grey.500', // Cambiar color del ícono
+                        color: orderStatus === 'En curso' ? 'black' : 'grey.500', 
                     }}
                 />
             </TimelineDot>
@@ -302,7 +302,7 @@ const Order = ({ onClose }) => {
         </>
       )}
 
-      {/* Snackbar para notificaciones. */}
+      
       <Snackbar
        open={notification.open}
        onClose={handleCloseSnackbar}

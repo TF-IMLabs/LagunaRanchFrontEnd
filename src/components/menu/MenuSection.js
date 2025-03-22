@@ -6,7 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import AddProductDialog from '../dialogs/AddProductDialog';
 import CreateAndRemoveCategoriesDialog from '../dialogs/CreateAndDeleteCategoriesDialog';
 import CreateAndDeleteSubcategoriesDialog from '../dialogs/CreateAndDeleteSubcategoriesDialog';
-import TableContainerComponent from './tableContainerComponent'; // Importa el componente de la tabla
+import TableContainerComponent from './tableContainerComponent'; 
 
 const MenuSection = () => {
     const queryClient = useQueryClient();
@@ -54,7 +54,7 @@ const MenuSection = () => {
             nombre: product.nombre, 
             precio: product.precio, 
             descripcion: product.descripcion,
-            dieta: product.dieta || '' // Agregar el campo dieta al editar
+            dieta: product.dieta || '' 
         });
     };
 
@@ -151,15 +151,24 @@ const MenuSection = () => {
             </Box>
 
             <TextField fullWidth label="Buscar en todo el menú" variant="outlined" value={searchTerm} onChange={handleSearchTermChange} sx={{ mb: 4, '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'black' }, '&:hover fieldset': { borderColor: 'black' }, '&.Mui-focused fieldset': { borderColor: '#DD98AD' } }, '& .MuiInputLabel-root': { color: 'black' }, '& .MuiInputLabel-root.Mui-focused': { color: 'black' } }} />
-            <FormControl fullWidth sx={{ mb: 4 }}>
-                <InputLabel id="category-select-label">Filtrar por categoría</InputLabel>
-                <Select labelId="category-select-label" value={selectedCategory} onChange={handleCategoryChange}>
-                    <MenuItem value=""><em>Todos</em></MenuItem>
-                    {categories.map((category) => <MenuItem key={category.id_categoria} value={category.id_categoria}>{category.nombre}</MenuItem>)}
-                </Select>
-            </FormControl>
+            <FormControl fullWidth sx={{ 
+    mb: 4, 
+    '& .MuiInputLabel-root': { color: 'black' }, 
+    '& .MuiInputLabel-root.Mui-focused': { color: 'black' }, 
+    '& .MuiOutlinedInput-root': { 
+        '& fieldset': { borderColor: 'black' }, 
+        '&:hover fieldset': { borderColor: 'black' }, 
+        '&.Mui-focused fieldset': { borderColor: '#DD98AD' } 
+    } 
+}}>
+    <InputLabel id="category-select-label">Filtrar por categoría</InputLabel>
+    <Select labelId="category-select-label" value={selectedCategory} onChange={handleCategoryChange}>
+        <MenuItem value=""><em>Todos</em></MenuItem>
+        {categories.map((category) => <MenuItem key={category.id_categoria} value={category.id_categoria}>{category.nombre}</MenuItem>)}
+    </Select>
+</FormControl>
 
-            {/* Llamada al TableContainerComponent */}
+            
             <TableContainerComponent
                 filteredProducts={filteredProducts}
                 editingProductId={editingProductId}

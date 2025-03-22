@@ -4,7 +4,7 @@ import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import Home from '../pages/Home';
 import Menu from '../pages/MenuPage';
-import AdminPage from '../pages/AdminPage'; // Importa la AdminPage.
+import AdminPage from '../pages/AdminPage'; 
 
 const AppRouter = () => (
   <>
@@ -13,7 +13,7 @@ const AppRouter = () => (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/menu" element={<Menu />} />
-      <Route path="/admin" element={<AdminPage />} /> {/* Ruta para la AdminPage. */}
+      <Route path="/admin" element={<AdminPage />} /> 
     </Routes>
     <Footer />
 

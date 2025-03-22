@@ -63,11 +63,15 @@ const CustomFormControl = styled(FormControl)(({ theme }) => ({
     },
     '& .MuiInputLabel-root': {
         color: 'black',
+        '&.Mui-focused': {
+            color: 'black', 
+        },
     },
     '& .MuiFormHelperText-root': {
         color: 'red',
     },
 }));
+
 
 const CreateWaiterDialog = ({ open, onClose }) => {
     const [nombre, setNombre] = useState('');

@@ -10,22 +10,21 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-// Estilos personalizados
+
 const CustomDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-container': {
-    backdropFilter: 'blur(10px)', // Añadir desenfoque de fondo
+    backdropFilter: 'blur(10px)', 
   },
   '& .MuiPaper-root': {
-    borderRadius: '20px', // Bordes redondeados
-    boxShadow: 'none', // Eliminar sombra para evitar el borde visible
-    //backgroundColor: 'rgba(58, 19, 0, 0.7)', // Fondo uniforme para todo el diálogo
+    borderRadius: '20px', 
+    boxShadow: 'none', 
   },
   '& .MuiDialogTitle-root': {
     backgroundColor: 'black',
-    color: '#DD98AD', // Cambiar color de fuente a blanco
-    textAlign: 'center', // Centrar el texto del título
-    borderTopLeftRadius: '20px', // Bordes redondeados
-    borderTopRightRadius: '20px', // Bordes redondeados
+    color: '#DD98AD', 
+    textAlign: 'center', 
+    borderTopLeftRadius: '20px', 
+    borderTopRightRadius: '20px', 
   },
 }));
 
@@ -33,29 +32,29 @@ const CenteredDialogTitle = styled(DialogTitle)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  color: '#ffffff',           // Color de texto blanco
-  fontWeight: 'bold',         // Negrita para el título
-  height: '60px',             // Altura para centrar visualmente
-  borderTopLeftRadius: '20px', // Bordes redondeados en la parte superior izquierda
-  borderTopRightRadius: '20px', // Bordes redondeados en la parte superior derecha
+  color: '#ffffff',           
+  fontWeight: 'bold',         
+  height: '60px',             
+  borderTopLeftRadius: '20px', 
+  borderTopRightRadius: '20px', 
 }));
 
 const CustomDialogContent = styled(DialogContent)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  backgroundColor: '#9b8c8d', // Color de fondo del contenido
-  color: 'black',           // Color de texto blanco
+  backgroundColor: '#9b8c8d', 
+  color: 'black',           
   padding: theme.spacing(2),
-  maxHeight: 'calc(100vh - 100px)', // Limitar altura máxima del diálogo
-  overflowY: 'auto', // Permitir desplazamiento vertical solo si es necesario
+  maxHeight: 'calc(100vh - 100px)', 
+  overflowY: 'auto', 
 }));
 
 const CombinedDialog = () => {
-  const { combinedDialogOpen, closeCombinedDialog } = useCart(); // Usamos el estado y el cierre del contexto
+  const { combinedDialogOpen, closeCombinedDialog } = useCart(); 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Determina si es un dispositivo móvil
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); 
 
-  // Efecto para manejar el foco al abrir el diálogo
+
   useEffect(() => {
     if (combinedDialogOpen) {
       const dialogElement = document.querySelector('[role="dialog"]');
@@ -71,19 +70,19 @@ const CombinedDialog = () => {
       onClose={closeCombinedDialog}
       fullWidth
       maxWidth="md"
-      fullScreen={isMobile} // Fullscreen en móvil
-      aria-labelledby="combined-dialog-title" // Añadimos etiqueta aria para accesibilidad
-      TransitionComponent={Transition} // Añadimos la transición
+      fullScreen={isMobile} 
+      aria-labelledby="combined-dialog-title" 
+      TransitionComponent={Transition} 
     >
       <CenteredDialogTitle id="combined-dialog-title">
         Tu Pedido Actual
         <IconButton
-  onClick={closeCombinedDialog} // Cierra el diálogo
+  onClick={closeCombinedDialog} 
   sx={{ 
     position: 'absolute', 
     right: 8, 
     top: 8, 
-    color: '#DD98AD' // Rosa
+    color: '#DD98AD' 
   }} 
   aria-label="cerrar"
 >

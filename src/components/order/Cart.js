@@ -8,7 +8,7 @@ import { updateTableNote } from '../../services/tableService';
 import { Remove as RemoveIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import ConfirmOrderDialog from './ConfirmOrderDialog';
 
-// Estilos personalizados
+
 const CustomButton = styled(Button)({
   color: '#DD98AD',
   backgroundColor: 'black',
@@ -26,7 +26,7 @@ const Cart = ({ onClose }) => {
   const { cart, updateItemQuantity, removeItem, sendOrder } = useCart();
   const [note, setNote] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Estado de envío
+  const [isSubmitting, setIsSubmitting] = useState(false); 
   const navigate = useNavigate();
   const maxQuantity = 10;
 
@@ -39,20 +39,20 @@ const Cart = ({ onClose }) => {
   };
 
   const handleSendOrder = async () => {
-    setIsSubmitting(true); // Activar el estado de "enviando"
+    setIsSubmitting(true); 
     try {
-      await updateTableNote(auth.tableId, note);  // Actualiza la nota de la mesa
-      await sendOrder();  // Envia el pedido
-      onClose();  // Cierra el modal
+      await updateTableNote(auth.tableId, note); 
+      await sendOrder();  
+      onClose();  
     } catch (error) {
       console.error('Error al enviar el pedido:', error);
       alert('Ocurrió un error al enviar tu pedido. Inténtalo de nuevo.');
     } finally {
-      setIsSubmitting(false); // Desactivar el estado de "enviando"
+      setIsSubmitting(false); 
     }
   };
 
-  const isSendDisabled = !auth?.tableId || cart.length === 0 || isSubmitting; // Deshabilitar si está enviando
+  const isSendDisabled = !auth?.tableId || cart.length === 0 || isSubmitting; 
 
   return (
     <Box sx={{ p: 2 }}>
@@ -122,14 +122,14 @@ const Cart = ({ onClose }) => {
             </CustomButton>
           </Box>
 
-          {/* Uso del componente ConfirmOrderDialog */}
+          
           <ConfirmOrderDialog
             open={openDialog}
             onClose={handleCloseDialog}
             onSendOrder={handleSendOrder}
             cart={cart}
             note={note}
-            isSubmitting={isSubmitting} // Pasar el estado de "enviando"
+            isSubmitting={isSubmitting} 
           />
         </>
       )}

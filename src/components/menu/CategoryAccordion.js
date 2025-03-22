@@ -7,7 +7,7 @@ import SubcategoryAccordion from './SubcategoryAccordion';
 import ProductList from './ProductList'; 
 import { styled } from '@mui/material/styles';
 
-// Estilos personalizados para Accordion
+
 const CustomAccordion = styled(Accordion)(({ theme }) => ({
     borderRadius: '12px', 
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -18,49 +18,48 @@ const CustomAccordion = styled(Accordion)(({ theme }) => ({
     },
 }));
 
-// Estilos personalizados para AccordionSummary
 const CustomAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
-    padding: theme.spacing(1.5, 2), // Padding para el encabezado del acordeón
-    backgroundColor: 'transparent', // Color de fondo para el encabezado del acordeón
-    color: '#fff', // Color del texto
-    borderRadius: '11px', // Bordes redondeados solo en la parte superior
-    display: 'flex', // Usar flexbox para centrar el texto
-    alignItems: 'center', // Alinear verticalmente en el centro
-    justifyContent: 'center', // Alinear horizontalmente en el centro
-    textTransform: 'uppercase', // Convertir el texto a mayúsculas
+    padding: theme.spacing(1.5, 2), 
+    backgroundColor: 'transparent', 
+    color: '#fff',
+    borderRadius: '11px', 
+    display: 'flex',
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    textTransform: 'uppercase', 
     '& .MuiAccordionSummary-content': {
-        justifyContent: 'center', // Centrar el contenido dentro de AccordionSummary
+        justifyContent: 'center', 
     },
     '& .MuiAccordionSummary-expandIconWrapper': {
-        justifyContent: 'center', // Centrar el icono de expansión (si es necesario)
+        justifyContent: 'center', 
     },
 }));
 
-// Estilos personalizados para AccordionDetails
+
 const CustomAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
-    padding: theme.spacing(2), // Padding para los detalles del acordeón
-    backgroundColor: 'transparent', // Color de fondo para los detalles del acordeón
-    color: 'black', // Color del texto
-    borderRadius: '12px', // Bordes redondeados solo en la parte inferior
+    padding: theme.spacing(2),
+    backgroundColor: 'transparent', 
+    color: 'black',
+    borderRadius: '12px', 
 }));
 
 const CategoryAccordion = ({ onProductClick }) => {
-    // Usamos useQuery para cargar las categorías
+   
     const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
-        queryKey: ['categories'], // queryKey debe ser un array
-        queryFn: getAllCategories, // queryFn es la función que realiza la consulta
+        queryKey: ['categories'], 
+        queryFn: getAllCategories,
     });
 
-    // Usamos useQuery para cargar los productos
+    
     const { data: products = [], isLoading: isLoadingProducts } = useQuery({
-        queryKey: ['products'], // queryKey para los productos
-        queryFn: getAllProducts, // queryFn es la función que realiza la consulta
+        queryKey: ['products'], 
+        queryFn: getAllProducts, 
     });
 
     const [expanded, setExpanded] = useState(false);
     const accordionRefs = useRef({});
 
-    // Controlar la expansión del acordeón
+   
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
         if (isExpanded) {
@@ -77,12 +76,12 @@ const CategoryAccordion = ({ onProductClick }) => {
         return <Typography>Cargando categorías y productos...</Typography>;
     }
 
-    // Filtrar productos que son "Plato del Día"
+    
     const dailyDishes = products.filter((product) => product.plato_del_dia === 1);
 
     return (
         <div>
-            {/* Mostrar la categoría "Plato del Día" si hay productos */}
+           
             {dailyDishes.length > 0 && (
                 <CustomAccordion
                     expanded={expanded === 'panelPlatoDelDia'}
@@ -98,8 +97,8 @@ const CategoryAccordion = ({ onProductClick }) => {
                             variant="h5"
                             sx={{
                                 fontSize: {
-                                    sm: '1.5rem', // Tamaño de fuente en pantallas pequeñas
-                                    md: '1.7rem', // Tamaño de fuente en pantallas medianas y mayores
+                                    sm: '1.5rem', 
+                                    md: '1.7rem', 
                                 },
                             }}
                         >
@@ -107,7 +106,7 @@ const CategoryAccordion = ({ onProductClick }) => {
                         </Typography>
                     </CustomAccordionSummary>
                     <CustomAccordionDetails>
-                        {/* Mostrar los productos que son "Plato del Día" usando ProductList */}
+                        
                         <ProductList products={dailyDishes} onAddToCart={onProductClick} />
                     </CustomAccordionDetails>
                 </CustomAccordion>
@@ -129,8 +128,8 @@ const CategoryAccordion = ({ onProductClick }) => {
                             variant="h5"
                             sx={{
                                 fontSize: {
-                                    sm: '1.5rem', // Tamaño de fuente en pantallas pequeñas
-                                    md: '1.7rem', // Tamaño de fuente en pantallas medianas y mayores
+                                    sm: '1.5rem',
+                                    md: '1.7rem', 
                                 },
                             }}
                         >
@@ -138,7 +137,7 @@ const CategoryAccordion = ({ onProductClick }) => {
                         </Typography>
                     </CustomAccordionSummary>
                     <CustomAccordionDetails>
-                        {/* Mostrar SubcategoryAccordion si hay subcategorías */}
+                       
                         <SubcategoryAccordion
                             categoryId={category.id_categoria}
                             onProductClick={onProductClick} 

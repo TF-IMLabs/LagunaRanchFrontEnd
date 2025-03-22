@@ -48,7 +48,7 @@ const fetchSubcategoriesAndProducts = async (categoryId) => {
 
     const allProducts = await getAllProducts();
     
-    // Filtrar productos por stock (sin importar si están en subcategorías o categoría principal)
+   
     const filteredProducts = allProducts.filter(product => 
         product.id_categoria === categoryId && product.stock > 0
     );
@@ -95,7 +95,7 @@ const SubcategoryAccordion = ({ categoryId }) => {
                 subcategories.map((subcategory) => {
                     const panelId = `panel-${subcategory.id_subcategoria}`;
                     
-                    // Filtrar productos para mostrar solo los que pertenecen a la subcategoría actual
+                    
                     const productsForSubcategory = products.filter(product => product.id_subcategoria === subcategory.id_subcategoria);
 
                     return (
@@ -123,11 +123,11 @@ const SubcategoryAccordion = ({ categoryId }) => {
                                         alignItems: 'center',
                                     }}
                                 >
-                                    {subcategory.nombre} {/* Solo muestra el nombre */}
+                                   
                                 </Typography>
                             </CustomAccordionSummary>
                             <CustomAccordionDetails>
-                                {/* Renderizar la lista de productos dentro de las subcategorías filtradas */}
+                                
                                 <ProductList subcategoryId={subcategory.id_subcategoria} products={productsForSubcategory} />
                             </CustomAccordionDetails>
                         </CustomAccordion>

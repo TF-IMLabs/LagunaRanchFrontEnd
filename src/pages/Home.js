@@ -2,11 +2,11 @@ import React from 'react';
 import { Container, Box } from '@mui/material';
 import { styled } from '@mui/system';
 import Slider from 'react-slick';
-import images from '../assets/imageLoader'; // Ajusta esta ruta según la estructura de tu proyecto
-import logo from '../assets/amelie-logo-rosa.png'; // Ajusta esta ruta según la estructura de tu proyecto
-import background from '../assets/background5.jpg'; // Importa la imagen de fondo
+import images from '../assets/imageLoader'; 
+import logo from '../assets/amelie-logo-rosa.png'; 
+import background from '../assets/background5.jpg'; 
 
-// Configuración del carrusel
+
 const settings = {
   dots: false,
   infinite: true,
@@ -76,26 +76,26 @@ const ContentWrapper = styled(Box)(({ theme }) => ({
 }));
 
 const LogoContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: 'rgba(59, 59, 59, 0.85)', // Gris traslúcido
-  width: '250px', // Tamaño del contenedor igual al logo
-  height: '250px', // Tamaño igual al ancho para mantener circularidad
-  borderRadius: '50%', // Contenedor circular
-  display: 'flex', // Centra el logo dentro del contenedor
+  backgroundColor: 'rgba(59, 59, 59, 0.85)', 
+  width: '250px', 
+  height: '250px', 
+  borderRadius: '50%',
+  display: 'flex', 
   justifyContent: 'center',
   alignItems: 'center',
-  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.2)', // Sombra
+  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.2)', 
 }));
 
 const LogoImage = styled('img')({
-  width: '250px', // El tamaño del logo coincide exactamente con el contenedor
-  height: '250px', // Igual al contenedor para evitar bordes visibles
-  borderRadius: '50%', // Hace que el logo también sea circular
-  objectFit: 'cover', // Ajusta el logo para cubrir todo el contenedor
+  width: '250px', 
+  height: '250px', 
+  borderRadius: '50%', 
+  objectFit: 'cover', 
   display: 'block',
 });
 
 
-// Modificaciones para las imágenes del carrusel
+
 const CarouselContainer = styled(Box)(({ theme }) => ({
   width: '100%',
   maxWidth: '1400px',

@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext } from 'react'; 
 import { addProductToOrder, createOrder, GetOrderByTable, updateOrderDetail, updateOrderStatus } from '../services/cartService';
 import { useAuth } from './AuthContext';
-import SuccessDialog from '../components/dialogs/SuccessDialog'; // Importar el nuevo componente
+import SuccessDialog from '../components/dialogs/SuccessDialog'; 
 
 const CartContext = createContext();
 
@@ -11,7 +11,7 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [combinedDialogOpen, setCombinedDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false); // Estado para el diálogo de éxito
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false); 
 
   // Funciones para manejar el carrito
   const addToCart = (product, quantity) => {

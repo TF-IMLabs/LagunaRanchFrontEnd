@@ -61,6 +61,9 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
     },
     '& .MuiInputLabel-root': {
         color: 'black',
+        '&.Mui-focused': {
+            color: 'black', 
+        },
     },
 }));
 
@@ -78,6 +81,9 @@ const CustomFormControl = styled(FormControl)(({ theme }) => ({
     },
     '& .MuiInputLabel-root': {
         color: 'black',
+        '&.Mui-focused': {
+            color: 'black', 
+        },
     },
     '& .MuiFormHelperText-root': {
         color: 'red',

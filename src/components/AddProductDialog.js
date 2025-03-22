@@ -17,22 +17,22 @@ import {
 import { styled } from '@mui/material/styles';
 import { getSubcategoriesByCategoryId } from '../services/menuService';
 
-// Estilos personalizados para el diálogo y el botón
+
 const CustomDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-container': {
-    backdropFilter: 'blur(10px)', // Añadir desenfoque de fondo
+    backdropFilter: 'blur(10px)', 
   },
   '& .MuiPaper-root': {
-    borderRadius: '20px', // Bordes redondeados.
-    boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)', // Sombra sutil.
-    backgroundColor: '#fff', // Color de fondo blanco para mayor elegancia.
+    borderRadius: '20px', 
+    boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)', 
+    backgroundColor: '#fff', 
   },
   '& .MuiDialogTitle-root': {
     backgroundColor: '#d9c9a3',
     color: '#3e2d1f',
     fontWeight: 'bold',
-    borderRadius: '20px 20px 0px 0px', // Bordes redondeados
-    boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)', // Sombra sutil
+    borderRadius: '20px 20px 0px 0px', 
+    boxShadow: '0px 4px 30px rgba(0, 0, 0, 0.2)', 
   },
   '& .MuiDialogContent-root': {
     backgroundColor: '#ffffff',
@@ -279,7 +279,7 @@ const AddProductDialog = ({ open, onClose, categories, onAddProduct }) => {
         </DialogActions>
       </CustomDialog>
 
-      {/* Diálogo de Confirmación */}
+     
       <CustomDialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Confirmar Nuevo Producto</DialogTitle>
         <DialogContent>

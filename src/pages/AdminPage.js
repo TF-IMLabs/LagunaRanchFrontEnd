@@ -1,20 +1,20 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, Tab, Box, IconButton } from '@mui/material';
-import { Logout } from '@mui/icons-material'; // Importamos el ícono de logout
+import { Logout } from '@mui/icons-material'; 
 import MenuSection from '../components/menu/MenuSection';
 import TablesSection from '../components/tables/TablesSection';
 import AuthContext from '../contexts/AuthContext';
 import AuthDialog from '../components/dialogs/AuthDialog';
 
 const AdminPage = () => {
-  const { auth, logout } = useContext(AuthContext); // Incluimos el método logout del contexto
+  const { auth, logout } = useContext(AuthContext); 
   const [value, setValue] = useState(0);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const navigate = useNavigate(); 
 
   useEffect(() => {
-    // Si el usuario no está autenticado como administrador, abrir el diálogo
+    
     if (!auth || !auth.isAdmin) {
       setAuthDialogOpen(true);
     }
@@ -29,8 +29,8 @@ const AdminPage = () => {
   };
 
   const handleLogout = () => {
-    logout(); // Cerramos la sesión
-    navigate('/'); // Redirigimos al usuario a la página de inicio.
+    logout(); 
+    navigate('/'); 
   };
 
   return (
@@ -46,13 +46,13 @@ const AdminPage = () => {
         flexDirection: 'column', 
         justifyContent: 'center', 
         alignItems: 'center',
-        position: 'relative', // Para colocar el ícono de logout en la esquina
+        position: 'relative', 
       }}
     >
-      {/* Icono de cerrar sesión */}
+      
       <IconButton
         onClick={handleLogout}
-        sx={{ position: 'absolute', top: 16, right: 16, color: '#DD98AD' }} // Posición del ícono
+        sx={{ position: 'absolute', top: 16, right: 16, color: '#DD98AD' }} 
       >
         <Logout />
       </IconButton>
@@ -93,12 +93,12 @@ const AdminPage = () => {
         />
       </Tabs>
 
-      {/* Caja que se expande y no tiene scrollbar en "Mesas" */}
+      
       <Box 
         sx={{ 
           width: '100%',      
-          flexGrow: 1, // Permite que la caja crezca según el contenido
-          overflowY: value === 1 ? 'hidden' : 'auto', // Sin scrollbar en la pestaña "Mesas"
+          flexGrow: 1, 
+          overflowY: value === 1 ? 'hidden' : 'auto', 
           backgroundColor: 'rgba(255, 255, 255, 0.8)', 
           borderRadius: '8px', 
         }}
@@ -111,13 +111,13 @@ const AdminPage = () => {
         </TabPanel>
       </Box>
 
-      {/* Diálogo para autenticarse */}
+     
       <AuthDialog open={authDialogOpen} onClose={handleCloseAuthDialog} />
     </Box>
   );
 };
 
-// Componente para paneles de pestañas
+
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
