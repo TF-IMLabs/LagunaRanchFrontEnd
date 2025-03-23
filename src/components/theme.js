@@ -2,34 +2,34 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
     typography: {
-        fontFamily: ' "Roboto","Verdana"', 
+        fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif', 
         h1: {
-            fontFamily: ' "Roboto","Verdana"',
+            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
         },
         h2: {
-            fontFamily: ' "Roboto","Verdana"',
+            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
         },
         h4: {
-            fontFamily: ' "Roboto","Verdana"',
+            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
             color: '#DD98AD',
         },
         h5: {
-            fontFamily: ' "Roboto", "Verdana"',
+            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
             color: '#DD98AD',
             fontSize: '1.4rem',
         },
         h5b: {
-            fontFamily: ' "Roboto","Verdana"',
+            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
             color: 'black',
             fontSize: '1.4rem',
         },
         h6: {
-            fontFamily: ' "Roboto","Verdana"',
+            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
             color: 'white',
             fontSize: '1.2rem',
         },
         h6b: {
-            fontFamily: ' "Roboto","Verdana"',
+            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
             color: 'black',
             fontSize: '1.2rem',
         },
