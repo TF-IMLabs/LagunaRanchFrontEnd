@@ -26,7 +26,7 @@ const CustomAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center', 
     justifyContent: 'center', 
-     
+    textTransform: 'uppercase', 
     '& .MuiAccordionSummary-content': {
         justifyContent: 'center', 
     },

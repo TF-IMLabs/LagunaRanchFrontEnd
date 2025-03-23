@@ -2,34 +2,34 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
     typography: {
-        fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif', 
+        fontFamily: '"Verdana", "Roboto", "Georgia", "Arial", sans-serif', 
         h1: {
-            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
+            fontFamily: '"Verdana", "Roboto", "Georgia", "Arial", sans-serif',
         },
         h2: {
-            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
+            fontFamily: '"Verdana", "Roboto", "Georgia", "Arial", sans-serif',
         },
         h4: {
-            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
+            fontFamily: '"Verdana", "Roboto", "Georgia", "Arial", sans-serif',
             color: '#DD98AD',
         },
         h5: {
-            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
+            fontFamily: '"Verdana", "Roboto", "Georgia", "Arial", sans-serif',
             color: '#DD98AD',
             fontSize: '1.4rem',
         },
         h5b: {
-            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
+            fontFamily: '"Verdana", "Roboto", "Georgia", "Arial", sans-serif',
             color: 'black',
             fontSize: '1.4rem',
         },
         h6: {
-            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
+            fontFamily: '"Verdana", "Roboto", "Georgia", "Arial", sans-serif',
             color: 'white',
             fontSize: '1.2rem',
         },
         h6b: {
-            fontFamily: '"Cambria", "Roboto", "Helvetica", "Arial", sans-serif',
+            fontFamily: '"Verdana", "Roboto", "Georgia", "Arial", sans-serif',
             color: 'black',
             fontSize: '1.2rem',
         },
