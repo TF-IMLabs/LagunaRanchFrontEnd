@@ -25,7 +25,7 @@ const CustomButton = styled(Button)({
   '&:hover': { backgroundColor: 'grey', borderColor: 'grey' }
 });
 
-// Estilos de los campos de entrada (TextField y Select)
+
 const CustomTextField = styled(TextField)(() => ({
   '& .MuiOutlinedInput-root': {
     '& fieldset': { borderColor: 'black' },
@@ -53,7 +53,7 @@ const CustomFormControl = styled(FormControl)(() => ({
   },
 }));
 
-// Estilos personalizados para el Checkbox
+
 const CustomCheckbox = styled(Checkbox)(() => ({
   color: 'black',
   '&.Mui-checked': {
@@ -182,7 +182,7 @@ const AddProductDialog = ({ open, onClose, categories, onAddProduct }) => {
         </DialogActions>
       </CustomDialog>
 
-      {/* Diálogo de confirmación */}
+      
       <CustomDialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Confirmar Nuevo Producto</DialogTitle>
         <DialogContent>

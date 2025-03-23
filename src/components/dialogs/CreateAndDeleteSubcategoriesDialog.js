@@ -14,28 +14,28 @@ import {
   Alert,
 } from '@mui/material';
 import { styled } from '@mui/system';
-import { getSubcategoriesByCategoryId } from '../../services/menuService'; // Asegúrate de tener esta función importada
+import { getSubcategoriesByCategoryId } from '../../services/menuService'; 
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
-      borderColor: 'black', // Borde por defecto
+      borderColor: 'black', 
     },
     '&:hover fieldset': {
-      borderColor: 'grey', // Borde al hacer hover
+      borderColor: 'grey', 
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#DD98AD', // Borde rosa cuando está enfocado
+      borderColor: '#DD98AD', 
     },
   },
   '& .MuiInputLabel-root': {
     color: 'black',
   },
   '& .MuiInputLabel-root.Mui-focused': {
-    color: '#DD98AD', // Color rosa para la etiqueta cuando está enfocado
+    color: '#DD98AD',
   },
 }));
-// Estilos personalizados del diálogo
+
 const CustomDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-container': {
     backdropFilter: 'blur(10px)',
@@ -58,14 +58,14 @@ const CustomDialog = styled(Dialog)(({ theme }) => ({
     
   },
   '& .MuiDialogActions-root': {
-    justifyContent: 'center', // Centrar los botones en el diálogo
+    justifyContent: 'center', 
     backgroundColor: 'black',
-    borderBottomLeftRadius: '20px', // Bordes redondeados
-    borderBottomRightRadius: '20px', // Bordes redondeados
+    borderBottomLeftRadius: '20px', 
+    borderBottomRightRadius: '20px', 
   },
 }));
 
-// Botón personalizado
+
 const CustomButton = styled(Button)(({ theme }) => ({
   color: '#DD98AD',
   borderColor: 'rgb(155, 140, 141)',
@@ -74,7 +74,7 @@ const CustomButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-// Estilo personalizado para el Select
+
 const CustomFormControl = styled(FormControl)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
@@ -84,7 +84,7 @@ const CustomFormControl = styled(FormControl)(({ theme }) => ({
       borderColor: 'grey',
     },
     '&.Mui-focused fieldset': {
-      borderColor: '#DD98AD', // Borde rosa cuando está enfocado
+      borderColor: '#DD98AD', 
     },
   },
   '& .MuiInputLabel-root': {

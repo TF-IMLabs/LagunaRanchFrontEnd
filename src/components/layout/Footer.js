@@ -1,12 +1,12 @@
 import React from 'react';
 import { Container, Typography, IconButton, Grid } from '@mui/material';
-import { Facebook, Instagram, Phone, Mail, LocationOn } from '@mui/icons-material';
+import { Facebook, Instagram, Phone, LocationOn } from '@mui/icons-material';
 import { styled } from '@mui/system';
 
-// Estilos personalizados para el Footer
+
 const FooterContainer = styled('footer')(({ theme }) => ({
   backgroundColor: 'black',
-  padding: '10px 0', // Espacio reducido
+  padding: '10px 0',
   color: '#DD98AD',
   textAlign: 'center',
 }));
@@ -24,8 +24,8 @@ const FooterContent = styled(Container)(({ theme }) => ({
 const Section = styled(Grid)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center', // Alinea los contenidos verticalmente en el centro
-  marginBottom: '10px', // Espacio entre secciones
+  alignItems: 'center', 
+  marginBottom: '10px', 
   [theme.breakpoints.up('sm')]: {
     marginBottom: '0',
   },
@@ -33,17 +33,17 @@ const Section = styled(Grid)(({ theme }) => ({
 
 const SocialIcons = styled('div')(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column', // Predeterminado: columna en pantallas grandes
+  flexDirection: 'column', 
   alignItems: 'center',
   '& svg': {
     color: '#DD98AD',
-    fontSize: '2rem', // Tamaño aumentado de los íconos
-    margin: '10px 0', // Margen para separar los íconos verticalmente
+    fontSize: '2rem', 
+    margin: '10px 0', 
   },
   [theme.breakpoints.down('sm')]: {
-    flexDirection: 'row', // Cambia a fila en pantallas pequeñas
+    flexDirection: 'row', 
     '& svg': {
-      margin: '0 5px', // Ajusta el margen horizontal en móvil
+      margin: '0 5px', 
     },
   },
 }));
@@ -54,7 +54,7 @@ const ContactInfo = styled('div')(({ theme }) => ({
   '& a': {
     color: '#DD98AD',
     textDecoration: 'none',
-    marginLeft: '3px', // Espacio reducido
+    marginLeft: '3px', 
   },
   '& svg': {
     color: '#DD98AD',
@@ -62,11 +62,11 @@ const ContactInfo = styled('div')(({ theme }) => ({
 }));
 
 const Rights = styled('div')(({ theme }) => ({
-  fontSize: '0.75rem', // Texto más pequeño
+  fontSize: '0.75rem', 
 }));
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear(); // Obtener el año actual
+  const currentYear = new Date().getFullYear(); 
 
   return (
     <FooterContainer data-test="footer-container">
@@ -95,19 +95,7 @@ const Footer = () => {
                 236 448 9575
               </a>
             </Typography>
-            {/* <Typography variant="body2" data-test="contact-email">
-              <IconButton 
-                component="a" 
-                href="mailto:hola@andirestaurante.com.ar" 
-                aria-label="Email" 
-                data-test="email-icon"
-              >
-                <Mail />
-              </IconButton>
-              <a href="mailto:hola@andirestaurante.com.ar" data-test="email-link">
-                contacto@andirestaurante.com.ar
-              </a>
-            </Typography> */}
+          
             <Typography variant="body2" data-test="contact-address">
               <IconButton 
                 component="a" 

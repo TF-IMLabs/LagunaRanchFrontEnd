@@ -198,7 +198,7 @@ const Order = ({ onClose }) => {
             >
                 <ArrowRightAltIcon
                     sx={{
-                        color: orderStatus === 'iniciado' || orderStatus === 'Actualizado' ? 'black' : 'grey.500', // Cambiar color del ícono
+                        color: orderStatus === 'iniciado' || orderStatus === 'Actualizado' ? 'black' : 'grey.500', 
                     }}
                 />
             </TimelineDot>

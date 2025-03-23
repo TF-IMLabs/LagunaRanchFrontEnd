@@ -15,7 +15,7 @@ import {
 import { styled } from '@mui/system';
 import { createTable } from '../../services/tableService';
 
-// Estilos personalizados
+
 const CustomDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialog-container': {
         backdropFilter: 'blur(10px)',

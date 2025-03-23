@@ -257,6 +257,12 @@ const TableCardDetail = ({
     }
   }, [table.callw, table.bill, currentProducts.length]);
 
+  const [expanded, setExpanded] = useState(false);
+
+  const handleCollapse = () => {
+    setExpanded(false);
+  };
+
   return (
 
     
@@ -279,7 +285,7 @@ const TableCardDetail = ({
         }
       `}</style>
 
-      <Accordion>
+<Accordion expanded={expanded} onChange={() => setExpanded(prev => !prev)}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ backgroundColor: table.estado === 'ocupada' ? 'rgba(139, 0, 0, 0.8)' : 'rgba(34, 139, 34, 0.8)', color: '#fff' }}>
           <Typography variant="h6" align="center">
             Mesa {table.n_mesa}
@@ -334,36 +340,41 @@ const TableCardDetail = ({
           </CardContent>
 
           <CardActions sx={{ justifyContent: 'space-between', px: 1 }}>
-  <Button
-    variant="contained"
-    color="success"
-    onClick={() => {
-      handleReceiveOrderClick();
-      handlePrintNewProducts();
-    }}
-    disabled={isReceiveButtonDisabled}
-  >
-    Confirmar
-  </Button>
+          <Button
+  variant="contained"
+  color="success"
+  onClick={() => {
+    handleReceiveOrderClick();
+    handlePrintNewProducts();
+    handleCollapse();
+  }}
+  disabled={isReceiveButtonDisabled}
+>
+  Confirmar
+</Button>
 
-  <Button
-    variant="contained"
-    sx={{
-      backgroundColor: (order[0]?.estado_pedido === 'En curso' || inProgressDisabled) ? 'grey' : 'orange',
-      color: '#fff'
-    }}
-    onClick={handleOrderInProgressClick}
-    disabled={isActionButtonsDisabled || inProgressDisabled || order[0]?.estado_pedido === 'En curso'}
-  >
-    En Curso
-  </Button>
+<Button
+  variant="contained"
+  sx={{
+    backgroundColor: (order[0]?.estado_pedido === 'En curso' || inProgressDisabled) ? 'grey' : 'orange',
+    color: '#fff'
+  }}
+  onClick={() => {
+    handleOrderInProgressClick();
+    handleCollapse();
+  }}
+  disabled={isActionButtonsDisabled || inProgressDisabled || order[0]?.estado_pedido === 'En curso'}
+>
+  En Curso
+</Button>
 
-  <Button
+<Button
   variant="contained"
   color="error"
   onClick={() => {
-    handleFinalizeOrderClick(); 
-    handlePrintFullOrder(); 
+    handleFinalizeOrderClick();
+    handlePrintFullOrder();
+    handleCollapse();
   }}
   disabled={isActionButtonsDisabled}
 >

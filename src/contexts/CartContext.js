@@ -13,7 +13,7 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false); 
 
-  // Funciones para manejar el carrito
+  
   const addToCart = (product, quantity) => {
     setCart(prevCart => {
       const existingItemIndex = prevCart.findIndex(
@@ -21,10 +21,10 @@ export const CartProvider = ({ children }) => {
       );
 
       if (existingItemIndex > -1) {
-        // Si ya existe con nuevo=0, creamos una nueva entrada con nuevo=1
+        
         return [...prevCart, { product: { ...product, nuevo: 1 }, cantidad: quantity }];
       } else {
-        // Si no existe, simplemente lo agregamos al carrito
+       
         return [...prevCart, { product, cantidad: quantity }];
       }
     });
@@ -87,11 +87,11 @@ export const CartProvider = ({ children }) => {
       const existingOrderId = await fetchCurrentOrder();
       let orderId = existingOrderId;
   
-      let isNewOrder = false; // Variable para determinar si estamos creando una nueva orden
+      let isNewOrder = false; 
   
       if (!orderId) {
         
-        // Crear nueva orden si no existe
+        
         const orderData = {
           id_cliente: parseInt(clientId, 10),
           id_mesa: parseInt(tableId, 10),
@@ -101,7 +101,7 @@ export const CartProvider = ({ children }) => {
        
         if (response && response.orderId) {
           orderId = response.orderId;
-          isNewOrder = true; // Marcamos que se ha creado una nueva orden
+          isNewOrder = true; 
           
         } else {
           throw new Error('No se pudo obtener el orderId después de crear la orden');
@@ -116,7 +116,7 @@ export const CartProvider = ({ children }) => {
       const existingOrderDetails = await GetOrderByTable(tableId);
       
       
-      let itemsUpdated = false;  // Flag para verificar si se han agregado nuevos elementos
+      let itemsUpdated = false;  
   
       for (const item of cart) {
         
@@ -129,7 +129,7 @@ export const CartProvider = ({ children }) => {
           await updateOrderDetail({
             id_pedido: orderId,
             id_producto: item.product.id_producto,
-            cantidad: item.cantidad, // Asegúrate de pasar solo la cantidad del carrito
+            cantidad: item.cantidad, 
           });
           
           itemsUpdated = true;
@@ -151,14 +151,14 @@ export const CartProvider = ({ children }) => {
         await updateOrderStatus({ id_pedido: orderId, estado: 'Actualizado' });
       }
   
-      // Actualizar el estado de los productos nuevos (nuevo=1) a viejo (nuevo=0)
+      
       await Promise.all(cart.map(item => {
         if (item.product.nuevo === 1) {
           return updateOrderDetail({
             id_pedido: orderId,
             id_producto: item.product.id_producto,
             cantidad: item.cantidad,
-            nuevo: 0,  // Cambiamos el estado de nuevo a 0
+            nuevo: 0,  
           });
         }
         return null;
@@ -180,7 +180,7 @@ export const CartProvider = ({ children }) => {
   const openCombinedDialog = () => setCombinedDialogOpen(true);
   const closeCombinedDialog = () => setCombinedDialogOpen(false);
   
-  const handleCloseSuccessDialog = () => setSuccessDialogOpen(false); // Manejar el cierre del diálogo de éxito
+  const handleCloseSuccessDialog = () => setSuccessDialogOpen(false); 
 
   return (
     <CartContext.Provider value={{
@@ -196,7 +196,7 @@ export const CartProvider = ({ children }) => {
       loading,
     }}>
       {children}
-      <SuccessDialog open={successDialogOpen} onClose={handleCloseSuccessDialog} /> {/* Añadir el diálogo aquí */}
+      <SuccessDialog open={successDialogOpen} onClose={handleCloseSuccessDialog} />
     </CartContext.Provider>
   );
 };

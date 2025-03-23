@@ -111,20 +111,21 @@ const SubcategoryAccordion = ({ categoryId }) => {
                                 id={`${panelId}-header`}
                             >
                                 <Typography
-                                    variant="h5"
-                                    sx={{
-                                        fontSize: {
-                                            xs: '1rem',
-                                            sm: '1.2rem',
-                                            md: '1.5rem',
-                                            lg: '1.7rem',
-                                        },
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                  {subcategory.nombre}  
-                                </Typography>
+    variant="h5"
+    sx={{
+        fontSize: {
+            xs: '1rem',
+            sm: '1.2rem',
+            md: '1.5rem',
+            lg: '1.7rem',
+        },
+        display: 'flex',
+        alignItems: 'center',
+    }}
+    translate="no"
+>
+    {subcategory.nombre}  
+</Typography>
                             </CustomAccordionSummary>
                             <CustomAccordionDetails>
                                 

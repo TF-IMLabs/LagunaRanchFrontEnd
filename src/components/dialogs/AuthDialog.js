@@ -16,22 +16,22 @@ import AuthContext from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 
-// Transición personalizada
+
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
 });
 
-// Estilos personalizados
+
 const CustomDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-container": {
-    backdropFilter: "blur(10px)", // Añadir desenfoque de fondo
-    overflow: "visible", // Permitir crecimiento dinámico del diálogo
+    backdropFilter: "blur(10px)", 
+    overflow: "visible", 
   },
   "& .MuiPaper-root": {
     borderRadius: "20px",
     boxShadow: "none",
     backgroundColor: "rgba(0, 0, 0, 0.9)",
-    overflow: "visible", // Evitar scroll interno
+    overflow: "visible", 
   },
   "& .MuiDialogTitle-root": {
     color: "#DD98AD",
@@ -82,7 +82,7 @@ const AuthDialog = ({ open, onClose }) => {
 
   const handleLogin = () => {
     if (loginAsAdmin(username, password)) {
-      navigate("/admin"); // Redirige a la página de administración
+      navigate("/admin"); 
       onClose();
     } else {
       alert("Credenciales incorrectas");
@@ -100,7 +100,7 @@ const AuthDialog = ({ open, onClose }) => {
       onClose={handleClose}
       fullWidth
       maxWidth="sm"
-      fullScreen={isMobile} // Pantalla completa en dispositivos móviles
+      fullScreen={isMobile} 
       aria-labelledby="auth-dialog-title"
       TransitionComponent={Transition}
     >

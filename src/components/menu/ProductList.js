@@ -126,19 +126,20 @@ const ProductList = React.memo(({ subcategoryId, products, onAddToCart }) => {
   <StyledListItemText
     primary={
       <Typography
-        component="span"
-        variant="body1"
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%' }}
-      >
-        {/* Nombre del producto primero */}
-        {product.nombre}
-
-        {/* Ahora los iconos */}
-        {renderIcons(product)} {/* Iconos alineados después del nombre */}
-
-        {/* Condicional para mostrar "Plato del Día" */}
-        {product.plato_del_dia === 1 && <BlinkText>Plato del Día!</BlinkText>}
-      </Typography>
+      component="span"
+      variant="body1"
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%' }}
+      translate="no"
+  >
+      
+      {product.nombre}
+  
+      
+      {renderIcons(product)} 
+  
+     
+      {product.plato_del_dia === 1 && <BlinkText>Plato del Día!</BlinkText>}
+  </Typography>
     }
     secondary={
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
@@ -159,7 +160,7 @@ const ProductList = React.memo(({ subcategoryId, products, onAddToCart }) => {
           style={{
             fontWeight: 'bold',
             display: 'flex',
-            justifyContent: 'flex-end', // Alinea el precio a la derecha
+            justifyContent: 'flex-end', 
           }}
         >
           <span>${product.precio}</span>

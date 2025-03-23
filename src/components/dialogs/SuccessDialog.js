@@ -104,8 +104,8 @@ const SuccessDialog = ({ open, onClose }) => {
           Cerrar
         </CustomButton>
         <CustomButton onClick={() => {
-          onClose(); // Cerrar el diálogo de éxito
-          openCombinedDialog(); // Abrir el CombinedDialog
+          onClose(); 
+          openCombinedDialog(); 
         }} variant="outlined">
           Ver Pedido
         </CustomButton>

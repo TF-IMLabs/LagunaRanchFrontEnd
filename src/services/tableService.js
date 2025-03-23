@@ -1,6 +1,6 @@
-import apiClient from './apiClient'; // Reutilizamos el cliente configurado con Axios
+import apiClient from './apiClient'; 
 
-// Obtener todas las mesas
+
 export const getAllTables = async () => {
   try {
     const response = await apiClient.get('/table/all');
@@ -11,7 +11,7 @@ export const getAllTables = async () => {
   }
 };
 
-// Obtener usuario y contraseña por ID de mesa
+
 export const getUserAndPasswByTable = async (tableId) => {
   try {
     const response = await apiClient.get(`/table/user/${tableId}`);
@@ -22,7 +22,7 @@ export const getUserAndPasswByTable = async (tableId) => {
   }
 };
 
-// Actualizar el estado de una mesa
+
 export const updateTableStatus = async (tableData) => {
   try {
     const response = await apiClient.put('/table/update/table', tableData);
@@ -33,7 +33,7 @@ export const updateTableStatus = async (tableData) => {
   }
 };
 
-// Actualizar el estado de un pedido y una mesa
+
 export const updateOrderAndTableStatus = async (orderAndTableData) => {
   try {
     const response = await apiClient.put('/table/update/o&t', orderAndTableData);
@@ -44,7 +44,7 @@ export const updateOrderAndTableStatus = async (orderAndTableData) => {
   }
 };
 
-// Actualizar el mozo de una mesa
+
 export const updateTableWaiter = async (id_mesa, id_mozo) => {
   try {
     const response = await apiClient.put('/table/update/table/waiter', { id_mesa, id_mozo });
@@ -55,7 +55,7 @@ export const updateTableWaiter = async (id_mesa, id_mozo) => {
   }
 };
 
-// Actualizar la información de una mesa (capacidad, estado, mozo)
+
 export const updateTableInfo = async (tableData) => {
   try {
     const response = await apiClient.put('/table/update/info', tableData);
@@ -66,7 +66,7 @@ export const updateTableInfo = async (tableData) => {
   }
 };
 
-// Crear una nueva mesa
+
 export const createTable = async (tableData) => {
   try {
     const response = await apiClient.post('/table/create', tableData);
@@ -77,7 +77,7 @@ export const createTable = async (tableData) => {
   }
 };
 
-// Actualizar la nota de una mesa
+
 export const updateTableNote = async (id_mesa, nota) => {
   try {
     const response = await apiClient.put('/table/update/note', { id_mesa, nota });
@@ -88,7 +88,7 @@ export const updateTableNote = async (id_mesa, nota) => {
   }
 };
 
-// Eliminar la nota de una mesa
+
 export const deleteTableNote = async (id_mesa) => {
   try {
     const response = await apiClient.delete('/table/delete/note', { data: { id_mesa } });

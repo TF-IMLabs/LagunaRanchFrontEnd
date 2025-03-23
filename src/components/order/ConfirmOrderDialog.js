@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Box, Divider, Button, CircularProgress } from '@mui/material';
 import { styled } from '@mui/system';
 
-// Botón personalizado
+
 const CustomButton = styled(Button)({
   color: '#DD98AD',
   backgroundColor: 'black',
@@ -10,14 +10,14 @@ const CustomButton = styled(Button)({
   '&:hover': { borderColor: '#DD98AD' },
 });
 
-// Título centrado
+
 const StyledDialogTitle = styled(DialogTitle)({
   color: '#DD98AD',
   backgroundColor: 'black',
   textAlign: 'center',
 });
 
-// Acciones centradas
+
 const StyledDialogActions = styled(DialogActions)({
   backgroundColor: 'black',
   justifyContent: 'center',

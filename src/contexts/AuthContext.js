@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Exportamos useAuth para acceder al contexto
+
 export const useAuth = () => useContext(AuthContext);
 
 export default AuthContext;

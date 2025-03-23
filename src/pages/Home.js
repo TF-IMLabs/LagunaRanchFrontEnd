@@ -32,7 +32,7 @@ const settings = {
   ],
 };
 
-// Estilos personalizados
+
 const MainContainer = styled(Box)(({ theme }) => ({
   flex: 1,
   backgroundColor: '#d9c9a3',

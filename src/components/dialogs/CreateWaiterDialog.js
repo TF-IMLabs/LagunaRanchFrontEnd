@@ -17,7 +17,7 @@ import {
 import { styled } from '@mui/system';
 import { createWaiter } from '../../services/waiterService';
 
-// Estilos personalizados
+
 const CustomDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialog-container': {
         backdropFilter: 'blur(10px)',

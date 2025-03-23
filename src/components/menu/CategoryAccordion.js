@@ -94,16 +94,18 @@ const CategoryAccordion = ({ onProductClick }) => {
                         id="panelPlatoDelDia-header"
                     >
                         <Typography
-                            variant="h5"
-                            sx={{
-                                fontSize: {
-                                    sm: '1.5rem', 
-                                    md: '1.7rem', 
-                                },
-                            }}
-                        >
-                            Plato del Día
-                        </Typography>
+    variant="h5"
+    sx={{
+        fontSize: {
+            sm: '1.5rem', 
+            md: '1.7rem', 
+        },
+    }}
+    translate="no"
+>
+    Plato del Día
+</Typography>
+
                     </CustomAccordionSummary>
                     <CustomAccordionDetails>
                         
@@ -125,16 +127,17 @@ const CategoryAccordion = ({ onProductClick }) => {
                         id={`panel${category.id_categoria}-header`}
                     >
                         <Typography
-                            variant="h5"
-                            sx={{
-                                fontSize: {
-                                    sm: '1.5rem',
-                                    md: '1.7rem', 
-                                },
-                            }}
-                        >
-                            {category.nombre}
-                        </Typography>
+    variant="h5"
+    sx={{
+        fontSize: {
+            sm: '1.5rem',
+            md: '1.7rem', 
+        },
+    }}
+    translate="no"
+>
+    {category.nombre}
+</Typography>
                     </CustomAccordionSummary>
                     <CustomAccordionDetails>
                        

@@ -1,6 +1,6 @@
 import apiClient from './apiClient'; 
 
-// Crear un mozo
+
 export const createWaiter = async (nombre, turno) => {
   try {
     const response = await apiClient.post('/waiter/create', { nombre, turno });
@@ -11,7 +11,7 @@ export const createWaiter = async (nombre, turno) => {
   }
 };
 
-// Actualizar un mozo
+
 export const updateWaiter = async (id_mozo, nombre, turno) => {
   try {
     const response = await apiClient.put('/waiter/update', { id_mozo, nombre, turno });
@@ -42,7 +42,7 @@ export const callWaiter = async (id_mesa) => {
   }
 };
 
-// Solicitar la cuenta
+
 export const requestBill = async (id_mesa) => {
   try {
     const response = await apiClient.put('/waiter/requestBill', { id_mesa });
@@ -53,7 +53,7 @@ export const requestBill = async (id_mesa) => {
   }
 };
 
-// Resetear notificaciones
+
 export const updateNotifications = async (id_mesa) => {
   try {
     const response = await apiClient.put('/waiter/resetNotifications', { id_mesa });

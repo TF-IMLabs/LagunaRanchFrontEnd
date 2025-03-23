@@ -6,21 +6,21 @@ import {
   updateTableWaiter,
   updateTableStatus,
   deleteTableNote,
-} from "../../services/tableService"; // Asegúrate de que deleteTableNote esté importada
+} from "../../services/tableService"; 
 import { getCartInfo } from "../../services/cartService";
 import { getAllWaiters } from "../../services/waiterService";
 import { Grid, Typography, CircularProgress, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import TableDetail from "./TableCardDetail";
 import WaiterDialog from "../dialogs/WaiterDialog";
-import CreateTableDialog from "../dialogs/CreateTableDialog"; // Importa el diálogo de crear mesa
-import CreateWaiterDialog from "../dialogs/CreateWaiterDialog"; // Importa el diálogo de crear mozo
+import CreateTableDialog from "../dialogs/CreateTableDialog"; 
+import CreateWaiterDialog from "../dialogs/CreateWaiterDialog"; 
 
 const TablesSection = () => {
   const queryClient = useQueryClient();
   const [openDialog, setOpenDialog] = useState(false);
-  const [openCreateTableDialog, setOpenCreateTableDialog] = useState(false); // Estado para el diálogo de crear mesa
-  const [openCreateWaiterDialog, setOpenCreateWaiterDialog] = useState(false); // Estado para el diálogo de crear mozo
+  const [openCreateTableDialog, setOpenCreateTableDialog] = useState(false); 
+  const [openCreateWaiterDialog, setOpenCreateWaiterDialog] = useState(false); 
   const [currentTable, setCurrentTable] = useState(null);
   const [newItemsMap, setNewItemsMap] = useState({});
   const [previousOrders, setPreviousOrders] = useState({});
@@ -83,9 +83,9 @@ const TablesSection = () => {
   });
 
   const deleteTableNoteMutation = useMutation({
-    mutationFn: (tableId) => deleteTableNote(tableId), // Asegúrate de que deleteTableNote esté correctamente implementada
+    mutationFn: (tableId) => deleteTableNote(tableId), 
     onSuccess: () => {
-      queryClient.invalidateQueries("tables"); // Vuelve a cargar las tablas después de eliminar la nota
+      queryClient.invalidateQueries("tables"); 
     },
   });
 
@@ -102,7 +102,7 @@ const TablesSection = () => {
   const handleUpdateTableStatus = (tableId) => {
     const newStatus = "libre";
     updateTableStatusMutation.mutate({ id_mesa: tableId, estado: newStatus });
-    deleteTableNoteMutation.mutate(tableId); // Llama a deleteTableNote después de actualizar el estado de la mesa
+    deleteTableNoteMutation.mutate(tableId); 
   };
 
   const handleOrderInProgress = (orderId, tableId) => {

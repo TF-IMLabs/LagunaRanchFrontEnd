@@ -129,7 +129,7 @@ const AddProductDialog = ({ open, onClose, categories, onAddProduct }) => {
       setFormErrors(errors);
       return;
     }
-    setConfirmationOpen(true); // Abre el diálogo de confirmación
+    setConfirmationOpen(true); 
   };
 
   const handleConfirmAddProduct = () => {

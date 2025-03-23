@@ -1,86 +1,86 @@
 import React, { useState, forwardRef } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Divider, Box, Slide } from '@mui/material';
 import { styled } from '@mui/system';
-import { useCart } from '../../contexts/CartContext'; // Usar el contexto de carrito
+import { useCart } from '../../contexts/CartContext'; 
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close'; // Importamos el icono de cerrar
+import CloseIcon from '@mui/icons-material/Close'; 
 
-// Estilos personalizados
+
 const ProductImage = styled('img')(({ theme }) => ({
   width: '100%',
   maxHeight: '200px',
   objectFit: 'cover',
   marginBottom: theme.spacing(2),
-  borderRadius: '10px',         // Bordes redondeados para la imagen
-  border: '2px solid #3A1300',  // Borde oscuro para enmarcar la imagen
+  borderRadius: '10px',         
+  border: '2px solid #3A1300',  
 }));
 
 const CustomDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-container': {
-    backdropFilter: 'blur(10px)', // Añadir desenfoque de fondo
+    backdropFilter: 'blur(10px)', 
   },
   '& .MuiPaper-root': {
-    borderRadius: '20px',       // Bordes redondeados
-    boxShadow: 'none',          // Eliminar sombra para evitar borde visible
-    backgroundColor: '#9b8c8d', // Fondo gris para todo el diálogo
+    borderRadius: '20px',       
+    boxShadow: 'none',          
+    backgroundColor: '#9b8c8d', 
   },
   '& .MuiDialogTitle-root': {
-    color: '#DD98AD',           // Color de texto rosa
-    textAlign: 'center',        // Centrar el texto del título
-    borderTopLeftRadius: '20px', // Bordes redondeados
-    borderTopRightRadius: '20px', // Bordes redondeados
-    backgroundColor: '#000000',  // Fondo negro en el título
-    position: 'relative', // Para posicionar el botón de cerrar
+    color: '#DD98AD',           
+    textAlign: 'center',        
+    borderTopLeftRadius: '20px', 
+    borderTopRightRadius: '20px', 
+    backgroundColor: '#000000',  
+    position: 'relative', 
   },
   '& .MuiDialogContent-root': {
-    backgroundColor: '#9b8c8d', // Fondo gris para el contenido
-    color: '#3b3b3bfa',           // Color de texto rosa
-    textAlign: 'center',        // Centrar el texto del contenido
+    backgroundColor: '#9b8c8d', 
+    color: '#3b3b3bfa',          
+    textAlign: 'center',        
   },
   '& .MuiDialogActions-root': {
-    backgroundColor: '#000000', // Fondo negro para las acciones
+    backgroundColor: '#000000', 
     display: 'flex',
-    justifyContent: 'center',   // Centrar los botones
-    gap: '10px',                // Espacio entre los botones
+    justifyContent: 'center',   
+    gap: '10px',                
   }
 }));
 
 const CustomButton = styled(Button)(({ theme }) => ({
-  color: '#DD98AD',             // Color de texto rosa
-  borderColor: '#9b8c8d',         // Color de borde negro
+  color: '#DD98AD',             
+  borderColor: '#9b8c8d',         
   '&:hover': {
-    backgroundColor: 'grey',   // Fondo negro en estado hover
-    borderColor: 'black',       // Borde negro en estado hover
+    backgroundColor: 'grey',   
+    borderColor: 'black',       
   },
 }));
 
 const CustomIconButton = styled(Button)(({ theme }) => ({
   minWidth: '30px',
   padding: '6px',
-  color: 'black',             // Color de icono rosa
-  borderColor: 'white',         // Color de borde negro
+  color: 'black',             
+  borderColor: 'white',         
   '&:hover': {
-    backgroundColor: 'white',   // Fondo negro en estado hover
-    borderColor: 'black',       // Borde negro en estado hover
+    backgroundColor: 'white',   
+    borderColor: 'black',       
   },
 }));
 
-// Transición para el diálogo
+
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 const ProductDialog = ({ open, onClose, product }) => {
   const [quantity, setQuantity] = useState(1);
-  const { addToCart, openCombinedDialog } = useCart(); // Usamos openOrderDialog para abrir el CombinedDialog
+  const { addToCart, openCombinedDialog } = useCart(); 
 
   const handleAddToCart = () => {
     const quantityNumber = Number(quantity);
     if (quantityNumber > 0 && quantityNumber <= 10) {
       addToCart(product, quantityNumber);
-      openCombinedDialog(); // Abrimos el CombinedDialog después de añadir al carrito
-      onClose(); // Cerramos el diálogo después de añadir al carrito
+      openCombinedDialog(); 
+      onClose(); 
     } else {
       alert('La cantidad debe ser entre 1 y 10.');
     }
@@ -98,7 +98,7 @@ const ProductDialog = ({ open, onClose, product }) => {
     <CustomDialog open={open} onClose={onClose} TransitionComponent={Transition}>
       <DialogTitle>
         {product?.nombre}
-        {/* Botón de cerrar en la parte superior derecha */}
+        
         <CustomIconButton
           onClick={onClose}
           style={{
