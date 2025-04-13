@@ -11,10 +11,10 @@ import { updateOrderAndTableStatus } from '../../services/tableService';
 import { useEffect } from 'react';
 
 
-// Función para formatear la fecha sin convertirla a la zona horaria local (usando UTC)
+
 const formatDate = (dateString) => {
-  const date = new Date(dateString); // Convertimos la fecha ISO a un objeto Date
-  return date.toISOString().slice(0, 19).replace('T', ' '); // Formato: 2024-12-09 16:20:09
+  const date = new Date(dateString); 
+  return date.toISOString().slice(0, 19).replace('T', ' '); 
 };
 
 const playNotificationSound = () => {

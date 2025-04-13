@@ -1,6 +1,6 @@
-import apiClient from './apiClient'; // Reutilizamos el cliente configurado con Axios
+import apiClient from './apiClient'; 
 
-// Crear un pedido
+
 export const createOrder = async (orderData) => {
   try {
     const response = await apiClient.post('/cart/create', orderData);
@@ -16,21 +16,21 @@ export const addProductToOrder = async (productData) => {
 
 
     const response = await apiClient.post('/cart/add', {
-      orderId: productData.orderId, // Incluye orderId
+      orderId: productData.orderId, 
       id_producto: productData.id_producto,
       cantidad: productData.cantidad,
-      // No envíes `p_del_dia` si no es necesario
+      
     });
 
    
-    return response.data; // Retorna los datos de la respuesta
+    return response.data; 
   } catch (error) {
     console.error('Error al agregar el producto a la orden:', error);
-    throw error; // Propaga el error para manejarlo en el lugar de llamada
+    throw error; 
   }
 };
 
-// Obtener detalles del pedido por ID de pedido
+
 export const getOrderDetailByOrderId = async (id_pedido) => {
   try {
     const response = await apiClient.get(`/cart/detail/${id_pedido}`);
@@ -41,7 +41,7 @@ export const getOrderDetailByOrderId = async (id_pedido) => {
   }
 };
 
-// Obtener información del carrito por ID de pedido
+
 export const getCartInfo = async (id_pedido) => {
   try {
     const response = await apiClient.get(`/cart/${id_pedido}`);
@@ -52,7 +52,7 @@ export const getCartInfo = async (id_pedido) => {
   }
 };
 
-// Obtener todos los pedidos
+
 export const getAllOrders = async () => {
   try {
     const response = await apiClient.get('/cart/all');
@@ -63,7 +63,7 @@ export const getAllOrders = async () => {
   }
 };
 
-// Actualizar el estado del pedido
+
 export const updateOrderStatus = async (orderStatusData) => {
   try {
     const response = await apiClient.put('/cart/update/order', orderStatusData);
@@ -74,7 +74,7 @@ export const updateOrderStatus = async (orderStatusData) => {
   }
 };
 
-// Eliminar un producto del carrito por ID de detalle
+
 export const removeCartItem = async (id_detalle) => {
   try {
     const response = await apiClient.delete(`/cart/item/${id_detalle}`);
@@ -85,7 +85,7 @@ export const removeCartItem = async (id_detalle) => {
   }
 };
 
-// Eliminar un pedido por ID de pedido
+
 export const removeOrder = async (id_pedido) => {
   try {
     const response = await apiClient.delete(`/cart/order/${id_pedido}`);
@@ -96,7 +96,7 @@ export const removeOrder = async (id_pedido) => {
   }
 };
 
-// Obtener el pedido por tableId
+
 export const GetOrderByTable = async (tableId) => {
   try {
     const response = await apiClient.get(`/cart/table/${tableId}`);
@@ -121,7 +121,7 @@ export const updateOrderDetail = async (orderDetailData) => {
   }
 };
 
-// Pasar los productos a viejo para poder diferenciarlos en el detalle del pedido
+
 export const putProductsAsOld = async (orderId) => {
   try {
     const response = await apiClient.put('/cart/putProductsAsOld', { orderId });
