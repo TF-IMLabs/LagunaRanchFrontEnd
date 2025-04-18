@@ -5,6 +5,7 @@ const apiClient = axios.create({
   baseURL: 'https://amelieapp.alwaysdata.net/api/', 
   headers: {
     'Content-Type': 'application/json',
+    
   },
 });
 
