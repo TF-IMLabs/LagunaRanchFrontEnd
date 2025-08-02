@@ -6,7 +6,7 @@ import "slick-carousel/slick/slick-theme.css";
 import CssBaseline from '@mui/material/CssBaseline';
 import { Helmet } from 'react-helmet';
 import { ThemeProvider } from '@mui/material/styles';
-import theme from './components/theme';
+import theme from './theme/theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './contexts/AuthContext';

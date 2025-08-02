@@ -1,2 +1,2 @@
-# AmelieFrontEnd
-Repository to deploy on Vercel for Le Jardin d'Amelie
+
+Repository to deploy on Vercel for TF&IMLabs Restó 

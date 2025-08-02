@@ -1,18 +1,15 @@
 import React, { createContext, useState, useContext, useEffect } from 'react'; 
 import { addProductToOrder, createOrder, GetOrderByTable, updateOrderDetail, updateOrderStatus } from '../services/cartService';
 import { useAuth } from './AuthContext';
-import SuccessDialog from '../components/dialogs/SuccessDialog'; 
+import SuccessDialog from '../pages/Menu/SuccessDialog'; 
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const { auth } = useAuth();
-  const { tableId, clientId } = auth;
+  const { tableId, clientId } = useAuth();
 
-  // Determinamos un tiempo máximo (30 minutos)
-  const maxCartAge = 30 * 60 * 1000; // 30 minutos en milisegundos
+  const maxCartAge = 30 * 60 * 1000; 
 
-  // Inicializamos el carrito desde localStorage si existe y no expiró
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart');
     const savedTime = localStorage.getItem('cartSetTime');
@@ -21,7 +18,6 @@ export const CartProvider = ({ children }) => {
       if (timePassed < maxCartAge) {
         return JSON.parse(savedCart);
       } else {
-        // Si expiró, limpiamos el carrito
         localStorage.removeItem('cart');
         localStorage.removeItem('cartSetTime');
       }
@@ -29,7 +25,6 @@ export const CartProvider = ({ children }) => {
     return [];
   });
 
-  // Cada vez que el carrito cambie se guarda en localStorage y se actualiza el timestamp
   useEffect(() => {
     if (cart.length > 0) {
       localStorage.setItem('cart', JSON.stringify(cart));
@@ -64,6 +59,13 @@ export const CartProvider = ({ children }) => {
 
   const emptyCart = () => {
     setCart([]);
+  };
+
+  
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem('cart');
+    localStorage.removeItem('cartSetTime');
   };
 
   const updateItemQuantity = (productId, newQuantity) => {
@@ -102,7 +104,7 @@ export const CartProvider = ({ children }) => {
     if (cart.length === 0 || !tableId || !clientId) {
       return;
     }
-  
+
     setLoading(true);
     try {
       const existingOrderId = await fetchCurrentOrder();
@@ -113,6 +115,7 @@ export const CartProvider = ({ children }) => {
         const orderData = {
           id_cliente: parseInt(clientId, 10),
           id_mesa: parseInt(tableId, 10),
+          tipo_pedido: 0,
         };
   
         const response = await createOrder(orderData);
@@ -192,6 +195,7 @@ export const CartProvider = ({ children }) => {
       addToCart,
       removeItem,
       emptyCart,
+      clearCart, 
       updateItemQuantity,
       sendOrder,
       combinedDialogOpen,

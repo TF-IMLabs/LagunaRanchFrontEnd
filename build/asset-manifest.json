@@ -1,0 +1,39 @@
+{
+  "files": {
+    "main.css": "/static/css/main.c0c1ae41.css",
+    "main.js": "/static/js/main.b5b60fe2.js",
+    "static/media/background8.jpg": "/static/media/background8.dbc96d0e031c566685b3.jpg",
+    "static/media/BarTF&IMLabs.png": "/static/media/BarTF&IMLabs.5afcb67dabd23a525e00.png",
+    "static/media/RestoApp12.jpg": "/static/media/RestoApp12.eacdba46f29268d15d04.jpg",
+    "static/media/RestoApp9.jpg": "/static/media/RestoApp9.c5e93f5627d204161adf.jpg",
+    "static/media/RestoApp14.jpg": "/static/media/RestoApp14.c076fe64c7e0e57155af.jpg",
+    "static/media/RestoApp10.jpg": "/static/media/RestoApp10.ff309e5f85a513dd5856.jpg",
+    "static/media/RestoApp1.jpg": "/static/media/RestoApp1.2e3032a23add51220521.jpg",
+    "static/media/RestoApp4.jpg": "/static/media/RestoApp4.282dec5ee02c7136e0fd.jpg",
+    "static/media/backgroundandi2.jpg": "/static/media/backgroundandi2.9269122dfe0dfb3cad3c.jpg",
+    "static/media/backgroundamelie3.jpg": "/static/media/backgroundamelie3.1dac26680997bd68c645.jpg",
+    "static/media/RestoApp8.jpg": "/static/media/RestoApp8.93555b7eed9a3054150a.jpg",
+    "static/media/RestoApp5.jpg": "/static/media/RestoApp5.0a28dc9f96296a680579.jpg",
+    "static/media/amelie13.jpeg": "/static/media/amelie13.fcfab24b1d81292ef774.jpeg",
+    "static/media/RestoApp11.jpg": "/static/media/RestoApp11.366dbc2c4cc612ce15af.jpg",
+    "static/media/RestoApp7.jpg": "/static/media/RestoApp7.17289c32fb16d5be851c.jpg",
+    "static/media/RestoApp13.jpg": "/static/media/RestoApp13.75e79d4581aca22d1fdd.jpg",
+    "static/media/RestoApp6.jpg": "/static/media/RestoApp6.f22da7481db46fe44cc5.jpg",
+    "static/media/RestoApp3.jpg": "/static/media/RestoApp3.94732550cb98e73f994f.jpg",
+    "static/media/RestoApp2.jpg": "/static/media/RestoApp2.1eb8348690320cb48a8b.jpg",
+    "static/media/vegano.png": "/static/media/vegano.9507a1d3efa3bbd90e72.png",
+    "static/media/celiaco.png": "/static/media/celiaco.04cb2a3da052bab93cb1.png",
+    "static/media/vegetariano.png": "/static/media/vegetariano.9215f9af45b9c5262bf5.png",
+    "static/media/slick.svg": "/static/media/slick.2630a3e3eab21c607e21.svg",
+    "static/media/slick.eot": "/static/media/slick.a4e97f5a2a64f0ab1323.eot",
+    "static/media/slick.ttf": "/static/media/slick.c94f7671dcc99dce43e2.ttf",
+    "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
+    "index.html": "/index.html",
+    "main.c0c1ae41.css.map": "/static/css/main.c0c1ae41.css.map",
+    "main.b5b60fe2.js.map": "/static/js/main.b5b60fe2.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c0c1ae41.css",
+    "static/js/main.b5b60fe2.js"
+  ]
+}
