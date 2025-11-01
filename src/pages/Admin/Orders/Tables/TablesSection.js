@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getAllTables,
@@ -48,17 +48,21 @@ const TablesSection = () => {
     queryFn: getAllWaiters,
   });
 
+  const tableIds = useMemo(
+    () => tables.map((t) => t.ultimo_id_pedido).filter(Boolean),
+    [tables]
+  );
+
   const { data: ordersById = {}, isLoading: loadingOrders } = useQuery({
-    queryKey: ["orders", tables.map((t) => t.ultimo_id_pedido)],
+    queryKey: ["orders", { tableIds }],
     queryFn: async () => {
-      const validIds = tables.map((t) => t.ultimo_id_pedido).filter(Boolean);
-      if (!validIds.length) return {};
+      if (!tableIds.length) return {};
       const orders = await Promise.all(
-        validIds.map((id) => getCartInfo(id).then((order) => ({ [id]: order })))
+        tableIds.map((id) => getCartInfo(id).then((order) => ({ [id]: order })))
       );
       return Object.assign({}, ...orders);
     },
-    enabled: tables.length > 0,
+    enabled: tableIds.length > 0,
   });
 
 
@@ -67,24 +71,24 @@ const TablesSection = () => {
   const receiveOrderMutation = useMutation({
     mutationFn: updateOrderAndTableStatus,
     onSuccess: () => {
-      queryClient.invalidateQueries("orders");
-      queryClient.invalidateQueries("tables");
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["tables"] });
     },
   });
 
   const updateTableStatusMutation = useMutation({
     mutationFn: ({ id_mesa, estado }) => updateTableStatus({ id_mesa, estado }),
-    onSuccess: () => queryClient.invalidateQueries("tables"),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tables"] }),
   });
 
   const updateWaiterMutation = useMutation({
     mutationFn: (data) => updateTableWaiter(data.id_mesa, data.id_mozo),
-    onSuccess: () => queryClient.invalidateQueries("tables"),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tables"] }),
   });
 
   const deleteTableNoteMutation = useMutation({
     mutationFn: deleteTableNote,
-    onSuccess: () => queryClient.invalidateQueries("tables"),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tables"] }),
   });
 
   const handleReceiveOrder = (orderId, tableId) => {
@@ -148,8 +152,8 @@ const TablesSection = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      queryClient.invalidateQueries("tables");
-      queryClient.invalidateQueries("orders");
+      queryClient.invalidateQueries({ queryKey: ["tables"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
     }, 5000);
     return () => clearInterval(interval);
   }, [queryClient]);

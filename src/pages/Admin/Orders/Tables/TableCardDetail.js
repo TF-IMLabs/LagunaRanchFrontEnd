@@ -12,7 +12,10 @@ import {
   List,
   ListItem,
   Divider,
-  Box
+  Box,
+  Snackbar,
+  Alert,
+  Tooltip,
 } from '@mui/material';
 import {
   Print as PrintIcon,
@@ -50,23 +53,42 @@ const TableCardDetail = ({
 }) => {
   const [inProgressDisabled, setInProgressDisabled] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
   const validOrder = useMemo(() => (Array.isArray(order) ? order : []), [order]);
   const currentProducts = useMemo(() => validOrder.filter(({ nuevo }) => nuevo === 1), [validOrder]);
   const oldProducts = useMemo(() => validOrder.filter(({ nuevo }) => nuevo === 0), [validOrder]);
 
-  const handleOrderInProgressClick = useCallback(() => {
-    handleOrderInProgress(table.ultimo_id_pedido, table.n_mesa);
-    setInProgressDisabled(true);
+  const handleOrderInProgressClick = useCallback(async () => {
+    try {
+      await handleOrderInProgress(table.ultimo_id_pedido, table.n_mesa);
+      setInProgressDisabled(true);
+      setFeedback({ severity: 'info', message: `Pedido de la mesa ${table.n_mesa} marcado en curso.` });
+    } catch (error) {
+      console.error('Error al marcar el pedido en curso:', error);
+      setFeedback({ severity: 'error', message: 'No se pudo actualizar el estado a "En curso".' });
+    }
   }, [handleOrderInProgress, table]);
 
   const handleReceiveOrderClick = useCallback(async () => {
-    await handleReceiveOrder(table.ultimo_id_pedido, table.n_mesa, 'Recibido');
-    await putProductsAsOld(table.ultimo_id_pedido);
+    try {
+      await handleReceiveOrder(table.ultimo_id_pedido, table.n_mesa, 'Recibido');
+      await putProductsAsOld(table.ultimo_id_pedido);
+      setFeedback({ severity: 'success', message: `Productos confirmados para la mesa ${table.n_mesa}.` });
+    } catch (error) {
+      console.error('Error al confirmar los productos nuevos:', error);
+      setFeedback({ severity: 'error', message: 'No se pudo confirmar los productos nuevos.' });
+    }
   }, [handleReceiveOrder, table]);
 
-  const handleClearNotifications = useCallback(() => {
-    return updateNotifications(table.n_mesa);
+  const handleClearNotifications = useCallback(async () => {
+    try {
+      await updateNotifications(table.n_mesa);
+      setFeedback({ severity: 'success', message: `Notificaciones limpiadas para la mesa ${table.n_mesa}.` });
+    } catch (error) {
+      console.error('Error al limpiar notificaciones:', error);
+      setFeedback({ severity: 'error', message: 'No se pudieron limpiar las notificaciones.' });
+    }
   }, [table.n_mesa]);
 
   const handleFinalizeOrderClick = useCallback(async () => {
@@ -77,17 +99,29 @@ const TableCardDetail = ({
       });
       await handleClearNotifications();
       handleUpdateTableStatus(table.n_mesa);
+      setFeedback({ severity: 'success', message: `Mesa ${table.n_mesa} finalizada y liberada.` });
     } catch (error) {
       console.error('Error al finalizar el pedido y liberar la mesa:', error);
+      setFeedback({ severity: 'error', message: 'No se pudo finalizar el pedido.' });
     }
   }, [table, handleClearNotifications, handleUpdateTableStatus]);
 
   const handlePrintNewProducts = useCallback(() => {
-    printNewTicket(table, currentProducts);
+    const result = printNewTicket(table, currentProducts);
+    if (result?.success) {
+      setFeedback({ severity: 'success', message: `Ticket de nuevos productos enviado a impresión (mesa ${table.n_mesa}).` });
+    } else if (result) {
+      setFeedback({ severity: 'info', message: result.message });
+    }
   }, [table, currentProducts]);
 
   const handlePrintFullOrder = useCallback(() => {
-    printFullOrderTicket(table, validOrder);
+    const result = printFullOrderTicket(table, validOrder);
+    if (result?.success) {
+      setFeedback({ severity: 'success', message: `Ticket completo de la mesa ${table.n_mesa} enviado a impresión.` });
+    } else if (result) {
+      setFeedback({ severity: 'info', message: result.message });
+    }
   }, [table, validOrder]);
 
   const isReceiveButtonDisabled = currentProducts.length === 0;
@@ -103,6 +137,11 @@ const TableCardDetail = ({
   const handleCollapse = useCallback(() => {
     setExpanded(false);
   }, []);
+
+  const handleCloseFeedback = (_event, reason) => {
+    if (reason === 'clickaway') return;
+    setFeedback(null);
+  };
 
   return (
     <Card
@@ -157,19 +196,32 @@ const TableCardDetail = ({
                 )}
               </Box>
               <Box>
-                <IconButton onClick={handlePrintFullOrder} color="inherit">
-                  <PrintIcon />
-                </IconButton>
-                <IconButton
-                  onClick={handleClearNotifications}
-                  disabled={isClearNotificationsDisabled}
-                  sx={{ color: isClearNotificationsDisabled ? 'grey' : 'red' }}
-                >
-                  <NotificationsOffIcon />
-                </IconButton>
-                <IconButton onClick={() => handleOpenDialog(table)} color="inherit">
-                  <PersonAddIcon />
-                </IconButton>
+                <Tooltip title="Imprimir ticket completo">
+                  <IconButton onClick={handlePrintFullOrder} color="inherit" aria-label={`Imprimir ticket completo de la mesa ${table.n_mesa}`}>
+                    <PrintIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Limpiar notificaciones">
+                  <span>
+                    <IconButton
+                      onClick={handleClearNotifications}
+                      disabled={isClearNotificationsDisabled}
+                      aria-label={`Limpiar notificaciones de la mesa ${table.n_mesa}`}
+                      sx={{ color: isClearNotificationsDisabled ? 'grey' : 'red' }}
+                    >
+                      <NotificationsOffIcon />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+                <Tooltip title="Asignar mozo">
+                  <IconButton
+                    onClick={() => handleOpenDialog(table)}
+                    color="inherit"
+                    aria-label={`Asignar mozo a la mesa ${table.n_mesa}`}
+                  >
+                    <PersonAddIcon />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </Box>
 
@@ -213,49 +265,71 @@ const TableCardDetail = ({
           </CardContent>
 
           <CardActions sx={{ justifyContent: 'space-between', px: 1 }}>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={() => {
-                handleReceiveOrderClick();
-                handlePrintNewProducts();
-                handleCollapse();
-              }}
-              disabled={isReceiveButtonDisabled}
-            >
-              Confirmar
-            </Button>
+            <Tooltip title="Confirmar productos nuevos">
+              <span>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={() => {
+                    handleReceiveOrderClick();
+                    handlePrintNewProducts();
+                    handleCollapse();
+                  }}
+                  disabled={isReceiveButtonDisabled}
+                >
+                  Confirmar
+                </Button>
+              </span>
+            </Tooltip>
 
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: (validOrder[0]?.estado_pedido === 'En curso' || inProgressDisabled) ? 'grey' : 'orange',
-                color: '#fff'
-              }}
-              onClick={() => {
-                handleOrderInProgressClick();
-                handleCollapse();
-              }}
-              disabled={isActionButtonsDisabled || inProgressDisabled || orderInfo.estado_pedido === 'En curso'}
-            >
-              En Curso
-            </Button>
+            <Tooltip title="Marcar pedido en curso">
+              <span>
+                <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: (validOrder[0]?.estado_pedido === 'En curso' || inProgressDisabled) ? 'grey' : 'orange',
+                    color: '#fff'
+                  }}
+                  onClick={() => {
+                    handleOrderInProgressClick();
+                    handleCollapse();
+                  }}
+                  disabled={isActionButtonsDisabled || inProgressDisabled || orderInfo.estado_pedido === 'En curso'}
+                >
+                  En curso
+                </Button>
+              </span>
+            </Tooltip>
 
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => {
-                handleFinalizeOrderClick();
-                handlePrintFullOrder();
-                handleCollapse();
-              }}
-              disabled={isActionButtonsDisabled}
-            >
-              Finalizar
-            </Button>
+            <Tooltip title="Finalizar pedido">
+              <span>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => {
+                    handleFinalizeOrderClick();
+                    handlePrintFullOrder();
+                    handleCollapse();
+                  }}
+                  disabled={isActionButtonsDisabled}
+                >
+                  Finalizar
+                </Button>
+              </span>
+            </Tooltip>
           </CardActions>
         </AccordionDetails>
       </Accordion>
+      <Snackbar
+        open={Boolean(feedback)}
+        autoHideDuration={5000}
+        onClose={handleCloseFeedback}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseFeedback} severity={feedback?.severity ?? 'info'} variant="filled">
+          {feedback?.message}
+        </Alert>
+      </Snackbar>
     </Card>
   );
 };

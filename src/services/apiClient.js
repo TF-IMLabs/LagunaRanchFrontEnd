@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://cobalto.alwaysdata.net/api', 
+  baseURL: 'http://amelieapp.alwaysdata.net/api', 
   headers: {
     'Content-Type': 'application/json',
     

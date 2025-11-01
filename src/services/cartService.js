@@ -1,5 +1,4 @@
-import apiClient from './apiClient'; 
-
+import apiClient from './apiClient';
 
 export const createOrder = async (orderData) => {
   try {
@@ -11,25 +10,19 @@ export const createOrder = async (orderData) => {
   }
 };
 
-export const addProductToOrder = async (productData) => {
+export const addProductToOrder = async ({ id_pedido, id_producto, cantidad }) => {
   try {
-
-
     const response = await apiClient.post('/cart/add', {
-      orderId: productData.orderId, 
-      id_producto: productData.id_producto,
-      cantidad: productData.cantidad,
-      
+      id_pedido,
+      id_producto,
+      cantidad,
     });
-
-   
-    return response.data; 
+    return response.data;
   } catch (error) {
     console.error('Error al agregar el producto a la orden:', error);
-    throw error; 
+    throw error;
   }
 };
-
 
 export const getOrderDetailByOrderId = async (id_pedido) => {
   try {
@@ -41,7 +34,6 @@ export const getOrderDetailByOrderId = async (id_pedido) => {
   }
 };
 
-
 export const getCartInfo = async (id_pedido) => {
   try {
     const response = await apiClient.get(`/cart/${id_pedido}`);
@@ -51,7 +43,6 @@ export const getCartInfo = async (id_pedido) => {
     throw error;
   }
 };
-
 
 export const getAllOrders = async () => {
   try {
@@ -63,7 +54,6 @@ export const getAllOrders = async () => {
   }
 };
 
-
 export const updateOrderStatus = async (orderStatusData) => {
   try {
     const response = await apiClient.put('/cart/update/order', orderStatusData);
@@ -74,6 +64,15 @@ export const updateOrderStatus = async (orderStatusData) => {
   }
 };
 
+export const updateOrderDelay = async (delayData) => {
+  try {
+    const response = await apiClient.put('/cart/updateDelay', delayData);
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar el delay del pedido:', error);
+    throw error;
+  }
+};
 
 export const removeCartItem = async (id_detalle) => {
   try {
@@ -85,7 +84,6 @@ export const removeCartItem = async (id_detalle) => {
   }
 };
 
-
 export const removeOrder = async (id_pedido) => {
   try {
     const response = await apiClient.delete(`/cart/order/${id_pedido}`);
@@ -96,10 +94,9 @@ export const removeOrder = async (id_pedido) => {
   }
 };
 
-
-export const GetOrderByTable = async (tableId) => {
+export const getOrderByTable = async (id_table) => {
   try {
-    const response = await apiClient.get(`/cart/table/${tableId}`);
+    const response = await apiClient.get(`/cart/table/${id_table}`);
     return response.data;
   } catch (error) {
     console.error('Error al obtener el pedido por mesa:', error);
@@ -107,12 +104,13 @@ export const GetOrderByTable = async (tableId) => {
   }
 };
 
-export const updateOrderDetail = async (orderDetailData) => {
+export const updateOrderDetail = async ({ id_pedido, id_producto, cantidad, nuevo }) => {
   try {
     const response = await apiClient.put('/cart/updateUnit', {
-      id_pedido: orderDetailData.id_pedido,
-      id_producto: orderDetailData.id_producto,
-      cantidad: orderDetailData.cantidad,
+      id_pedido,
+      id_producto,
+      cantidad,
+      ...(typeof nuevo !== 'undefined' ? { nuevo } : {}),
     });
     return response.data;
   } catch (error) {
@@ -121,13 +119,12 @@ export const updateOrderDetail = async (orderDetailData) => {
   }
 };
 
-
-export const putProductsAsOld = async (orderId) => {
+export const putProductsAsOld = async (id_pedido) => {
   try {
-    const response = await apiClient.put('/cart/putProductsAsOld', { orderId });
+    const response = await apiClient.put('/cart/putProductsAsOld', { id_pedido });
     return response.data;
   } catch (error) {
-    console.error('Error al marcar los productos como viejos:', error);
+    console.error('Error al marcar los productos como antiguos:', error);
     throw error;
   }
 };

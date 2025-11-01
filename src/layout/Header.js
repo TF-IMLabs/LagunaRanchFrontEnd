@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
 import {
   AppBar, Toolbar, IconButton, Button, Badge,
-  Dialog, DialogActions, DialogContent, DialogTitle
+  Dialog, DialogActions, DialogContent, DialogTitle, Box,
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { styled } from '@mui/system';
-import logo from '../assets/BarTF&IMLabs.png';
+import logo from '../assets/logoranch.png';
 import CartIcon from '@mui/icons-material/ShoppingCart';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import AuthDialog from '../users/AuthDialog';
+import AuthDialog from '../components/dialogs/AuthDialog';
 import CombinedDialog from '../pages/Menu/CombinedDialog';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
-import ProfileDialog from '../users/ProfileDialog'; 
+import ProfileDialog from '../components/dialogs/ProfileDialog'; 
 import LoginIcon from '@mui/icons-material/Login'; 
 
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: 'black',
-  color: '#c96b21',
+  backgroundColor: theme.palette.background.default,
+  color: theme.palette.primary.main,
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -29,24 +29,26 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 }));
 
 const Logo = styled('img')(({ theme }) => ({
-  height: '70px',
-  marginRight: '10px',
+  height: 70,
+  marginRight: theme.spacing(1.5),
   [theme.breakpoints.down('sm')]: {
-    height: '70px',
+    height: 64,
   },
 }));
 
 const NavButton = styled(Button)(({ theme }) => ({
-  color: '#c96b21',
-  fontSize: '20px',
+  color: theme.palette.primary.main,
+  fontSize: 20,
   textTransform: 'none',
-  padding: '0 10px',
+  padding: theme.spacing(0, 1),
+  minWidth: 'auto',
   '&:hover': {
-    backgroundColor: 'black',
+    backgroundColor: theme.palette.background.default,
+    opacity: 0.85,
   },
   [theme.breakpoints.down('sm')]: {
-    fontSize: '20px',
-    marginRight: '5px',
+    fontSize: 18,
+    marginRight: theme.spacing(0.5),
   },
 }));
 
@@ -55,18 +57,24 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  padding: '0 10px',
+  padding: theme.spacing(0, 1.5),
 }));
 
 const CustomBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-dot': {
-    backgroundColor: 'black',
+    backgroundColor: theme.palette.primary.main,
   },
   '& .MuiBadge-badge': {
-    color: 'white',
-    backgroundColor: 'black',
-    border: '1px solid black',
+    color: theme.palette.background.default,
+    backgroundColor: theme.palette.primary.main,
+    border: `1px solid ${theme.palette.primary.main}`,
   },
+}));
+
+const ActionsWrapper = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1),
 }));
 
 const Header = () => {
@@ -97,23 +105,23 @@ const Header = () => {
   return (
     <StyledAppBar position="static">
       <StyledToolbar>
-        <IconButton component={Link} to="/">
+        <IconButton component={Link} to="/" aria-label="Ir al inicio">
           <Logo src={logo} alt="Logo" />
         </IconButton>
 
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <NavButton component={Link} to="/menu">
+        <ActionsWrapper>
+          <NavButton component={Link} to="/menu" aria-label="Ir al menú">
             <MenuBookIcon fontSize="small" />
           </NavButton>
 
-          <NavButton onClick={openCombinedDialog}>
-  <CustomBadge badgeContent={totalItems} showZero={false}>
-    <CartIcon fontSize="small" />
-  </CustomBadge>
-</NavButton>
+          <NavButton onClick={openCombinedDialog} aria-label="Ver carrito">
+            <CustomBadge badgeContent={totalItems} showZero={false}>
+              <CartIcon fontSize="small" />
+            </CustomBadge>
+          </NavButton>
 
           {!user && (
-            <NavButton onClick={() => setAuthDialogOpen(true)}>
+            <NavButton onClick={() => setAuthDialogOpen(true)} aria-label="Iniciar sesión">
               <LoginIcon fontSize="small" />
             </NavButton>
           )}
@@ -121,19 +129,19 @@ const Header = () => {
           {user && (
             <>
               {!!user.isAdmin && (
-  <NavButton component={Link} to="/admin">
-    <AdminPanelSettingsIcon fontSize="small" />
-  </NavButton>
-)}
-              <NavButton onClick={() => setProfileDialogOpen(true)}>
+                <NavButton component={Link} to="/admin" aria-label="Panel de administración">
+                  <AdminPanelSettingsIcon fontSize="small" />
+                </NavButton>
+              )}
+              <NavButton onClick={() => setProfileDialogOpen(true)} aria-label="Perfil">
                 <AccountCircleIcon fontSize="small" />
               </NavButton>
-              <NavButton onClick={() => setConfirmLogoutOpen(true)}>
+              <NavButton onClick={() => setConfirmLogoutOpen(true)} aria-label="Cerrar sesión">
                 <LogoutIcon fontSize="small" />
               </NavButton>
             </>
           )}
-        </div>
+        </ActionsWrapper>
       </StyledToolbar>
 
       <CombinedDialog open={combinedDialogOpen} onClose={closeCombinedDialog} />

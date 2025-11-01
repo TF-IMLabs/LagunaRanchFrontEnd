@@ -1,5 +1,4 @@
-import apiClient from './apiClient'; 
-
+import apiClient from './apiClient';
 
 export const getAllTables = async () => {
   try {
@@ -11,7 +10,6 @@ export const getAllTables = async () => {
   }
 };
 
-
 export const getUserAndPasswByTable = async (tableId) => {
   try {
     const response = await apiClient.get(`/table/user/${tableId}`);
@@ -21,7 +19,6 @@ export const getUserAndPasswByTable = async (tableId) => {
     throw error;
   }
 };
-
 
 export const updateTableStatus = async (tableData) => {
   try {
@@ -33,7 +30,6 @@ export const updateTableStatus = async (tableData) => {
   }
 };
 
-
 export const updateOrderAndTableStatus = async (orderAndTableData) => {
   try {
     const response = await apiClient.put('/table/update/o&t', orderAndTableData);
@@ -43,7 +39,6 @@ export const updateOrderAndTableStatus = async (orderAndTableData) => {
     throw error;
   }
 };
-
 
 export const updateTableWaiter = async (id_mesa, id_mozo) => {
   try {
@@ -55,7 +50,6 @@ export const updateTableWaiter = async (id_mesa, id_mozo) => {
   }
 };
 
-
 export const updateTableInfo = async (tableData) => {
   try {
     const response = await apiClient.put('/table/update/info', tableData);
@@ -65,7 +59,6 @@ export const updateTableInfo = async (tableData) => {
     throw error;
   }
 };
-
 
 export const createTable = async (tableData) => {
   try {
@@ -77,7 +70,6 @@ export const createTable = async (tableData) => {
   }
 };
 
-
 export const updateTableNote = async (id_mesa, nota) => {
   try {
     const response = await apiClient.put('/table/update/note', { id_mesa, nota });
@@ -87,7 +79,6 @@ export const updateTableNote = async (id_mesa, nota) => {
     throw error;
   }
 };
-
 
 export const deleteTableNote = async (id_mesa) => {
   try {

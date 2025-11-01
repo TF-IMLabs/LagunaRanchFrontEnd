@@ -7,7 +7,7 @@ import {
   Snackbar,
   useMediaQuery
 } from '@mui/material';
-import { GetOrderByTable } from '../../services/cartService';
+import { getOrderByTable } from '../../services/cartService';
 import { useAuth } from '../../contexts/AuthContext';
 import { callWaiter, requestBill } from '../../services/waiterService';
 import {
@@ -35,9 +35,9 @@ const Order = ({ onClose }) => {
     let mounted = true;
     const loadOrder = async () => {
       try {
-        const { result } = await GetOrderByTable(tableId);
+        const { result } = await getOrderByTable(tableId);
         if (!mounted) return;
-        if (result.length && result[0].mensaje === 'La mesa no está ocupada.') {
+        if (result.length && result[0].mensaje === 'La mesa no estÃ¡ ocupada.') {
           setOrder([]);
           setWaiterName('');
           setOrderStatus('');
@@ -75,7 +75,7 @@ const Order = ({ onClose }) => {
       const { message } = await actionFn(tableId);
       setNotification({ open: true, message });
     } catch {
-      setNotification({ open: true, message: 'Error. Intenta nuevamente. ❌' });
+      setNotification({ open: true, message: 'Error. Intenta nuevamente. âŒ' });
     }
   };
 
@@ -83,21 +83,21 @@ const Order = ({ onClose }) => {
     Actualizado: 'Actualizado',
     Iniciado: 'Pendiente',
     Recibido: 'Confirmado',
-    'En curso': 'En preparación',
+    'En curso': 'En preparaciÃ³n',
   };
   const statusMessage = statusMap[orderStatus] || '';
 
   return (
     <Box>
       <Typography variant="h6" textAlign="center" mb={2}>
-        Estás pidiendo en la Mesa {tableId}
+        EstÃ¡s pidiendo en la Mesa {tableId}
       </Typography>
 
       {order.length === 0 ? (
         <Box textAlign="center">
           <Typography variant="body1" color="textSecondary">
             {order.length === 0 && waiterName === ''
-              ? 'Aún no pediste nada, ¡hacé tu pedido utilizando el carrito!'
+              ? 'AÃºn no pediste nada, Â¡hacÃ© tu pedido utilizando el carrito!'
               : 'Cargando el pedido...'}
           </Typography>
           <Button

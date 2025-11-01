@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import {
-  Button, Typography, Divider, Box, IconButton, TextField
+  Button,
+  Typography,
+  Divider,
+  Box,
+  IconButton,
+  TextField,
+  Snackbar,
+  Alert,
+  Tooltip,
 } from '@mui/material';
 import { useCart } from '../../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +28,7 @@ const Cart = ({ onClose }) => {
   const [note, setNote] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(null);
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -34,20 +43,28 @@ const Cart = ({ onClose }) => {
       onClose();
     } catch (error) {
       console.error('Error al enviar el pedido:', error);
-      alert('Ocurrió un error al enviar tu pedido. Inténtalo de nuevo.');
+      setFeedback({
+        severity: 'error',
+        message: 'Ocurrió un error al enviar tu pedido. Intentalo nuevamente.',
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleCloseFeedback = (_event, reason) => {
+    if (reason === 'clickaway') return;
+    setFeedback(null);
+  };
+
   return (
     <Box sx={{ p: 2 }}>
       {cart.length === 0 ? (
-        canShowAddMoreButton && ( 
+        canShowAddMoreButton && (
           <Box display="flex" justifyContent="center" mt={2}>
             <Button
               variant="outlined"
-              sx={{ width: 200 }}
+              sx={{ width: 220 }}
               onClick={() => {
                 onClose();
                 navigate('/menu');
@@ -59,7 +76,6 @@ const Cart = ({ onClose }) => {
         )
       ) : (
         <>
-
           {cart.map(({ product, cantidad }) => (
             <Box key={product.id_producto} mb={2}>
               <Typography variant="body1">{product.nombre}</Typography>
@@ -68,22 +84,42 @@ const Cart = ({ onClose }) => {
                   ${product.precio} x {cantidad}
                 </Typography>
                 <Box display="flex" alignItems="center">
-                  <IconButton
-                    onClick={() => updateItemQuantity(product.id_producto, cantidad - 1)}
-                    disabled={cantidad <= 1}
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                  <Typography variant="body1" mx={1}>{cantidad}</Typography>
-                  <IconButton
-                    onClick={() => updateItemQuantity(product.id_producto, cantidad + 1)}
-                    disabled={cantidad >= 10}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                  <IconButton onClick={() => removeItem(product.id_producto)}>
-                    <DeleteIcon />
-                  </IconButton>
+                  <Tooltip title={`Disminuir cantidad de ${product.nombre}`}>
+                    <span>
+                      <IconButton
+                        onClick={() => updateItemQuantity(product.id_producto, cantidad - 1)}
+                        disabled={cantidad <= 1}
+                        aria-label={`Disminuir cantidad de ${product.nombre}`}
+                        size="small"
+                      >
+                        <RemoveIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                  <Typography variant="body1" mx={1} aria-live="polite">
+                    {cantidad}
+                  </Typography>
+                  <Tooltip title={`Aumentar cantidad de ${product.nombre}`}>
+                    <span>
+                      <IconButton
+                        onClick={() => updateItemQuantity(product.id_producto, cantidad + 1)}
+                        disabled={cantidad >= 10}
+                        aria-label={`Aumentar cantidad de ${product.nombre}`}
+                        size="small"
+                      >
+                        <AddIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                  <Tooltip title={`Quitar ${product.nombre}`}>
+                    <IconButton
+                      onClick={() => removeItem(product.id_producto)}
+                      aria-label={`Quitar ${product.nombre} del pedido`}
+                      size="small"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
               </Box>
               <Divider sx={{ my: 1 }} />
@@ -106,6 +142,8 @@ const Cart = ({ onClose }) => {
               '& .MuiInputLabel-root.Mui-focused': { color: theme.palette.text.primary },
             }}
             margin="normal"
+            multiline
+            maxRows={4}
           />
 
           <Box display="flex" justifyContent="space-between" mt={2}>
@@ -117,15 +155,15 @@ const Cart = ({ onClose }) => {
                 navigate('/menu');
               }}
             >
-              Seguir Pidiendo!
+              Seguir pidiendo
             </Button>
             <Button
-              variant="outlined"
+              variant="contained"
               sx={{ width: 200 }}
               onClick={() => setOpenDialog(true)}
               disabled={isSendDisabled}
             >
-              Enviar Pedido
+              Enviar pedido
             </Button>
           </Box>
 
@@ -139,6 +177,22 @@ const Cart = ({ onClose }) => {
           />
         </>
       )}
+
+      <Snackbar
+        open={Boolean(feedback)}
+        autoHideDuration={6000}
+        onClose={handleCloseFeedback}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseFeedback}
+          severity={feedback?.severity ?? 'info'}
+          variant="filled"
+          elevation={6}
+        >
+          {feedback?.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

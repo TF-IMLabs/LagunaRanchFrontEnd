@@ -137,20 +137,20 @@ const generateFullOrderPrintContent = (table, order) => {
 };
 
 export const printNewTicket = (table, newProducts) => {
-  if (newProducts.length === 0) {
-    alert("No hay productos nuevos para imprimir.");
-    return;
+  if (!newProducts.length) {
+    return { success: false, message: 'No hay productos nuevos para imprimir.' };
   }
   const content = generateNewProductsPrintContent(table, newProducts);
   printWindowContent(content);
+  return { success: true };
 };
 
 
 export const printFullOrderTicket = (table, order) => {
   const content = generateFullOrderPrintContent(table, order);
   if (!content) {
-    alert("No hay productos en el pedido para imprimir.");
-    return;
+    return { success: false, message: 'No hay productos en el pedido para imprimir.' };
   }
   printWindowContent(content);
+  return { success: true };
 };

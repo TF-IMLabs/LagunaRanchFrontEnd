@@ -1,6 +1,5 @@
-import apiClient from './apiClient'; // Reutilizamos el cliente configurado con Axios
+import apiClient from './apiClient';
 
-// Obtener todos los productos
 export const getAllProducts = async () => {
   try {
     const response = await apiClient.get('/menu');
@@ -11,10 +10,9 @@ export const getAllProducts = async () => {
   }
 };
 
-// Obtener producto por ID
 export const getProductById = async (productId) => {
   try {
-    const response = await apiClient.get(`/menu/${productId}`);
+    const response = await apiClient.get(`/menu/product/${productId}`);
     return response.data;
   } catch (error) {
     console.error(`Error al obtener el producto con ID ${productId}:`, error);
@@ -22,10 +20,9 @@ export const getProductById = async (productId) => {
   }
 };
 
-// Obtener todas las categorías
 export const getAllCategories = async () => {
   try {
-    const response = await apiClient.get('/menu/cat');
+    const response = await apiClient.get('/menu/categories');
     return response.data;
   } catch (error) {
     console.error('Error al obtener todas las categorías:', error);
@@ -33,10 +30,9 @@ export const getAllCategories = async () => {
   }
 };
 
-// Obtener subcategorías por ID de categoría
 export const getSubcategoriesByCategoryId = async (categoryId) => {
   try {
-    const response = await apiClient.get(`/menu/subcat/${categoryId}`);
+    const response = await apiClient.get(`/menu/subcategories/category/${categoryId}`);
     return response.data;
   } catch (error) {
     console.error(`Error al obtener subcategorías para la categoría con ID ${categoryId}:`, error);
@@ -44,7 +40,16 @@ export const getSubcategoriesByCategoryId = async (categoryId) => {
   }
 };
 
-// Crear un producto
+export const getProductsByCategoryId = async (categoryId) => {
+  try {
+    const response = await apiClient.get(`/menu/products/category/${categoryId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al obtener productos para la categoría con ID ${categoryId}:`, error);
+    throw error;
+  }
+};
+
 export const createProduct = async (productData) => {
   try {
     const response = await apiClient.post('/menu', productData);
@@ -55,20 +60,19 @@ export const createProduct = async (productData) => {
   }
 };
 
-// Actualizar un producto
 export const updateProduct = async (productId, productData) => {
   try {
-    const response = await apiClient.put(`/menu/${productId}`, productData);
+    const response = await apiClient.put(`/menu/product/${productId}`, productData);
     return response.data;
   } catch (error) {
     console.error(`Error al actualizar el producto con ID ${productId}:`, error);
     throw error;
   }
 };
-// Eliminar un producto
+
 export const deleteProduct = async (productId) => {
   try {
-    const response = await apiClient.delete(`/menu/${productId}`);
+    const response = await apiClient.delete(`/menu/product/${productId}`);
     return response.data;
   } catch (error) {
     console.error(`Error al eliminar el producto con ID ${productId}:`, error);
@@ -76,7 +80,6 @@ export const deleteProduct = async (productId) => {
   }
 };
 
-// Crear una categoría
 export const createCategory = async (categoryData) => {
   try {
     const response = await apiClient.post('/menu/category', categoryData);
@@ -87,7 +90,6 @@ export const createCategory = async (categoryData) => {
   }
 };
 
-// Eliminar una categoría
 export const deleteCategory = async (categoryId) => {
   try {
     const response = await apiClient.delete(`/menu/category/${categoryId}`);
@@ -98,7 +100,6 @@ export const deleteCategory = async (categoryId) => {
   }
 };
 
-// Actualizar el stock de un producto
 export const updateStock = async (id_producto, stock) => {
   try {
     const response = await apiClient.put('/menu/updateStock', { id_producto, stock });
@@ -119,7 +120,6 @@ export const updatePlatoDelDia = async (id_producto, p_del_dia) => {
   }
 };
 
-// Crear una subcategoría
 export const createSubCategory = async (subCategoryData) => {
   try {
     const response = await apiClient.post('/menu/subCategory', subCategoryData);
@@ -130,7 +130,6 @@ export const createSubCategory = async (subCategoryData) => {
   }
 };
 
-// Actualizar una categoría
 export const updateCategory = async (categoryId, categoryData) => {
   try {
     const response = await apiClient.put('/menu/category', { id: categoryId, ...categoryData });
@@ -141,7 +140,6 @@ export const updateCategory = async (categoryId, categoryData) => {
   }
 };
 
-// Actualizar una subcategoría
 export const updateSubCategory = async (subCategoryId, subCategoryData) => {
   try {
     const response = await apiClient.put('/menu/subCategory', { id: subCategoryId, ...subCategoryData });
@@ -152,7 +150,6 @@ export const updateSubCategory = async (subCategoryId, subCategoryData) => {
   }
 };
 
-// Eliminar una subcategoría
 export const deleteSubCategory = async (subCategoryId) => {
   try {
     const response = await apiClient.delete(`/menu/subCategory/${subCategoryId}`);

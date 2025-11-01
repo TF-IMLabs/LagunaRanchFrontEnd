@@ -126,13 +126,48 @@ const TableContainerComponent = ({
                                     <TableCell align="center">{product.stock ? 'Disponible' : 'Sin stock'}</TableCell>
                                     <TableCell align="center">
                                         {editingProductId === product.id_producto ? (
-                                            <IconButton onClick={() => handleSaveClick(product.id_producto)}><SaveIcon /></IconButton>
+                                            <Tooltip title={`Guardar cambios de ${product.nombre}`}>
+                                                <IconButton
+                                                    onClick={() => handleSaveClick(product.id_producto)}
+                                                    aria-label={`Guardar cambios de ${product.nombre}`}
+                                                >
+                                                    <SaveIcon />
+                                                </IconButton>
+                                            </Tooltip>
                                         ) : (
-                                            <IconButton onClick={() => handleEditClick(product)}><EditIcon /></IconButton>
+                                            <Tooltip title={`Editar ${product.nombre}`}>
+                                                <IconButton
+                                                    onClick={() => handleEditClick(product)}
+                                                    aria-label={`Editar ${product.nombre}`}
+                                                >
+                                                    <EditIcon />
+                                                </IconButton>
+                                            </Tooltip>
                                         )}
-                                        <IconButton onClick={() => handleToggleStock(product.id_producto, product.stock)}>{product.stock ? <VisibilityOffIcon /> : <VisibilityIcon />}</IconButton>
-                                        <IconButton onClick={() => { setProductToDelete(product); setOpenDialog(true); }}><DeleteIcon /></IconButton>
-                                        <IconButton onClick={() => handleTogglePlatoDelDia(product.id_producto, product.plato_del_dia)}>{product.plato_del_dia ? <RestaurantIcon color="success" /> : <RestaurantIcon color="disabled" />}</IconButton>
+                                        <Tooltip title={product.stock ? 'Ocultar del menú' : 'Mostrar en el menú'}>
+                                            <IconButton
+                                                onClick={() => handleToggleStock(product.id_producto, product.stock)}
+                                                aria-label={product.stock ? `Ocultar ${product.nombre} del menú` : `Mostrar ${product.nombre} en el menú`}
+                                            >
+                                                {product.stock ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title={`Eliminar ${product.nombre}`}>
+                                            <IconButton
+                                                onClick={() => { setProductToDelete(product); setOpenDialog(true); }}
+                                                aria-label={`Eliminar ${product.nombre}`}
+                                            >
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title={product.plato_del_dia ? 'Quitar Plato del Día' : 'Marcar como Plato del Día'}>
+                                            <IconButton
+                                                onClick={() => handleTogglePlatoDelDia(product.id_producto, product.plato_del_dia)}
+                                                aria-label={product.plato_del_dia ? `Quitar ${product.nombre} como Plato del Día` : `Marcar ${product.nombre} como Plato del Día`}
+                                            >
+                                                {product.plato_del_dia ? <RestaurantIcon color="success" /> : <RestaurantIcon color="disabled" />}
+                                            </IconButton>
+                                        </Tooltip>
                                     </TableCell>
                                 </TableRow>
                             );

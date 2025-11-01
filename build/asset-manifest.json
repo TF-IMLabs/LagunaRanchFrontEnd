@@ -1,9 +1,9 @@
 {
   "files": {
     "main.css": "/static/css/main.c0c1ae41.css",
-    "main.js": "/static/js/main.b5b60fe2.js",
+    "main.js": "/static/js/main.0bdf1b2f.js",
     "static/media/background8.jpg": "/static/media/background8.dbc96d0e031c566685b3.jpg",
-    "static/media/BarTF&IMLabs.png": "/static/media/BarTF&IMLabs.5afcb67dabd23a525e00.png",
+    "static/media/logoranch.png": "/static/media/logoranch.3746d426b69a6a5d9af1.png",
     "static/media/RestoApp12.jpg": "/static/media/RestoApp12.eacdba46f29268d15d04.jpg",
     "static/media/RestoApp9.jpg": "/static/media/RestoApp9.c5e93f5627d204161adf.jpg",
     "static/media/RestoApp14.jpg": "/static/media/RestoApp14.c076fe64c7e0e57155af.jpg",
@@ -30,10 +30,10 @@
     "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
     "index.html": "/index.html",
     "main.c0c1ae41.css.map": "/static/css/main.c0c1ae41.css.map",
-    "main.b5b60fe2.js.map": "/static/js/main.b5b60fe2.js.map"
+    "main.0bdf1b2f.js.map": "/static/js/main.0bdf1b2f.js.map"
   },
   "entrypoints": [
     "static/css/main.c0c1ae41.css",
-    "static/js/main.b5b60fe2.js"
+    "static/js/main.0bdf1b2f.js"
   ]
 }

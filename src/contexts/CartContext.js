@@ -1,7 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react'; 
-import { addProductToOrder, createOrder, GetOrderByTable, updateOrderDetail, updateOrderStatus } from '../services/cartService';
+import { addProductToOrder, createOrder, getOrderByTable, updateOrderDetail, updateOrderStatus } from '../services/cartService';
 import { useAuth } from './AuthContext';
-import SuccessDialog from '../pages/Menu/SuccessDialog'; 
+import SuccessDialog from '../components/dialogs/SuccessDialog'; 
+import { Snackbar, Alert } from '@mui/material';
 
 const CartContext = createContext();
 
@@ -38,6 +39,7 @@ export const CartProvider = ({ children }) => {
   const [combinedDialogOpen, setCombinedDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false); 
+  const [feedback, setFeedback] = useState(null);
 
   const addToCart = (product, quantity) => {
     setCart(prevCart => {
@@ -86,10 +88,10 @@ export const CartProvider = ({ children }) => {
 
   const fetchCurrentOrder = async () => {
     if (tableId) {
-      const existingOrder = await GetOrderByTable(tableId);
+      const existingOrder = await getOrderByTable(tableId);
       if (existingOrder && existingOrder.result.length > 0) {
         const firstResult = existingOrder.result[0];
-        if (firstResult.mensaje === "La mesa no está ocupada.") {
+        if (firstResult.mensaje === "La mesa no estÃ¡ ocupada.") {
           return null;
         } else {
           const orderId = firstResult.id_pedido;
@@ -123,15 +125,15 @@ export const CartProvider = ({ children }) => {
           orderId = response.orderId;
           isNewOrder = true; 
         } else {
-          throw new Error('No se pudo obtener el orderId después de crear la orden');
+          throw new Error('No se pudo obtener el orderId despuÃ©s de crear la orden');
         }
       }
   
       if (!orderId) {
-        throw new Error('No se pudo obtener un ID de orden válido');
+        throw new Error('No se pudo obtener un ID de orden vÃ¡lido');
       }
   
-      const existingOrderDetails = await GetOrderByTable(tableId);
+      const existingOrderDetails = await getOrderByTable(tableId);
       let itemsUpdated = false;  
   
       for (const item of cart) {
@@ -148,7 +150,7 @@ export const CartProvider = ({ children }) => {
           itemsUpdated = true;
         } else {
           const productData = {
-            orderId: parseInt(orderId, 10),
+            id_pedido: parseInt(orderId, 10),
             id_producto: parseInt(item.product.id_producto, 10),
             cantidad: parseInt(item.cantidad, 10),
           };
@@ -178,7 +180,8 @@ export const CartProvider = ({ children }) => {
       
     } catch (error) {
       console.error('Error al enviar el pedido:', error.response ? error.response.data : error.message);
-      alert('Error al enviar el pedido: ' + (error.response ? error.response.data : error.message));
+      const message = error.response ? error.response.data : error.message;
+      setFeedback({ severity: 'error', message: `Error al enviar el pedido: ${message}` });
     } finally {
       setLoading(false);
       closeCombinedDialog();
@@ -188,6 +191,10 @@ export const CartProvider = ({ children }) => {
   const openCombinedDialog = () => setCombinedDialogOpen(true);
   const closeCombinedDialog = () => setCombinedDialogOpen(false);
   const handleCloseSuccessDialog = () => setSuccessDialogOpen(false); 
+  const handleCloseFeedback = (_event, reason) => {
+    if (reason === 'clickaway') return;
+    setFeedback(null);
+  };
 
   return (
     <CartContext.Provider value={{
@@ -205,6 +212,16 @@ export const CartProvider = ({ children }) => {
     }}>
       {children}
       <SuccessDialog open={successDialogOpen} onClose={handleCloseSuccessDialog} />
+      <Snackbar
+        open={Boolean(feedback)}
+        autoHideDuration={6000}
+        onClose={handleCloseFeedback}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseFeedback} severity={feedback?.severity ?? 'info'} variant="filled">
+          {feedback?.message}
+        </Alert>
+      </Snackbar>
     </CartContext.Provider>
   );
 };

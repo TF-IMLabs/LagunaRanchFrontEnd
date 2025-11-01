@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { Container, Typography, Box, Grid } from '@mui/material';
-import { styled } from '@mui/system';
-import CategoryAccordion from './CategoryAccordion';
-import ProductDialog from './ProductDialog';
-import vegetarianoIcon from '../../assets/vegetariano.png';
-import celiacoIcon from '../../assets/celiaco.png'; 
-import veganoIcon from '../../assets/vegano.png'; 
+import { Box, Container, Grid, Typography } from '@mui/material';
+import { alpha, styled } from '@mui/material/styles';
 import backgroundImage from '../../assets/background8.jpg';
+import celiacoIcon from '../../assets/celiaco.png';
+import veganoIcon from '../../assets/vegano.png';
+import vegetarianoIcon from '../../assets/vegetariano.png';
 import { useCart } from '../../contexts/CartContext';
+import CategoryAccordion from './CategoryAccordion';
 import CombinedDialog from './CombinedDialog';
+import ProductDialog from './ProductDialog';
 
 const MainContainer = styled(Box)(({ theme }) => ({
   flex: 1,
-  backgroundColor: '#d9c9a3',
+  backgroundColor: theme.palette.neutral.main,
   position: 'relative',
   display: 'flex',
   justifyContent: 'center',
@@ -45,11 +45,12 @@ const MainContainer = styled(Box)(({ theme }) => ({
 }));
 
 const MenuContainer = styled(Container)(({ theme }) => ({
-  borderRadius: '12px',
+  borderRadius: 12,
   padding: theme.spacing(4),
-  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-  maxWidth: '900px',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
+  maxWidth: 900,
   margin: '0 auto',
+  backgroundColor: alpha(theme.palette.background.paper, 0.92),
   [theme.breakpoints.down('sm')]: {
     padding: theme.spacing(3),
   },
@@ -60,27 +61,27 @@ const HighlightedText = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   padding: '8px 24px',
-  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-  color: '#fff',
-  borderRadius: '8px',
+  backgroundColor: alpha(theme.palette.background.default, 0.85),
+  color: theme.palette.primary.contrastText,
+  borderRadius: 8,
   marginBottom: theme.spacing(4),
   textAlign: 'center',
-  width: '100%', 
+  width: '100%',
 }));
 
 const TitleTypography = styled(Typography)(({ theme }) => ({
   fontSize: '1.8rem',
-  margin: 0, 
+  margin: 0,
   [theme.breakpoints.down('sm')]: {
     fontSize: '1.5rem',
   },
 }));
 
 const InfoBox = styled(Box)(({ theme }) => ({
-  backgroundColor: 'rgb(155, 140, 141)',
-  borderRadius: '8px',
+  backgroundColor: alpha(theme.palette.accent.main, 0.3),
+  borderRadius: 8,
   padding: theme.spacing(2),
-  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
   marginTop: theme.spacing(4),
   display: 'flex',
   flexDirection: 'column',
@@ -105,11 +106,17 @@ const Icon = styled('img')(({ theme }) => ({
   marginRight: theme.spacing(1),
 }));
 
+const advantages = [
+  { src: vegetarianoIcon, alt: 'Vegetariano', text: 'Apto vegetarianos' },
+  { src: celiacoIcon, alt: 'Celíaco', text: 'Apto celíacos' },
+  { src: veganoIcon, alt: 'Vegano', text: 'Apto veganos' },
+];
+
 const MenuPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { orderDialogOpen, closeOrderDialog } = useCart();
+  const { combinedDialogOpen, closeCombinedDialog } = useCart();
 
   const handleOpenDialog = (product) => {
     setSelectedProduct(product);
@@ -126,37 +133,21 @@ const MenuPage = () => {
       <MenuContainer>
         <HighlightedText>
           <TitleTypography variant="h4" gutterBottom>
-            NUESTRO MENÚ
+            {'NUESTRO MENÚ'}
           </TitleTypography>
         </HighlightedText>
         <InfoBox>
-  <Grid container spacing={2} justifyContent="center">
-    {[
-      {
-        src: vegetarianoIcon,
-        alt: 'Vegetariano',
-        text: 'Apto vegetarianos',
-      },
-      {
-        src: celiacoIcon,
-        alt: 'Celíaco',
-        text: 'Apto celíacos',
-      },
-      {
-        src: veganoIcon,
-        alt: 'Vegano',
-        text: 'Apto veganos',
-      },
-    ].map((icon, index) => (
-      <Grid item xs={12} sm={4} key={index}>
-        <IconContainer>
-          <Icon src={icon.src} alt={icon.alt} />
-          <Typography color="black">{icon.text}</Typography>
-        </IconContainer>
-      </Grid>
-    ))}
-  </Grid>
-</InfoBox>
+          <Grid container spacing={2} justifyContent="center">
+            {advantages.map((icon) => (
+              <Grid item xs={12} sm={4} key={icon.alt}>
+                <IconContainer>
+                  <Icon src={icon.src} alt={icon.alt} />
+                  <Typography color="text.primary">{icon.text}</Typography>
+                </IconContainer>
+              </Grid>
+            ))}
+          </Grid>
+        </InfoBox>
         <CategoryAccordion onProductClick={handleOpenDialog} />
         {selectedProduct && (
           <ProductDialog
@@ -167,7 +158,7 @@ const MenuPage = () => {
         )}
       </MenuContainer>
 
-      <CombinedDialog open={orderDialogOpen} onClose={closeOrderDialog} />
+      <CombinedDialog open={combinedDialogOpen} onClose={closeCombinedDialog} />
     </MainContainer>
   );
 };

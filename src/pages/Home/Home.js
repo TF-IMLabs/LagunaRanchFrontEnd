@@ -1,9 +1,10 @@
 import React from 'react';
 import { Container, Box } from '@mui/material';
 import { styled } from '@mui/system';
+import { alpha } from '@mui/material/styles';
 import Slider from 'react-slick';
 import images from '../../utils/imageLoader'; 
-import logo from '../../assets/BarTF&IMLabs.png'; 
+import logo from '../../assets/logoranch.png'; 
 import background from '../../assets/backgroundandi2.jpg'; 
 
 
@@ -35,7 +36,7 @@ const settings = {
 
 const MainContainer = styled(Box)(({ theme }) => ({
   flex: 1,
-  backgroundColor: '#d9c9a3',
+  backgroundColor: theme.palette.neutral.main,
   position: 'relative',
   display: 'flex',
   justifyContent: 'center',
@@ -76,7 +77,7 @@ const ContentWrapper = styled(Box)(({ theme }) => ({
 }));
 
 const LogoContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: 'rgba(59, 59, 59, 0.85)', 
+  backgroundColor: alpha(theme.palette.background.default, 0.85),
   width: '250px', 
   height: '250px', 
   borderRadius: '50%',

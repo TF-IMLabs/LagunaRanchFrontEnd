@@ -1,14 +1,14 @@
-
-import { Container, Typography, IconButton, Grid} from '@mui/material';
+import { Container, Typography, IconButton, Grid } from '@mui/material';
 import { Facebook, Instagram, Phone, LocationOn } from '@mui/icons-material';
 import { styled } from '@mui/system';
+import { alpha } from '@mui/material/styles';
 
 const FooterContainer = styled('footer')(({ theme }) => ({
-  backgroundColor: 'black',
-  color: '#c96b21',
+  backgroundColor: theme.palette.background.default,
+  color: theme.palette.primary.main,
   paddingTop: theme.spacing(4),
   paddingBottom: theme.spacing(2),
-  borderTop: `2px solid #c96b21`,
+  borderTop: `2px solid ${theme.palette.primary.main}`,
 }));
 
 const FooterContent = styled(Container)(({ theme }) => ({
@@ -19,33 +19,33 @@ const FooterContent = styled(Container)(({ theme }) => ({
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
   fontWeight: 'bold',
-  color: '#c96b21',
+  color: theme.palette.primary.main,
   marginBottom: theme.spacing(1),
 }));
 
-const InfoRow = styled('div')({
+const InfoRow = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  gap: 8,
-  marginBottom: 4,
-});
+  gap: theme.spacing(1),
+  marginBottom: theme.spacing(0.5),
+}));
 
-const SocialIcons = styled('div')({
+const SocialIcons = styled('div')(({ theme }) => ({
   display: 'flex',
-  gap: 16,
-});
+  gap: theme.spacing(2),
+}));
 
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  backgroundColor: '#1a1a1a',
-  border: `1px solid #c96b21`,
+  backgroundColor: alpha(theme.palette.background.paper, 0.8),
+  border: `1px solid ${theme.palette.primary.main}`,
   transition: 'transform 0.3s ease, background-color 0.3s ease',
   '&:hover': {
     transform: 'scale(1.1)',
-    backgroundColor: '#c96b21',
-    color: 'black',
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.background.default,
   },
   '& svg': {
-    color: '#c96b21',
+    color: theme.palette.primary.main,
   },
 }));
 
@@ -53,7 +53,7 @@ const Rights = styled(Typography)(({ theme }) => ({
   marginTop: theme.spacing(4),
   textAlign: 'center',
   fontSize: '0.8rem',
-  color: '#888',
+  color: theme.palette.text.secondary,
 }));
 
 const Footer = () => {
@@ -74,7 +74,9 @@ const Footer = () => {
               >
                 <Phone />
               </StyledIconButton>
-              <Typography variant="body2">236 4444444</Typography>
+              <Typography variant="body2" color="text.primary">
+                236 4444444
+              </Typography>
             </InfoRow>
             <InfoRow>
               <StyledIconButton
@@ -85,7 +87,9 @@ const Footer = () => {
               >
                 <LocationOn />
               </StyledIconButton>
-              <Typography variant="body2">Fake St. 123, Junín, BA</Typography>
+              <Typography variant="body2" color="text.primary">
+                Fake St. 123, Junín, BA
+              </Typography>
             </InfoRow>
           </Grid>
 

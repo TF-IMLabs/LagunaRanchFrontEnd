@@ -1,52 +1,67 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, Tab, Box } from '@mui/material';
+import { styled } from '@mui/system';
+import { alpha } from '@mui/material/styles';
 import MenuSection from '../Admin/Menu/MenuSection';
 import TablesSection from '../Admin/Orders/Tables/TablesSection';
 import { useAuth } from '../../contexts/AuthContext';
-import AuthDialog from '../../users/AuthDialog';
+import AuthDialog from '../../components/dialogs/AuthDialog';
 import TakeAwaySection from '../Admin/Orders/TakeAway/TakeAwaySection';
 import DeliverySection from '../Admin/Orders/Delivery/DeliverySection';
 
-const styles = {
-  container: {
-    width: '100%',
-    minHeight: '100vh',
-    backgroundImage: `url(${require('../../assets/backgroundamelie3.jpg')})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
+const AdminWrapper = styled(Box)(({ theme }) => ({
+  width: '100%',
+  minHeight: '100vh',
+  backgroundImage: `url(${require('../../assets/backgroundamelie3.jpg')})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  position: 'relative',
+  padding: theme.spacing(4, 2),
+}));
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  backgroundColor: alpha(theme.palette.background.default, 0.85),
+  borderRadius: 8,
+  marginBottom: theme.spacing(2),
+  padding: theme.spacing(0.5),
+  '.MuiTabs-flexContainer': {
+    gap: theme.spacing(0.5),
   },
-  tabs: {
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    borderRadius: '8px',
-    marginBottom: 2,
+  '.MuiTabs-indicator': {
+    backgroundColor: theme.palette.primary.main,
+    height: 3,
+    borderRadius: 3,
   },
-  tab: {
-    color: 'white',
-    fontSize: '1.2rem',
-    '&.Mui-selected': {
-      color: '#c96b21',
-    },
+}));
+
+const StyledTab = styled(Tab)(({ theme }) => ({
+  color: theme.palette.text.secondary,
+  fontSize: '1.1rem',
+  fontWeight: 600,
+  '&.Mui-selected': {
+    color: theme.palette.primary.main,
   },
-  contentBox: {
-    width: '100%',
-    flexGrow: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderRadius: '8px',
-  },
-  tabPanel: { padding: 3 },
-};
+}));
+
+const ContentBox = styled(Box)(({ theme }) => ({
+  width: '100%',
+  flexGrow: 1,
+  backgroundColor: alpha(theme.palette.background.paper, 0.85),
+  borderRadius: 8,
+  overflow: 'hidden',
+}));
+
+const TabPanel = ({ children }) => <Box sx={{ p: 3 }}>{children}</Box>;
 
 const AdminPage = () => {
-  const { isAdmin} = useAuth();
+  const { isAdmin } = useAuth();
   const [tabIndex, setTabIndex] = useState(0);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  
 
   useEffect(() => {
     if (!isAdmin) {
@@ -54,35 +69,45 @@ const AdminPage = () => {
     }
   }, [isAdmin]);
 
- 
   return (
-    <Box sx={styles.container}>
-     
-     <Tabs
+    <AdminWrapper>
+      <StyledTabs
         value={tabIndex}
         onChange={(_, newIndex) => setTabIndex(newIndex)}
         centered
-        sx={styles.tabs}
-        TabIndicatorProps={{ style: { backgroundColor: '#c96b21' } }}
       >
-        <Tab label="Menú" sx={styles.tab} />
-        <Tab label="Mesas" sx={styles.tab} />
-        <Tab label="Delivery" sx={styles.tab} />
-        <Tab label="TakeAway" sx={styles.tab} />
-      </Tabs>
+        <StyledTab label="Menú" />
+        <StyledTab label="Mesas" />
+        <StyledTab label="Delivery" />
+        <StyledTab label="Take Away" />
+      </StyledTabs>
 
-      <Box sx={{ ...styles.contentBox, overflowY: tabIndex === 1 ? 'hidden' : 'auto' }}>
-        {tabIndex === 0 && <TabPanel><MenuSection /></TabPanel>}
-        {tabIndex === 1 && <TabPanel><TablesSection /></TabPanel>}
-        {tabIndex === 2 && <TabPanel><DeliverySection /></TabPanel>}
-        {tabIndex === 3 && <TabPanel><TakeAwaySection /></TabPanel>}
-      </Box>
+      <ContentBox sx={{ overflowY: tabIndex === 1 ? 'hidden' : 'auto' }}>
+        {tabIndex === 0 && (
+          <TabPanel>
+            <MenuSection />
+          </TabPanel>
+        )}
+        {tabIndex === 1 && (
+          <TabPanel>
+            <TablesSection />
+          </TabPanel>
+        )}
+        {tabIndex === 2 && (
+          <TabPanel>
+            <DeliverySection />
+          </TabPanel>
+        )}
+        {tabIndex === 3 && (
+          <TabPanel>
+            <TakeAwaySection />
+          </TabPanel>
+        )}
+      </ContentBox>
 
       <AuthDialog open={authDialogOpen} onClose={() => setAuthDialogOpen(false)} />
-    </Box>
+    </AdminWrapper>
   );
 };
-
-const TabPanel = ({ children }) => <Box sx={styles.tabPanel}>{children}</Box>;
 
 export default AdminPage;

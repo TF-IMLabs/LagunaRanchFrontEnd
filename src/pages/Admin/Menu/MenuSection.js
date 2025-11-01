@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import {
-  getAllCategories,
-  getAllProducts,
   updateStock,
   updateProduct,
   deleteProduct,
@@ -31,12 +29,13 @@ import AddProductDialog from './AddProductDialog';
 import CreateAndRemoveCategoriesDialog from './CreateAndDeleteCategoriesDialog';
 import CreateAndDeleteSubcategoriesDialog from './CreateAndDeleteSubcategoriesDialog';
 import TableContainerComponent from './tableContainerComponent';
+import useMenuData from '../../../hooks/useMenuData';
 
 const MenuSection = () => {
   const queryClient = useQueryClient();
-
-  const { data: categories = [] } = useQuery({ queryKey: ['categories'], queryFn: getAllCategories });
-  const { data: products = [] } = useQuery({ queryKey: ['products'], queryFn: getAllProducts });
+  const { categoriesQuery, productsQuery } = useMenuData();
+  const categories = categoriesQuery.data ?? [];
+  const products = productsQuery.data ?? [];
 
   const [selectedCategory, setSelectedCategory] = useState('');
   const [subcategories, setSubcategories] = useState([]);

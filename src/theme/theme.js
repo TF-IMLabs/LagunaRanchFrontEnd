@@ -1,40 +1,62 @@
 import { createTheme } from '@mui/material/styles';
 
+const rawColors = {
+  brand: '#c96b21',
+  brandDark: '#a6561a',
+  brandMuted: '#3e2d1f',
+  brandMutedDark: '#5a4030',
+  highlight: '#c78048',
+  neutral: '#d9c9a3',
+  ink: '#121212',
+  paper: '#1e1e1e',
+  onDark: '#ffffff',
+  onDarkSecondary: '#cccccc',
+};
+
 const theme = createTheme({
   typography: {
     fontFamily: '"Josefin Sans", "Georgia", "Arial", sans-serif',
-    h1: { fontFamily: 'inherit' },
-    h2: { fontFamily: 'inherit' },
-    h4: { fontFamily: 'inherit', color: '#c96b21' },
-    h5: { fontFamily: 'inherit', color: '#c96b21', fontSize: '1.4rem' },
-    h5b: { fontFamily: 'inherit', color: 'white', fontSize: '1.4rem' },
-    h6: { fontFamily: 'inherit', color: 'white', fontSize: '1.2rem' },
-    h6b: { fontFamily: 'inherit', color: 'white', fontSize: '1.2rem' },
+    h1: { fontWeight: 600 },
+    h2: { fontWeight: 600 },
+    h4: { fontWeight: 500, color: rawColors.brand },
+    h5: { fontWeight: 500, color: rawColors.brand, fontSize: '1.4rem' },
+    h6: { fontWeight: 500, color: rawColors.onDark, fontSize: '1.2rem' },
+    button: { fontWeight: 600, textTransform: 'none' },
   },
   palette: {
     mode: 'dark',
     primary: {
-      main: '#c96b21',
+      main: rawColors.brand,
+      contrastText: rawColors.onDark,
     },
     secondary: {
-      main: '#3e2d1f',
+      main: rawColors.brandMuted,
+      contrastText: rawColors.onDark,
+    },
+    accent: {
+      main: rawColors.highlight,
+      contrastText: rawColors.onDark,
+    },
+    neutral: {
+      main: rawColors.neutral,
+      contrastText: rawColors.ink,
     },
     background: {
-      default: '#121212',
-      paper: '#1e1e1e',
+      default: rawColors.ink,
+      paper: rawColors.paper,
     },
     text: {
-      primary: '#ffffff',
-      secondary: '#cccccc',
+      primary: rawColors.onDark,
+      secondary: rawColors.onDarkSecondary,
     },
   },
   components: {
     MuiDialog: {
       styleOverrides: {
         paper: {
-          borderRadius: '16px',
+          borderRadius: 16,
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
-          backgroundColor: '#1e1e1e',
+          backgroundColor: rawColors.paper,
         },
       },
     },
@@ -44,20 +66,20 @@ const theme = createTheme({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#000',
-          color: '#c96b21',
+          backgroundColor: rawColors.ink,
+          color: rawColors.brand,
           fontWeight: 'bold',
-          height: '60px',
-          borderTopLeftRadius: '16px',
-          borderTopRightRadius: '16px',
+          height: 60,
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
         },
       },
     },
     MuiDialogContent: {
       styleOverrides: {
         root: {
-          padding: '24px',
-          color: '#ddd',
+          padding: 24,
+          color: rawColors.onDarkSecondary,
         },
       },
     },
@@ -67,18 +89,19 @@ const theme = createTheme({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          paddingBottom: 24,
         },
       },
     },
     MuiButton: {
       styleOverrides: {
-        root: {
-          color: '#fff',
-          backgroundColor: '#000',
-          borderColor: '#3e2d1f',
+        contained: {
+          backgroundColor: rawColors.brand,
+          color: rawColors.onDark,
+          borderColor: rawColors.brand,
           '&:hover': {
-            backgroundColor: '#3e2d1f',
-            borderColor: '#c78048',
+            backgroundColor: rawColors.brandDark,
+            borderColor: rawColors.brandDark,
           },
         },
       },
@@ -87,31 +110,31 @@ const theme = createTheme({
           props: { variant: 'close' },
           style: {
             minWidth: 0,
-            width: '36px',
-            height: '36px',
+            width: 36,
+            height: 36,
             borderRadius: '50%',
-            backgroundColor: '#3e2d1f',
-            color: '#fff',
+            backgroundColor: rawColors.brandMuted,
+            color: rawColors.onDark,
             fontWeight: 'bold',
             '&:hover': {
-              backgroundColor: '#5a4030',
+              backgroundColor: rawColors.brandMutedDark,
             },
           },
         },
         {
           props: { variant: 'iconAction' },
           style: {
-            minWidth: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            backgroundColor: '#c96b21',
-            color: 'white',
+            minWidth: 32,
+            height: 32,
+            borderRadius: 8,
+            backgroundColor: rawColors.brand,
+            color: rawColors.onDark,
             fontWeight: 'bold',
             fontSize: '1.2rem',
             lineHeight: 1,
             padding: 0,
             '&:hover': {
-              backgroundColor: '#a6561a',
+              backgroundColor: rawColors.brandDark,
             },
           },
         },
@@ -124,21 +147,21 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          marginTop: '12px',
-          marginBottom: '12px',
+          marginTop: 12,
+          marginBottom: 12,
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              borderColor: '#3e2d1f',
+              borderColor: rawColors.brandMuted,
             },
             '&:hover fieldset': {
-              borderColor: '#c96b21',
+              borderColor: rawColors.brand,
             },
             '&.Mui-focused fieldset': {
-              borderColor: '#c96b21',
+              borderColor: rawColors.brand,
             },
           },
           '& .MuiInputAdornment-root': {
-            color: '#c96b21',
+            color: rawColors.brand,
           },
         },
       },
@@ -146,13 +169,13 @@ const theme = createTheme({
     MuiInputBase: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1a1a1a',
-          color: 'white',
+          backgroundColor: rawColors.paper,
+          color: rawColors.onDark,
           borderRadius: 8,
-          paddingLeft: '4px',
+          paddingLeft: 4,
         },
         input: {
-          padding: '12px',
+          padding: 12,
         },
       },
     },
@@ -160,7 +183,7 @@ const theme = createTheme({
       styleOverrides: {
         body2: {
           fontSize: '0.95rem',
-          color: '#cccccc',
+          color: rawColors.onDarkSecondary,
         },
       },
     },
@@ -173,6 +196,3 @@ const theme = createTheme({
 });
 
 export default theme;
-
-
-// Todo krostyburgueado está esto

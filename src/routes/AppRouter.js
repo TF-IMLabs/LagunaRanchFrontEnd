@@ -5,7 +5,7 @@ import Footer from '../layout/Footer';
 import Home from '../pages/Home/Home';
 import Menu from '../pages/Menu/MenuPage';
 import AdminPage from '../pages/Admin/AdminPage';
-import TableLoginDialog from '../users/TableLoginDialog';
+import TableLoginDialog from '../components/dialogs/TableLoginDialog';
 import { useAuth } from '../contexts/AuthContext';
 
 const AppRouter = () => {

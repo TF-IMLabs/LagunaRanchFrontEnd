@@ -1,16 +1,12 @@
-
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@mui/material';
-
-
-
 
 const ConfirmDeleteProductDialog = ({ open, onClose, onConfirm }) => {
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Â¿EstÃ¡s seguro de que deseas eliminar este producto?</DialogTitle>
-      <DialogContent sx={{ backgroundColor: '#c78048' }}>
-        <Typography variant="body1" color="black">
-          Esta acciÃ³n no se puede deshacer.
+      <DialogTitle>¿Estás seguro de que deseas eliminar este producto?</DialogTitle>
+      <DialogContent sx={{ backgroundColor: (theme) => theme.palette.accent.main }}>
+        <Typography variant="body1" color="text.primary">
+          Esta acción no se puede deshacer.
         </Typography>
       </DialogContent>
       <DialogActions>

@@ -2,12 +2,12 @@ import { useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Typography, Box, Table, TableBody, TableCell,
-  TableContainer, TableRow, IconButton, CircularProgress,Button
+  TableContainer, TableRow, IconButton, CircularProgress, Button,
+  Tooltip,
 } from '@mui/material';
 import { Close, Delete } from '@mui/icons-material';
 import { removeCartItem } from '../../../services/cartService';
 import ConfirmDeleteDialog from './ConfirmDeleteProductDialog';
-
 
 const OrderDetailsDialog = ({ open, onClose, selectedOrder, orderInfo, loading }) => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
@@ -48,24 +48,32 @@ const OrderDetailsDialog = ({ open, onClose, selectedOrder, orderInfo, loading }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth aria-labelledby="order-details-title">
+      <DialogTitle id="order-details-title">
         Detalles del Pedido #{selectedOrder}
-        <IconButton onClick={onClose} sx={{ position: 'absolute', right: 16, top: 16, color: '#c96b21' }}>
+        <IconButton
+          onClick={onClose}
+          sx={{ position: 'absolute', right: 16, top: 16, color: (theme) => theme.palette.primary.main }}
+          aria-label="Cerrar"
+        >
           <Close />
         </IconButton>
       </DialogTitle>
-      <DialogContent sx={{ backgroundColor: '#c78048' }}>
+      <DialogContent sx={{ backgroundColor: (theme) => theme.palette.accent.main }}>
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" minHeight={100}>
-            <CircularProgress size={24} sx={{ color: '#c96b21' }} />
+            <CircularProgress size={24} color="inherit" />
           </Box>
         ) : (
           <>
             {pedidoData && (
               <Box sx={{ marginBottom: 2 }}>
-                <Typography variant="body1" color="black"><strong>Fecha y Hora:</strong> {new Date(pedidoData.fecha_pedido).toLocaleString()}</Typography>
-                <Typography variant="body1" color="black"><strong>Mozo:</strong> {pedidoData.nombre_mozo}</Typography>
+                <Typography variant="body1" color="text.primary">
+                  <strong>Fecha y Hora:</strong> {new Date(pedidoData.fecha_pedido).toLocaleString()}
+                </Typography>
+                <Typography variant="body1" color="text.primary">
+                  <strong>Mozo:</strong> {pedidoData.nombre_mozo}
+                </Typography>
               </Box>
             )}
             {productos.length > 0 ? (
@@ -78,13 +86,18 @@ const OrderDetailsDialog = ({ open, onClose, selectedOrder, orderInfo, loading }
                         <TableCell align="right">{item.cantidad}x</TableCell>
                         <TableCell align="right">${parseFloat(item.precio).toFixed(2)}</TableCell>
                         <TableCell align="right">
-                          <IconButton
-                            onClick={() => handleDeleteConfirmation(item.id_detalle)}
-                            color="error"
-                            disabled={pedidoData?.estado_pedido === 'Finalizado'}
-                          >
-                            <Delete />
-                          </IconButton>
+                          <Tooltip title="Eliminar producto del pedido">
+                            <span>
+                              <IconButton
+                                onClick={() => handleDeleteConfirmation(item.id_detalle)}
+                                color="error"
+                                disabled={pedidoData?.estado_pedido === 'Finalizado'}
+                                aria-label={`Eliminar ${item.nombre} del pedido`}
+                              >
+                                <Delete />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -92,15 +105,15 @@ const OrderDetailsDialog = ({ open, onClose, selectedOrder, orderInfo, loading }
                 </Table>
               </TableContainer>
             ) : (
-              <Typography variant="body2" color="black">No hay detalles disponibles.</Typography>
+              <Typography variant="body2" color="text.primary">
+                No hay detalles disponibles.
+              </Typography>
             )}
           </>
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>
-          Cerrar
-        </Button>
+        <Button onClick={onClose}>Cerrar</Button>
       </DialogActions>
 
       <ConfirmDeleteDialog
