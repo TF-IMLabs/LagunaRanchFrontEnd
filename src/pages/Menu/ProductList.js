@@ -1,104 +1,135 @@
 import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
-import { Box, List, ListItem, ListItemText, Skeleton, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardActionArea,
+  CardContent,
+  Grid,
+  Skeleton,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import celiacoIcon from '../../assets/celiaco.png';
 import veganoIcon from '../../assets/vegano.png';
 import vegetarianoIcon from '../../assets/vegetariano.png';
 import ProductDialog from './ProductDialog';
 
-const BlinkText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  fontSize: '0.9rem',
-  animation: 'blink-animation 1.5s ease-in-out infinite',
-  padding: theme.spacing(0.3, 0.8),
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.35)}`,
-  borderRadius: 8,
-  backgroundColor: alpha(theme.palette.background.default, 0.6),
-  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-  textTransform: 'uppercase',
-  fontWeight: 'bold',
-  letterSpacing: '0.05em',
-  display: 'inline-flex',
-  justifyContent: 'flex-end',
-  marginLeft: 'auto',
-  '@keyframes blink-animation': {
-    '0%': { opacity: 1 },
-    '50%': { opacity: 0.3 },
-    '100%': { opacity: 1 },
-  },
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '0.8rem',
-    padding: theme.spacing(0.2, 0.5),
-  },
-}));
+const formatPrice = (value) => {
+  const numericValue = Number.parseInt(`${value}`, 10);
+  if (Number.isNaN(numericValue)) {
+    return '$0';
+  }
+  return `$${numericValue.toLocaleString('es-AR')}`;
+};
 
-const StyledListItem = styled(ListItem)(({ theme }) => ({
-  backgroundColor: theme.palette.accent.main,
-  borderRadius: 8,
-  marginBottom: theme.spacing(1),
-  cursor: 'pointer',
-  transition: 'transform 0.2s ease',
-  '&:hover': {
-    transform: 'scale(1.01)',
-  },
-  [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(1),
-  },
-}));
-
-const StyledListItemText = styled(ListItemText)(({ theme }) => ({
-  '& .MuiListItemText-primary': {
-    color: theme.palette.neutral.contrastText,
-    fontWeight: 'bold',
-    fontSize: '1.2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    textAlign: 'justify',
-    width: '100%',
-    [theme.breakpoints.down('sm')]: {
-      fontSize: '1rem',
-    },
-  },
-  '& .MuiListItemText-secondary': {
-    display: 'flex',
-    justifyContent: 'space-between',
-    color: theme.palette.neutral.contrastText,
-    fontWeight: 'bold',
-    width: '100%',
-    textAlign: 'justify',
-    [theme.breakpoints.down('sm')]: {
-      fontSize: '0.9rem',
-    },
-  },
-}));
-
-const IconGroup = styled(Box)(({ theme }) => ({
+const ProductCard = styled(Card)(({ theme }) => ({
   display: 'flex',
+  flexDirection: 'column',
+  position: 'relative',
+  height: '100%',
+  backgroundColor: alpha(theme.palette.background.default, 0.92),
+  borderRadius: 14,
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
+  transition: theme.transitions.create(['transform', 'box-shadow'], {
+    duration: theme.transitions.duration.shorter,
+  }),
+  boxShadow: '0 6px 18px rgba(0, 0, 0, 0.24)',
+  overflow: 'hidden',
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    inset: 0,
+    borderRadius: 'inherit',
+    boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.04)',
+    pointerEvents: 'none',
+  },
+  '&:hover': {
+    transform: 'translateY(-3px)',
+    boxShadow: '0 12px 26px rgba(0, 0, 0, 0.32)',
+  },
+}));
+
+const ProductActionArea = styled(CardActionArea)(() => ({
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'stretch',
+  flex: 1,
+  width: '100%',
+  height: '100%',
+  padding: 0,
+  '&::after': {
+    pointerEvents: 'none',
+  },
+  '& .MuiCardActionArea-focusHighlight': {
+    borderRadius: 'inherit',
+  },
+}));
+
+const BadgeText = styled(Typography)(({ theme }) => ({
+  alignSelf: 'flex-start',
+  whiteSpace: 'nowrap',
+  color: theme.palette.primary.contrastText,
+  fontSize: '0.75rem',
+  textTransform: 'uppercase',
+  fontWeight: 600,
+  borderRadius: 999,
+  padding: theme.spacing(0.45, 1.4),
+  backgroundColor: alpha(theme.palette.primary.main, 0.22),
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.6)}`,
+  letterSpacing: '0.08em',
+  boxShadow: `0 0 10px ${alpha(theme.palette.primary.main, 0.45)}`,
+  transition: 'box-shadow 220ms ease, transform 220ms ease',
+  display: 'inline-flex',
   alignItems: 'center',
-  marginLeft: theme.spacing(1),
+  gap: theme.spacing(0.5),
+}));
+
+const PriceTag = styled(Typography)(({ theme }) => ({
+  fontWeight: 600,
+  fontSize: 'clamp(1rem, 0.95rem + 0.25vw, 1.25rem)',
+  color: theme.palette.primary.main,
+  whiteSpace: 'nowrap',
+}));
+
+const IconGroup = styled(Stack)(({ theme }) => ({
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: theme.spacing(0.6),
+  minHeight: 20,
   '& img': {
     width: 20,
     height: 20,
-    marginLeft: theme.spacing(0.5),
+    objectFit: 'contain',
+    filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))',
   },
 }));
 
 const LoadingSkeleton = () => (
-  <Box>
+  <Grid container spacing={{ xs: 1.2, sm: 2.5 }}>
     {Array.from({ length: 4 }).map((_, index) => (
-      <Skeleton
-        key={`product-skeleton-${index}`}
-        variant="rectangular"
-        height={68}
-        sx={{ mb: 1.5, borderRadius: 2 }}
-      />
+      <Grid item xs={12} sm={6} md={4} lg={3} key={`product-skeleton-${index}`}>
+        <Skeleton
+          variant="rounded"
+          height={220}
+          sx={{ borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.08)' }}
+        />
+      </Grid>
     ))}
-  </Box>
+  </Grid>
 );
 
 const ProductList = React.memo(
-  ({ subcategoryId, products, allProducts = [], onAddToCart, isLoading = false }) => {
+  ({
+    subcategoryId,
+    products,
+    allProducts = [],
+    onAddToCart,
+    isLoading = false,
+  }) => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -108,7 +139,7 @@ const ProductList = React.memo(
       }
       if (subcategoryId && allProducts.length > 0) {
         return allProducts.filter(
-          (product) => product.id_subcategoria === subcategoryId && product.stock > 0
+          (product) => product.id_subcategoria === subcategoryId && product.stock > 0,
         );
       }
       return [];
@@ -124,13 +155,36 @@ const ProductList = React.memo(
       setSelectedProduct(null);
     };
 
-    const renderIcons = (product) => (
-      <IconGroup>
-        {product.vegetariano === 1 && <img src={vegetarianoIcon} alt="Vegetariano" />}
-        {product.vegano === 1 && <img src={veganoIcon} alt="Vegano" />}
-        {product.celiaco === 1 && <img src={celiacoIcon} alt="Celíaco" />}
-      </IconGroup>
-    );
+    const renderIcons = (product) => {
+      const items = [];
+      if (product.vegetariano === 1) {
+        items.push(
+          <Tooltip key="vegetariano" title="Apto vegetarianos">
+            <img
+              src={vegetarianoIcon}
+              alt="Vegetariano"
+              loading="lazy"
+              style={{ filter: 'brightness(0) saturate(100%)' }}
+            />
+          </Tooltip>,
+        );
+      }
+      if (product.vegano === 1) {
+        items.push(
+          <Tooltip key="vegano" title="Apto veganos">
+            <img src={veganoIcon} alt="Vegano" loading="lazy" />
+          </Tooltip>,
+        );
+      }
+      if (product.celiaco === 1) {
+        items.push(
+          <Tooltip key="celiaco" title="Apto celíacos">
+            <img src={celiacoIcon} alt="Celíaco" loading="lazy" />
+          </Tooltip>,
+        );
+      }
+      return items.length ? <IconGroup>{items}</IconGroup> : null;
+    };
 
     if (isLoading) {
       return <LoadingSkeleton />;
@@ -138,64 +192,81 @@ const ProductList = React.memo(
 
     return (
       <>
-        <List>
+        <Grid container spacing={{ xs: 1.2, sm: 2 }} columns={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
           {productList.length > 0 ? (
-            productList.map((product) => (
-              <StyledListItem key={product.id_producto} onClick={() => handleClick(product)}>
-                <StyledListItemText
-                  primaryTypographyProps={{ component: 'div' }}
-                  secondaryTypographyProps={{ component: 'div' }}
-                  primary={
-                    <Box
-                      component="span"
+            productList.map((product, index) => (
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                lg={3}
+                key={product.id_producto}
+              >
+                <ProductCard sx={{ mb: { xs: 1, sm: 0 } }}>
+                  <ProductActionArea onClick={() => handleClick(product)}>
+                    <CardContent
                       sx={{
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
+                        flexDirection: 'column',
+                        gap: 1.3,
+                        p: { xs: 2, sm: 2.25 },
+                        flexGrow: 1,
                         width: '100%',
-                        gap: 1,
                       }}
                     >
-                      <Typography component="span" variant="body1" translate="no">
-                        {product.nombre}
-                      </Typography>
-                      {renderIcons(product)}
-                      {product.plato_del_dia === 1 && <BlinkText>Plato del Día</BlinkText>}
-                    </Box>
-                  }
-                  secondary={
-                    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                      <Typography
-                        variant="body2"
-                        sx={(theme) => ({
-                          color: alpha(theme.palette.text.primary, 0.75),
-                          marginBottom: 0.5,
-                          textAlign: 'justify',
-                        })}
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        gap={1.2}
+                        flexWrap="wrap"
                       >
-                        {product.descripcion || ''}
-                      </Typography>
+                        <Typography
+                          variant="h6"
+                          component="h3"
+                          translate="no"
+                          sx={{
+                            fontWeight: 500,
+                            flex: '1 1 auto',
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          {product.nombre}
+                        </Typography>
+                        {renderIcons(product)}
+                        <PriceTag component="span">{formatPrice(product.precio)}</PriceTag>
+                      </Box>
 
-                      <Typography
-                        variant="body2"
-                        color="text.primary"
-                        sx={{
-                          fontWeight: 'bold',
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                        }}
-                      >
-                        <span>${product.precio}</span>
-                      </Typography>
-                    </Box>
-                  }
-                />
-              </StyledListItem>
+                      {product.plato_del_dia === 1 && (
+                        <BadgeText component="span">PLATO DEL DÍA</BadgeText>
+                      )}
+
+                      {product.descripcion && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: (theme) => alpha(theme.palette.text.primary, 0.76),
+                            minHeight: 48,
+                            lineHeight: 1.35,
+                          }}
+                        >
+                          {product.descripcion}
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </ProductActionArea>
+                </ProductCard>
+              </Grid>
             ))
           ) : (
-            <Typography>No hay productos para esta subcategoría.</Typography>
+            <Grid item xs={12}>
+              <Typography align="center" variant="body1" color="text.secondary">
+                No hay productos disponibles para esta categoría.
+              </Typography>
+            </Grid>
           )}
-        </List>
+        </Grid>
 
         {selectedProduct && (
           <ProductDialog
@@ -207,7 +278,7 @@ const ProductList = React.memo(
         )}
       </>
     );
-  }
+  },
 );
 
 ProductList.propTypes = {
@@ -225,7 +296,7 @@ ProductList.propTypes = {
       vegano: PropTypes.oneOfType([PropTypes.number, PropTypes.bool]),
       celiaco: PropTypes.oneOfType([PropTypes.number, PropTypes.bool]),
       plato_del_dia: PropTypes.oneOfType([PropTypes.number, PropTypes.bool]),
-    })
+    }),
   ),
   allProducts: PropTypes.arrayOf(
     PropTypes.shape({
@@ -233,7 +304,7 @@ ProductList.propTypes = {
       id_subcategoria: PropTypes.number,
       id_categoria: PropTypes.number,
       stock: PropTypes.number.isRequired,
-    })
+    }),
   ),
   onAddToCart: PropTypes.func,
   isLoading: PropTypes.bool,

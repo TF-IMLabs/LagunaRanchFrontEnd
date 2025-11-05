@@ -61,8 +61,15 @@ const CombinedDialog = () => {
         </StyledCloseButton>
       </DialogTitle>
 
-      <DialogContent>
-        <Box mb={2}>
+      <DialogContent
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3,
+          p: { xs: 2, sm: 3 },
+        }}
+      >
+        <Box>
           <Order onClose={closeCombinedDialog} />
         </Box>
         <Divider />

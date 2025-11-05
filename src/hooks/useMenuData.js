@@ -1,14 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAllCategories, getAllProducts } from '../services/menuService';
+import { queryKeys } from '../lib/queryClient';
 
 export const useMenuData = () => {
   const categoriesQuery = useQuery({
-    queryKey: ['categories'],
+    queryKey: queryKeys.menu.categories(),
     queryFn: getAllCategories,
   });
 
   const productsQuery = useQuery({
-    queryKey: ['products'],
+    queryKey: queryKeys.menu.products(),
     queryFn: getAllProducts,
   });
 

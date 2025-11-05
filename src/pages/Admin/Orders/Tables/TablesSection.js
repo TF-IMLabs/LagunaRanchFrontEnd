@@ -22,6 +22,7 @@ import WaiterDialog from "./WaiterDialog";
 import CreateTableDialog from "./CreateTableDialog";
 import CreateWaiterDialog from "./CreateWaiterDialog";
 import OrdersDialog from "../OrdersDialog";
+import { queryKeys } from "../../../../lib/queryClient";
 
 const TablesSection = () => {
   const queryClient = useQueryClient();
@@ -39,12 +40,12 @@ const TablesSection = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["tables"],
+    queryKey: queryKeys.tables.all,
     queryFn: getAllTables,
   });
 
   const { data: waiters = [] } = useQuery({
-    queryKey: ["waiters"],
+    queryKey: queryKeys.waiters.all,
     queryFn: getAllWaiters,
   });
 
@@ -54,7 +55,7 @@ const TablesSection = () => {
   );
 
   const { data: ordersById = {}, isLoading: loadingOrders } = useQuery({
-    queryKey: ["orders", { tableIds }],
+    queryKey: queryKeys.orders.list({ tableIds }),
     queryFn: async () => {
       if (!tableIds.length) return {};
       const orders = await Promise.all(
@@ -71,24 +72,27 @@ const TablesSection = () => {
   const receiveOrderMutation = useMutation({
     mutationFn: updateOrderAndTableStatus,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["tables"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tables.all });
     },
   });
 
   const updateTableStatusMutation = useMutation({
     mutationFn: ({ id_mesa, estado }) => updateTableStatus({ id_mesa, estado }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tables"] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.tables.all }),
   });
 
   const updateWaiterMutation = useMutation({
     mutationFn: (data) => updateTableWaiter(data.id_mesa, data.id_mozo),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tables"] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.tables.all }),
   });
 
   const deleteTableNoteMutation = useMutation({
     mutationFn: deleteTableNote,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tables"] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.tables.all }),
   });
 
   const handleReceiveOrder = (orderId, tableId) => {
@@ -152,8 +156,8 @@ const TablesSection = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      queryClient.invalidateQueries({ queryKey: ["tables"] });
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tables.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
     }, 5000);
     return () => clearInterval(interval);
   }, [queryClient]);
@@ -172,20 +176,38 @@ const TablesSection = () => {
 
   return (
     <>
-      <Box textAlign="center" mb={3}>
-  <Button variant="contained" onClick={() => setOpenCreateTableDialog(true)} startIcon={<AddIcon />}>
-    Agregar Mesa
-  </Button>
-  <Button variant="contained" onClick={() => setOpenCreateWaiterDialog(true)} startIcon={<AddIcon />} sx={{ ml: 2 }}>
-    Agregar Mozo
-  </Button>
-  <Button variant="outlined" onClick={() => setOpenOrdersDialog(true)} sx={{ ml: 2 }}>
-    Listar los pedidos
-  </Button>
-</Box>
-<OrdersDialog open={openOrdersDialog} onClose={() => setOpenOrdersDialog(false)} />
+      <Box mb={3}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+            justifyContent: 'center',
+            gap: 2,
+          }}
+        >
+          <Button
+            variant="contained"
+            onClick={() => setOpenCreateTableDialog(true)}
+            startIcon={<AddIcon />}
+          >
+            Agregar mesa
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => setOpenCreateWaiterDialog(true)}
+            startIcon={<AddIcon />}
+          >
+            Agregar mozo
+          </Button>
+          <Button variant="outlined" onClick={() => setOpenOrdersDialog(true)}>
+            Listar los pedidos
+          </Button>
+        </Box>
+      </Box>
+      <OrdersDialog open={openOrdersDialog} onClose={() => setOpenOrdersDialog(false)} />
 
-      <Grid container spacing={2}>
+      <Grid container spacing={{ xs: 2, md: 3 }}>
         {tables.map((table) => (
           <Grid item xs={12} sm={6} md={4} key={table.n_mesa}>
             <TableDetail

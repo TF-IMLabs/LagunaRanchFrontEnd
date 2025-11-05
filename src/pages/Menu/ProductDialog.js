@@ -2,8 +2,6 @@ import React, { useState, forwardRef } from 'react';
 import {
   Dialog,
   DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
   Typography,
   Divider,
@@ -13,35 +11,83 @@ import {
   Snackbar,
   Alert,
   Tooltip,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
-import { styled } from '@mui/system';
+import PropTypes from 'prop-types';
+import { keyframes, styled, alpha } from '@mui/material/styles';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 
+const formatPrice = (value) => {
+  const numericValue = Number.parseInt(`${value}`, 10);
+  if (Number.isNaN(numericValue)) {
+    return '$0';
+  }
+  return `$${numericValue.toLocaleString('es-AR')}`;
+};
+
 const ProductImage = styled('img')(({ theme }) => ({
   width: '100%',
-  maxHeight: '200px',
+  maxHeight: 240,
   objectFit: 'cover',
-  marginBottom: theme.spacing(2),
-  borderRadius: 10,
+  borderRadius: 12,
   border: `2px solid ${theme.palette.primary.main}`,
+  boxShadow: '0 8px 22px rgba(0,0,0,0.35)',
 }));
 
 const QuantityButton = styled(IconButton)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
   backgroundColor: theme.palette.background.paper,
   color: theme.palette.text.primary,
-  margin: theme.spacing(0, 0.5),
+  transition: theme.transitions.create(['transform', 'background-color'], {
+    duration: theme.transitions.duration.shorter,
+  }),
   '&:hover': {
     backgroundColor: theme.palette.action.hover,
+    transform: 'translateY(-1px)',
+  },
+}));
+
+const fadeSlideIn = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const AnimatedDialogContent = styled(DialogContent)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing(2),
+  padding: theme.spacing(2.5, 3),
+  animation: `${fadeSlideIn} 260ms ${theme.transitions.easing.easeOut}`,
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(2, 2.5),
+    gap: theme.spacing(1.8),
+  },
+}));
+
+const AnimatedDialogActions = styled(DialogActions)(({ theme }) => ({
+  flexWrap: 'wrap',
+  gap: theme.spacing(2),
+  padding: theme.spacing(0, 3, 3),
+  justifyContent: 'space-between',
+  animation: `${fadeSlideIn} 260ms ${theme.transitions.easing.easeOut}`,
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(0, 2.5, 2.5),
   },
 }));
 
 const Transition = forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return <Slide direction="up" ref={ref} timeout={{ enter: 260, exit: 200 }} {...props} />;
 });
 
 const ProductDialog = ({ open, onClose, product }) => {
@@ -61,13 +107,8 @@ const ProductDialog = ({ open, onClose, product }) => {
     }
   };
 
-  const incrementQuantity = () => {
-    setQuantity((prev) => Math.min(prev + 1, 10));
-  };
-
-  const decrementQuantity = () => {
-    setQuantity((prev) => Math.max(prev - 1, 1));
-  };
+  const incrementQuantity = () => setQuantity((prev) => Math.min(prev + 1, 10));
+  const decrementQuantity = () => setQuantity((prev) => Math.max(prev - 1, 1));
 
   const handleCloseFeedback = (_event, reason) => {
     if (reason === 'clickaway') return;
@@ -82,28 +123,58 @@ const ProductDialog = ({ open, onClose, product }) => {
       fullWidth
       maxWidth="sm"
       aria-labelledby="product-dialog-title"
+      TransitionProps={{ mountOnEnter: true, unmountOnExit: true }}
     >
-      <DialogTitle id="product-dialog-title">
+      <DialogTitle
+        id="product-dialog-title"
+        sx={{
+          pr: 7,
+          color: '#fff',
+          fontWeight: 500,
+          letterSpacing: '0.04em',
+        }}
+      >
         {product?.nombre}
         <IconButton
           onClick={onClose}
-          sx={{ position: 'absolute', top: 10, right: 10 }}
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 10,
+            p: 1.2,
+            backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.25),
+            '&:hover': {
+              backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.35),
+            },
+          }}
           aria-label="Cerrar"
         >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers>
-        {product?.imagen && (
-          <ProductImage src={product.imagen} alt={product.nombre} />
-        )}
-        <Typography variant="body1" paragraph>
-          {product?.descripcion}
-        </Typography>
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-          <Typography variant="h6" color="text.primary">
-            ${product?.precio}
+
+      <Divider sx={{ m: 0 }} />
+
+      <AnimatedDialogContent>
+        {product?.imagen && <ProductImage src={product.imagen} alt={product.nombre} />}
+
+        {product?.descripcion && (
+          <Typography variant="body1" sx={{ lineHeight: 1.55 }}>
+            {product.descripcion}
           </Typography>
+        )}
+
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          flexWrap="wrap"
+          gap={2}
+        >
+          <Typography variant="h5" color="text.primary" sx={{ fontWeight: 600 }}>
+            {formatPrice(product?.precio)}
+          </Typography>
+
           <Box display="flex" alignItems="center" aria-live="polite">
             <Tooltip title="Disminuir cantidad">
               <span>
@@ -112,7 +183,11 @@ const ProductDialog = ({ open, onClose, product }) => {
                 </QuantityButton>
               </span>
             </Tooltip>
-            <Typography variant="body1" mx={1} component="span">
+            <Typography
+              variant="body1"
+              component="span"
+              sx={{ mx: 1, minWidth: 28, textAlign: 'center', fontWeight: 500 }}
+            >
               {quantity}
             </Typography>
             <Tooltip title="Aumentar cantidad">
@@ -124,15 +199,19 @@ const ProductDialog = ({ open, onClose, product }) => {
             </Tooltip>
           </Box>
         </Box>
-        <Divider sx={{ my: 2 }} />
-      </DialogContent>
-      <DialogActions>
+
+        <Divider />
+      </AnimatedDialogContent>
+
+      <AnimatedDialogActions>
         <Button
           onClick={() => {
             openCombinedDialog();
             onClose();
           }}
           variant="outlined"
+          fullWidth
+          sx={{ flex: { xs: '1 1 100%', sm: '1 1 auto' } }}
         >
           Ver pedido
         </Button>
@@ -140,10 +219,12 @@ const ProductDialog = ({ open, onClose, product }) => {
           onClick={handleAddToCart}
           variant="contained"
           disabled={!user}
+          fullWidth
+          sx={{ flex: { xs: '1 1 100%', sm: '0 1 auto' } }}
         >
           Añadir al pedido
         </Button>
-      </DialogActions>
+      </AnimatedDialogActions>
 
       <Snackbar
         open={Boolean(feedback)}
@@ -157,6 +238,17 @@ const ProductDialog = ({ open, onClose, product }) => {
       </Snackbar>
     </Dialog>
   );
+};
+
+ProductDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  product: PropTypes.shape({
+    nombre: PropTypes.string,
+    descripcion: PropTypes.string,
+    imagen: PropTypes.string,
+    precio: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  }).isRequired,
 };
 
 export default ProductDialog;

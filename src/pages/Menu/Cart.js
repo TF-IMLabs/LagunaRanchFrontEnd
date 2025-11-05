@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import {
   Button,
@@ -45,7 +46,7 @@ const Cart = ({ onClose }) => {
       console.error('Error al enviar el pedido:', error);
       setFeedback({
         severity: 'error',
-        message: 'Ocurrió un error al enviar tu pedido. Intentalo nuevamente.',
+        message: 'Ocurrió un error al enviar tu pedido. Intentá nuevamente.',
       });
     } finally {
       setIsSubmitting(false);
@@ -58,32 +59,57 @@ const Cart = ({ onClose }) => {
   };
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Box
+      sx={{
+        p: { xs: 2, sm: 3 },
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+      }}
+    >
       {cart.length === 0 ? (
         canShowAddMoreButton && (
           <Box display="flex" justifyContent="center" mt={2}>
             <Button
               variant="outlined"
-              sx={{ width: 220 }}
               onClick={() => {
                 onClose();
                 navigate('/menu');
               }}
+              fullWidth
+              sx={{ maxWidth: 320 }}
             >
-              ¡Agregá más productos!
+              Sumá productos
             </Button>
           </Box>
         )
       ) : (
         <>
           {cart.map(({ product, cantidad }) => (
-            <Box key={product.id_producto} mb={2}>
-              <Typography variant="body1">{product.nombre}</Typography>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mt={1}>
+            <Box
+              key={product.id_producto}
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                backgroundColor: theme.palette.background.paper,
+                boxShadow: '0 6px 16px rgba(0,0,0,0.28)',
+              }}
+            >
+              <Typography variant="h6" component="h3" translate="no">
+                {product.nombre}
+              </Typography>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                flexWrap="wrap"
+                gap={2}
+                mt={1.5}
+              >
                 <Typography variant="body1">
-                  ${product.precio} x {cantidad}
+                  ${product.precio} × {cantidad}
                 </Typography>
-                <Box display="flex" alignItems="center">
+                <Box display="flex" alignItems="center" gap={1}>
                   <Tooltip title={`Disminuir cantidad de ${product.nombre}`}>
                     <span>
                       <IconButton
@@ -96,7 +122,7 @@ const Cart = ({ onClose }) => {
                       </IconButton>
                     </span>
                   </Tooltip>
-                  <Typography variant="body1" mx={1} aria-live="polite">
+                  <Typography variant="body1" component="span" aria-live="polite">
                     {cantidad}
                   </Typography>
                   <Tooltip title={`Aumentar cantidad de ${product.nombre}`}>
@@ -122,46 +148,53 @@ const Cart = ({ onClose }) => {
                   </Tooltip>
                 </Box>
               </Box>
-              <Divider sx={{ my: 1 }} />
+              <Divider sx={{ mt: 2 }} />
             </Box>
           ))}
 
           <TextField
-            label="Nota del Pedido"
+            label="Nota del pedido"
             variant="outlined"
             fullWidth
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': { borderColor: 'gray' },
-                '&:hover fieldset': { borderColor: theme.palette.primary.main },
-                '&.Mui-focused fieldset': { borderColor: theme.palette.secondary.main },
-              },
-              '& .MuiInputLabel-root': { color: theme.palette.text.primary },
-              '& .MuiInputLabel-root.Mui-focused': { color: theme.palette.text.primary },
-            }}
             margin="normal"
             multiline
             maxRows={4}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: theme.palette.primary.main },
+                '&:hover fieldset': { borderColor: theme.palette.primary.light },
+                '&.Mui-focused fieldset': { borderColor: theme.palette.secondary.main },
+              },
+              '& .MuiInputLabel-root.Mui-focused': {
+                color: theme.palette.text.primary,
+              },
+            }}
           />
 
-          <Box display="flex" justifyContent="space-between" mt={2}>
+          <Box
+            mt={2}
+            display="flex"
+            flexDirection={{ xs: 'column', sm: 'row' }}
+            gap={2}
+            justifyContent="space-between"
+          >
             <Button
               variant="outlined"
-              sx={{ width: 200 }}
               onClick={() => {
                 onClose();
                 navigate('/menu');
               }}
+              fullWidth
             >
               Seguir pidiendo
             </Button>
             <Button
               variant="contained"
-              sx={{ width: 200 }}
               onClick={() => setOpenDialog(true)}
               disabled={isSendDisabled}
+              fullWidth
             >
               Enviar pedido
             </Button>
@@ -195,6 +228,10 @@ const Cart = ({ onClose }) => {
       </Snackbar>
     </Box>
   );
+};
+
+Cart.propTypes = {
+  onClose: PropTypes.func.isRequired,
 };
 
 export default Cart;

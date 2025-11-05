@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, Tab, Box } from '@mui/material';
+import PropTypes from 'prop-types';
 import { styled } from '@mui/system';
 import { alpha } from '@mui/material/styles';
 import MenuSection from '../Admin/Menu/MenuSection';
@@ -21,16 +22,35 @@ const AdminWrapper = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   position: 'relative',
-  padding: theme.spacing(4, 2),
+  padding: theme.spacing(6, 2),
+  [theme.breakpoints.down('md')]: {
+    padding: theme.spacing(4, 2),
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(3, 1.5),
+  },
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: alpha(theme.palette.background.default, 0.6),
+    backdropFilter: 'blur(6px)',
+  },
+  '& > *': {
+    position: 'relative',
+    zIndex: 1,
+  },
 }));
 
 const StyledTabs = styled(Tabs)(({ theme }) => ({
   backgroundColor: alpha(theme.palette.background.default, 0.85),
-  borderRadius: 8,
-  marginBottom: theme.spacing(2),
+  borderRadius: 10,
+  marginBottom: theme.spacing(3),
   padding: theme.spacing(0.5),
+  maxWidth: '100%',
   '.MuiTabs-flexContainer': {
     gap: theme.spacing(0.5),
+    flexWrap: 'wrap',
   },
   '.MuiTabs-indicator': {
     backgroundColor: theme.palette.primary.main,
@@ -41,8 +61,10 @@ const StyledTabs = styled(Tabs)(({ theme }) => ({
 
 const StyledTab = styled(Tab)(({ theme }) => ({
   color: theme.palette.text.secondary,
-  fontSize: '1.1rem',
+  fontSize: '1rem',
   fontWeight: 600,
+  minHeight: 48,
+  padding: theme.spacing(0.5, 1.5),
   '&.Mui-selected': {
     color: theme.palette.primary.main,
   },
@@ -51,12 +73,20 @@ const StyledTab = styled(Tab)(({ theme }) => ({
 const ContentBox = styled(Box)(({ theme }) => ({
   width: '100%',
   flexGrow: 1,
-  backgroundColor: alpha(theme.palette.background.paper, 0.85),
-  borderRadius: 8,
+  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+  borderRadius: 16,
   overflow: 'hidden',
+  boxShadow: '0 16px 40px rgba(0, 0, 0, 0.35)',
+  maxWidth: theme.breakpoints.values.lg,
 }));
 
-const TabPanel = ({ children }) => <Box sx={{ p: 3 }}>{children}</Box>;
+const TabPanel = ({ children }) => (
+  <Box sx={{ p: { xs: 2, md: 3 }, height: '100%', overflow: 'auto' }}>{children}</Box>
+);
+
+TabPanel.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 const AdminPage = () => {
   const { isAdmin } = useAuth();
@@ -74,15 +104,18 @@ const AdminPage = () => {
       <StyledTabs
         value={tabIndex}
         onChange={(_, newIndex) => setTabIndex(newIndex)}
-        centered
+        variant="scrollable"
+        scrollButtons
+        allowScrollButtonsMobile
+        aria-label="Panel de administración"
       >
         <StyledTab label="Menú" />
         <StyledTab label="Mesas" />
         <StyledTab label="Delivery" />
-        <StyledTab label="Take Away" />
+        <StyledTab label="Take away" />
       </StyledTabs>
 
-      <ContentBox sx={{ overflowY: tabIndex === 1 ? 'hidden' : 'auto' }}>
+      <ContentBox>
         {tabIndex === 0 && (
           <TabPanel>
             <MenuSection />

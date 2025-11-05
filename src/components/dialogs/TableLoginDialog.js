@@ -1,20 +1,39 @@
 import React, { useState } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, Button, Box, Typography, Divider, CircularProgress
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Button,
+  Box,
+  Typography,
+  Divider,
+  CircularProgress,
 } from '@mui/material';
 import {
   Info as InfoIcon,
   Person as PersonIcon,
   Group as GroupIcon,
-  RoomService as RoomServiceIcon
+  RoomService as RoomServiceIcon,
 } from '@mui/icons-material';
+import PropTypes from 'prop-types';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCart } from '../../contexts/CartContext';
 import AuthDialog from './AuthDialog';
 import { callWaiter } from '../../services/waiterService';
+import { ERROR_CODES } from '../../services/apiErrorCodes';
+
+const STRINGS = {
+  invalidTable: 'No se detectó una mesa válida.',
+  guestError: 'Error al ingresar como invitado.',
+  tableValidation: 'No pudimos validar la mesa. Verificá el código QR e intentá nuevamente.',
+  sessionExpired: 'Tu sesión caducó. Ingresá nuevamente.',
+  waiterCallError: 'No se pudo llamar al mozo. Intentá nuevamente.',
+  helperText:
+    'Elegí cómo querés ingresar. Podés hacer tu pedido como invitado, iniciar sesión con tu cuenta o llamar al mozo si necesitás ayuda.',
+};
 
 const TableLoginDialog = ({ open, onClose }) => {
-  const { tableId, login, register } = useAuth();
+  const { tableId, loginGuest, isLoading: authLoading, token } = useAuth();
   const { openCombinedDialog } = useCart();
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [error, setError] = useState('');
@@ -22,71 +41,83 @@ const TableLoginDialog = ({ open, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [callingWaiter, setCallingWaiter] = useState(false);
 
-  const GUEST_PASSWORD = 'Invitad@Resto!';
-
- const handleGuest = async () => {
-  const email = `Invitado${tableId}@resto.com`;
-  setLoading(true);
-  setError('');
-
-  try {
-    // Intentar loguearse primero
-    await login({ email, password: GUEST_PASSWORD, tableId });
-  } catch (loginError) {
-    // Si el login falla con 404, crear usuario
-    if (loginError.response?.status === 500) {
-      try {
-        await register({
-          email,
-          password: GUEST_PASSWORD,
-          nombre: `Invitado Mesa ${tableId}`,
-          telefono: '',
-          direccion: '',
-          fecha_nac: '',
-        });
-        // Luego loguear
-        await login({ email, password: GUEST_PASSWORD, tableId });
-      } catch (registerError) {
-        setError('No se pudo crear el usuario invitado.');
-        setLoading(false);
-        return;
-      }
-
+  const handleGuestLoginError = (loginError) => {
+    if (loginError.code === ERROR_CODES.TABLE_CLOSED) {
+      setError(STRINGS.tableValidation);
+    } else if (loginError.code === ERROR_CODES.SESSION_EXPIRED) {
+      setError(STRINGS.sessionExpired);
     } else {
-      setError('Error al ingresar como invitado.');
-      setLoading(false);
+      setError(STRINGS.guestError);
+    }
+  };
+
+  const handleGuest = async () => {
+    if (!tableId) {
+      setError(STRINGS.invalidTable);
       return;
     }
-  }
 
-  setLoading(false);
-  onClose();
-  openCombinedDialog();
-}
+    setLoading(true);
+    setError('');
+
+    try {
+      await loginGuest(tableId);
+      onClose();
+      openCombinedDialog();
+    } catch (loginError) {
+      handleGuestLoginError(loginError);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCallWaiter = async () => {
+    if (!tableId) {
+      setError(STRINGS.invalidTable);
+      return;
+    }
+
     setCallingWaiter(true);
     setError('');
+    setWaiterMessage('');
     try {
-      await callWaiter(tableId);
-      setWaiterMessage('El mozo fue notificado 🧑‍🍳');
+      if (!token) {
+        try {
+          await loginGuest(tableId);
+        } catch (loginError) {
+          handleGuestLoginError(loginError);
+          return;
+        }
+      }
+      const response = await callWaiter(tableId);
+      const message = response?.message || 'El mozo fue notificado correctamente.';
+      setWaiterMessage(message);
       setTimeout(() => setWaiterMessage(''), 3000);
     } catch (e) {
-      setError('No se pudo llamar al mozo. ❌');
+      setError(STRINGS.waiterCallError);
     } finally {
       setCallingWaiter(false);
     }
   };
 
+  const isBusy = loading || callingWaiter || authLoading;
+
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>{`Mesa ${tableId}`}</DialogTitle>
-      <DialogContent>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      aria-labelledby="table-login-dialog-title"
+    >
+      <DialogTitle id="table-login-dialog-title">{`Mesa ${tableId ?? ''}`}</DialogTitle>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {!showLoginForm ? (
           <Box display="flex" flexDirection="column" gap={2} mt={1}>
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <Box display="flex" alignItems="center" gap={1}>
               <InfoIcon color="info" />
               <Typography variant="body2" color="text.secondary">
-                Elegí cómo querés ingresar. Podés hacer tu pedido como invitado, iniciar sesión con tu cuenta o llamar al mozo si necesitás ayuda.
+                {STRINGS.helperText}
               </Typography>
             </Box>
 
@@ -94,9 +125,12 @@ const TableLoginDialog = ({ open, onClose }) => {
 
             <Button
               variant="outlined"
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <GroupIcon />}
+              startIcon={
+                isBusy ? <CircularProgress size={20} color="inherit" /> : <GroupIcon />
+              }
               onClick={handleGuest}
-              disabled={loading || callingWaiter}
+              disabled={isBusy}
+              fullWidth
             >
               {loading ? 'Ingresando...' : 'Ingresar como invitado'}
             </Button>
@@ -105,7 +139,8 @@ const TableLoginDialog = ({ open, onClose }) => {
               variant="outlined"
               startIcon={<PersonIcon />}
               onClick={() => setShowLoginForm(true)}
-              disabled={loading || callingWaiter}
+              disabled={isBusy}
+              fullWidth
             >
               Ingresar con tu cuenta
             </Button>
@@ -113,27 +148,30 @@ const TableLoginDialog = ({ open, onClose }) => {
             <Button
               variant="outlined"
               color="secondary"
-              startIcon={callingWaiter ? <CircularProgress size={20} color="inherit" /> : <RoomServiceIcon />}
+              startIcon={
+                callingWaiter ? <CircularProgress size={20} color="inherit" /> : <RoomServiceIcon />
+              }
               onClick={handleCallWaiter}
-              disabled={loading || callingWaiter}
+              disabled={isBusy}
+              fullWidth
             >
-              {callingWaiter ? 'Llamando al mozo...' : 'Llamar al Mozo'}
+              {callingWaiter ? 'Llamando al mozo...' : 'Llamar al mozo'}
             </Button>
 
             {error && (
-              <Typography color="error" mt={1}>
+              <Typography color="error" mt={1} textAlign="center">
                 {error}
               </Typography>
             )}
             {waiterMessage && (
-              <Typography color="success.main" mt={1}>
+              <Typography color="success.main" mt={1} textAlign="center">
                 {waiterMessage}
               </Typography>
             )}
           </Box>
         ) : (
           <AuthDialog
-            open={true}
+            open
             onClose={onClose}
             loginParams={{ tableId }}
             onLoginSuccess={() => {
@@ -145,6 +183,11 @@ const TableLoginDialog = ({ open, onClose }) => {
       </DialogContent>
     </Dialog>
   );
+};
+
+TableLoginDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
 export default TableLoginDialog;

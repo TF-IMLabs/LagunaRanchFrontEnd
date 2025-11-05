@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Box, Container } from '@mui/material';
 import { Route, Routes } from 'react-router-dom';
 import Header from '../layout/Header';
 import Footer from '../layout/Footer';
@@ -15,20 +16,42 @@ const AppRouter = () => {
   useEffect(() => {
     if (tableId && !user) {
       setDialogOpen(true);
+    } else {
+      setDialogOpen(false);
     }
   }, [tableId, user]);
 
   return (
-    <>
+    <Box
+      sx={(theme) => ({
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        backgroundColor: theme.palette.background.default,
+      })}
+    >
       <Header />
+
       <TableLoginDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/menu" element={<Menu />} />
-        <Route path="/admin" element={<AdminPage />} />
-      </Routes>
+
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          py: { xs: 3, md: 6 },
+        }}
+      >
+        <Container maxWidth="xl" disableGutters>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/menu" element={<Menu />} />
+            <Route path="/admin" element={<AdminPage />} />
+          </Routes>
+        </Container>
+      </Box>
+
       <Footer />
-    </>
+    </Box>
   );
 };
 

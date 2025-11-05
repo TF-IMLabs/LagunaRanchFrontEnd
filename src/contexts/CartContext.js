@@ -1,224 +1,238 @@
-import React, { createContext, useState, useContext, useEffect } from 'react'; 
-import { addProductToOrder, createOrder, getOrderByTable, updateOrderDetail, updateOrderStatus } from '../services/cartService';
-import { useAuth } from './AuthContext';
-import SuccessDialog from '../components/dialogs/SuccessDialog'; 
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Snackbar, Alert } from '@mui/material';
+import SuccessDialog from '../components/dialogs/SuccessDialog';
+import { useAuth } from './AuthContext';
+import useCartPersistence from '../hooks/useCartPersistence';
+import useExistingOrder from '../hooks/useExistingOrder';
+import useOrderSubmit from '../hooks/useOrderSubmit';
+import useTableService from '../hooks/useTableService';
+import { ERROR_CODES } from '../services/apiErrorCodes';
 
-const CartContext = createContext();
+const CartContext = createContext(null);
+
+const ERROR_MESSAGES = {
+  [ERROR_CODES.MISSING_ADDRESS]:
+    'Necesitamos que completes una dirección para poder enviar tu pedido de delivery.',
+  [ERROR_CODES.TABLE_CLOSED]:
+    'No encontramos una mesa activa asociada. Escaneá nuevamente el código QR.',
+  [ERROR_CODES.SESSION_EXPIRED]:
+    'Tu sesión expiró. Iniciá sesión para continuar.',
+};
+
+const resolveFeedbackMessage = (error) => {
+  if (!error) return 'Ocurrió un error inesperado al enviar el pedido.';
+
+  if (ERROR_MESSAGES[error.code]) {
+    return ERROR_MESSAGES[error.code];
+  }
+
+  return error.message || 'No se pudo enviar el pedido. Intentá nuevamente.';
+};
 
 export const CartProvider = ({ children }) => {
-  const { tableId, clientId } = useAuth();
+  const { tableId, clientId, orderType, token } = useAuth();
+  const {
+    cart: persistedCart,
+    updateCart,
+    clearCart: clearPersistedCart,
+    refreshCartTimestamp,
+  } = useCartPersistence();
+  const { existingItems, loadExistingOrder, loading: loadingExisting } =
+    useExistingOrder();
+  const { callWaiter, requestBill, updateNote, canUseTableService } =
+    useTableService();
 
-  const maxCartAge = 30 * 60 * 1000; 
+  const [combinedDialogOpen, setCombinedDialogOpen] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
-  const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem('cart');
-    const savedTime = localStorage.getItem('cartSetTime');
-    if (savedCart && savedTime) {
-      const timePassed = Date.now() - Number(savedTime);
-      if (timePassed < maxCartAge) {
-        return JSON.parse(savedCart);
-      } else {
-        localStorage.removeItem('cart');
-        localStorage.removeItem('cartSetTime');
+  const { submitOrder, isSubmitting } = useOrderSubmit({
+    tableId,
+    clientId,
+    cart: persistedCart,
+    orderType,
+    existingItems,
+    onSuccess: () => {
+      clearPersistedCart();
+      setSuccessDialogOpen(true);
+      if (tableId) {
+        loadExistingOrder(tableId);
       }
-    }
-    return [];
+    },
+    onError: (error) => {
+      setFeedback({
+        severity: 'error',
+        message: resolveFeedbackMessage(error),
+      });
+    },
   });
 
   useEffect(() => {
-    if (cart.length > 0) {
-      localStorage.setItem('cart', JSON.stringify(cart));
-      localStorage.setItem('cartSetTime', Date.now());
+    if (tableId && token) {
+      loadExistingOrder(tableId);
     } else {
-      localStorage.removeItem('cart');
-      localStorage.removeItem('cartSetTime');
+      loadExistingOrder(null);
     }
-  }, [cart]);
+  }, [tableId, token, loadExistingOrder]);
 
-  const [combinedDialogOpen, setCombinedDialogOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false); 
-  const [feedback, setFeedback] = useState(null);
+  const addToCart = useCallback(
+    (product, quantity) => {
+      if (!quantity || quantity <= 0) return;
 
-  const addToCart = (product, quantity) => {
-    setCart(prevCart => {
-      const existingItemIndex = prevCart.findIndex(
-        item => item.product.id_producto === product.id_producto && item.product.nuevo === 0
-      );
-
-      if (existingItemIndex > -1) {
-        return [...prevCart, { product: { ...product, nuevo: 1 }, cantidad: quantity }];
-      } else {
-        return [...prevCart, { product, cantidad: quantity }];
-      }
-    });
-  };
-
-  const removeItem = (itemId) => {
-    setCart(prevCart => prevCart.filter(item => item.product.id_producto !== itemId));
-  };
-
-  const emptyCart = () => {
-    setCart([]);
-  };
-
-  
-  const clearCart = () => {
-    setCart([]);
-    localStorage.removeItem('cart');
-    localStorage.removeItem('cartSetTime');
-  };
-
-  const updateItemQuantity = (productId, newQuantity) => {
-    setCart(prevCart => {
-      const existingItemIndex = prevCart.findIndex(item => item.product.id_producto === productId);
-      if (existingItemIndex > -1) {
-        const updatedCart = [...prevCart];
-        if (newQuantity <= 0) {
-          updatedCart.splice(existingItemIndex, 1);
-        } else {
-          updatedCart[existingItemIndex].cantidad = newQuantity;
-        }
-        return updatedCart;
-      }
-      return prevCart;
-    });
-  };
-
-  const fetchCurrentOrder = async () => {
-    if (tableId) {
-      const existingOrder = await getOrderByTable(tableId);
-      if (existingOrder && existingOrder.result.length > 0) {
-        const firstResult = existingOrder.result[0];
-        if (firstResult.mensaje === "La mesa no estÃ¡ ocupada.") {
-          return null;
-        } else {
-          const orderId = firstResult.id_pedido;
-          return orderId;
-        }
-      }
-    }
-    return null;
-  };
-
-  const sendOrder = async () => {
-    if (cart.length === 0 || !tableId || !clientId) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const existingOrderId = await fetchCurrentOrder();
-      let orderId = existingOrderId;
-      let isNewOrder = false; 
-  
-      if (!orderId) {
-        const orderData = {
-          id_cliente: parseInt(clientId, 10),
-          id_mesa: parseInt(tableId, 10),
-          tipo_pedido: 0,
-        };
-  
-        const response = await createOrder(orderData);
-        if (response && response.orderId) {
-          orderId = response.orderId;
-          isNewOrder = true; 
-        } else {
-          throw new Error('No se pudo obtener el orderId despuÃ©s de crear la orden');
-        }
-      }
-  
-      if (!orderId) {
-        throw new Error('No se pudo obtener un ID de orden vÃ¡lido');
-      }
-  
-      const existingOrderDetails = await getOrderByTable(tableId);
-      let itemsUpdated = false;  
-  
-      for (const item of cart) {
-        const existingDetail = existingOrderDetails.result.find(
-          detail => detail.id_producto === item.product.id_producto && detail.nuevo === 0
+      updateCart((prevCart) => {
+        const existingIndex = prevCart.findIndex(
+          (item) =>
+            item.product.id_producto === product.id_producto &&
+            item.product.nuevo === 0,
         );
-  
-        if (existingDetail) {
-          await updateOrderDetail({
-            id_pedido: orderId,
-            id_producto: item.product.id_producto,
-            cantidad: item.cantidad, 
-          });
-          itemsUpdated = true;
-        } else {
-          const productData = {
-            id_pedido: parseInt(orderId, 10),
-            id_producto: parseInt(item.product.id_producto, 10),
-            cantidad: parseInt(item.cantidad, 10),
-          };
-          await addProductToOrder(productData);
-          itemsUpdated = true;
-        }
-      }
-  
-      if (orderId && itemsUpdated && !isNewOrder) {
-        await updateOrderStatus({ id_pedido: orderId, estado: 'Actualizado' });
-      }
-  
-      await Promise.all(cart.map(item => {
-        if (item.product.nuevo === 1) {
-          return updateOrderDetail({
-            id_pedido: orderId,
-            id_producto: item.product.id_producto,
-            cantidad: item.cantidad,
-            nuevo: 0,  
-          });
-        }
-        return null;
-      }));
-  
-      emptyCart();
-      setSuccessDialogOpen(true);
-      
-    } catch (error) {
-      console.error('Error al enviar el pedido:', error.response ? error.response.data : error.message);
-      const message = error.response ? error.response.data : error.message;
-      setFeedback({ severity: 'error', message: `Error al enviar el pedido: ${message}` });
-    } finally {
-      setLoading(false);
-      closeCombinedDialog();
-    }
-  };
 
-  const openCombinedDialog = () => setCombinedDialogOpen(true);
-  const closeCombinedDialog = () => setCombinedDialogOpen(false);
-  const handleCloseSuccessDialog = () => setSuccessDialogOpen(false); 
-  const handleCloseFeedback = (_event, reason) => {
+        if (existingIndex > -1) {
+          return [
+            ...prevCart,
+            { product: { ...product, nuevo: 1 }, cantidad: quantity },
+          ];
+        }
+
+        return [...prevCart, { product, cantidad: quantity }];
+      });
+
+      refreshCartTimestamp();
+    },
+    [refreshCartTimestamp, updateCart],
+  );
+
+  const removeItem = useCallback(
+    (productId) => {
+      updateCart((prevCart) =>
+        prevCart.filter((item) => item.product.id_producto !== productId),
+      );
+      refreshCartTimestamp();
+    },
+    [refreshCartTimestamp, updateCart],
+  );
+
+  const clearCart = useCallback(() => {
+    clearPersistedCart();
+  }, [clearPersistedCart]);
+
+  const updateItemQuantity = useCallback(
+    (productId, newQuantity) => {
+      updateCart((prevCart) => {
+        const nextCart = prevCart
+          .map((item) => {
+            if (item.product.id_producto !== productId) {
+              return item;
+            }
+
+            if (newQuantity <= 0) {
+              return null;
+            }
+
+            return {
+              ...item,
+              cantidad: newQuantity,
+            };
+          })
+          .filter(Boolean);
+
+        return nextCart;
+      });
+      refreshCartTimestamp();
+    },
+    [refreshCartTimestamp, updateCart],
+  );
+
+  const sendOrder = useCallback(async () => {
+    try {
+      await submitOrder();
+      setCombinedDialogOpen(false);
+    } catch (error) {
+      // Error is already handled through onError callback.
+    }
+  }, [submitOrder]);
+
+  const openCombinedDialog = useCallback(
+    () => setCombinedDialogOpen(true),
+    [],
+  );
+  const closeCombinedDialog = useCallback(
+    () => setCombinedDialogOpen(false),
+    [],
+  );
+
+  const handleCloseSuccessDialog = useCallback(
+    () => setSuccessDialogOpen(false),
+    [],
+  );
+
+  const handleCloseFeedback = useCallback((_event, reason) => {
     if (reason === 'clickaway') return;
     setFeedback(null);
-  };
+  }, []);
 
-  return (
-    <CartContext.Provider value={{
-      cart,
+  const value = useMemo(
+    () => ({
+      cart: persistedCart,
+      existingItems,
       addToCart,
       removeItem,
-      emptyCart,
-      clearCart, 
+      clearCart,
       updateItemQuantity,
       sendOrder,
       combinedDialogOpen,
       openCombinedDialog,
       closeCombinedDialog,
-      loading,
-    }}>
+      loading: isSubmitting || loadingExisting,
+      callWaiter,
+      requestBill,
+      updateNote,
+      canUseTableService,
+    }),
+    [
+      addToCart,
+      callWaiter,
+      canUseTableService,
+      clearCart,
+      closeCombinedDialog,
+      combinedDialogOpen,
+      existingItems,
+      isSubmitting,
+      loadingExisting,
+      openCombinedDialog,
+      persistedCart,
+      removeItem,
+      requestBill,
+      sendOrder,
+      updateItemQuantity,
+      updateNote,
+    ],
+  );
+
+  return (
+    <CartContext.Provider value={value}>
       {children}
-      <SuccessDialog open={successDialogOpen} onClose={handleCloseSuccessDialog} />
+      <SuccessDialog
+        open={successDialogOpen}
+        onClose={handleCloseSuccessDialog}
+      />
       <Snackbar
         open={Boolean(feedback)}
         autoHideDuration={6000}
         onClose={handleCloseFeedback}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseFeedback} severity={feedback?.severity ?? 'info'} variant="filled">
+        <Alert
+          onClose={handleCloseFeedback}
+          severity={feedback?.severity ?? 'info'}
+          variant="filled"
+        >
           {feedback?.message}
         </Alert>
       </Snackbar>
@@ -227,3 +241,4 @@ export const CartProvider = ({ children }) => {
 };
 
 export const useCart = () => useContext(CartContext);
+export default CartContext;

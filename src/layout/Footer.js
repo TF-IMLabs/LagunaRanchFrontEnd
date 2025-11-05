@@ -1,127 +1,124 @@
-import { Container, Typography, IconButton, Grid } from '@mui/material';
-import { Facebook, Instagram, Phone, LocationOn } from '@mui/icons-material';
+import { Container, Typography, IconButton, Box, Stack } from '@mui/material';
+import { Instagram, Phone, LocationOn } from '@mui/icons-material';
 import { styled } from '@mui/system';
 import { alpha } from '@mui/material/styles';
 
 const FooterContainer = styled('footer')(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
   color: theme.palette.primary.main,
-  paddingTop: theme.spacing(4),
-  paddingBottom: theme.spacing(2),
-  borderTop: `2px solid ${theme.palette.primary.main}`,
+  borderTop: `1px solid ${alpha(theme.palette.primary.main, 0.45)}`,
+  padding: theme.spacing(3, 2.5),
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    background:
+      'linear-gradient(90deg, rgba(255, 140, 0, 0.4) 0%, rgba(255, 140, 0, 0.15) 50%, rgba(255, 140, 0, 0.4) 100%)',
+    opacity: 0.9,
+  },
 }));
 
 const FooterContent = styled(Container)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing(4),
+  alignItems: 'center',
+  gap: theme.spacing(2.5),
+  maxWidth: theme.breakpoints.values.sm,
+  textAlign: 'center',
+  padding: 0,
 }));
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
-  fontWeight: 'bold',
-  color: theme.palette.primary.main,
-  marginBottom: theme.spacing(1),
+  fontWeight: 500,
+  fontSize: '0.95rem',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
 }));
 
-const InfoRow = styled('div')(({ theme }) => ({
+const InfoItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(1),
-  marginBottom: theme.spacing(0.5),
-}));
-
-const SocialIcons = styled('div')(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(2),
-}));
-
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.background.paper, 0.8),
-  border: `1px solid ${theme.palette.primary.main}`,
-  transition: 'transform 0.3s ease, background-color 0.3s ease',
-  '&:hover': {
-    transform: 'scale(1.1)',
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.background.default,
-  },
-  '& svg': {
-    color: theme.palette.primary.main,
-  },
-}));
-
-const Rights = styled(Typography)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  textAlign: 'center',
-  fontSize: '0.8rem',
+  justifyContent: 'center',
   color: theme.palette.text.secondary,
+  fontSize: '0.85rem',
+  lineHeight: 1.4,
 }));
 
-const Footer = () => {
-  const currentYear = new Date().getFullYear();
+const DividerLine = styled('span')(({ theme }) => ({
+  display: 'block',
+  width: '100%',
+  height: 1,
+  background: alpha(theme.palette.primary.main, 0.35),
+}));
 
-  return (
-    <FooterContainer>
-      <FooterContent>
-        <Grid container spacing={4} justifyContent="center">
-          <Grid item xs={12} sm={6} md={4}>
-            <SectionTitle variant="h6">Contáctanos</SectionTitle>
-            <InfoRow>
-              <StyledIconButton
-                component="a"
-                href="https://wa.me/5492364489575"
-                target="_blank"
-                aria-label="WhatsApp"
-              >
-                <Phone />
-              </StyledIconButton>
-              <Typography variant="body2" color="text.primary">
-                236 4444444
-              </Typography>
-            </InfoRow>
-            <InfoRow>
-              <StyledIconButton
-                component="a"
-                href="https://www.google.com.ar/maps/place/Le+Jardin+d'Amelie"
-                target="_blank"
-                aria-label="Ubicación"
-              >
-                <LocationOn />
-              </StyledIconButton>
-              <Typography variant="body2" color="text.primary">
-                Fake St. 123, Junín, BA
-              </Typography>
-            </InfoRow>
-          </Grid>
+const SocialButton = styled(IconButton)(({ theme }) => ({
+  width: 44,
+  height: 44,
+  borderRadius: '50%',
+  border: `1px solid ${alpha(theme.palette.primary.main, 0.75)}`,
+  color: theme.palette.primary.main,
+  transition: theme.transitions.create(['transform', 'background-color', 'border-color'], {
+    duration: theme.transitions.duration.shorter,
+  }),
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    backgroundColor: alpha(theme.palette.primary.main, 0.16),
+    borderColor: theme.palette.primary.main,
+  },
+}));
 
-          <Grid item xs={12} sm={6} md={4}>
-            <SectionTitle variant="h6">Redes Sociales</SectionTitle>
-            <SocialIcons>
-              <StyledIconButton
-                component="a"
-                href="https://www.facebook.com/profile.php?id=100083276110577"
-                target="_blank"
-                aria-label="Facebook"
-              >
-                <Facebook />
-              </StyledIconButton>
-              <StyledIconButton
-                component="a"
-                href="https://www.instagram.com/le_jardin_d.amelie"
-                target="_blank"
-                aria-label="Instagram"
-              >
-                <Instagram />
-              </StyledIconButton>
-            </SocialIcons>
-          </Grid>
-        </Grid>
+const Copyright = styled(Typography)(({ theme }) => ({
+  fontSize: '0.75rem',
+  color: alpha(theme.palette.text.secondary, 0.85),
+  letterSpacing: '0.04em',
+}));
 
-        <Rights>
-          © {currentYear} AmelieApp. Todos los derechos reservados. Desarrollado por TF&IMLabs
-        </Rights>
-      </FooterContent>
-    </FooterContainer>
-  );
-};
+const Footer = () => (
+  <FooterContainer>
+    <FooterContent disableGutters>
+      <Stack spacing={1.5} width="100%">
+        <SectionTitle component="h6">Contactanos</SectionTitle>
+        <InfoItem component="p">
+          <Phone fontSize="small" />
+          <Typography component="span" variant="body2" sx={{ fontSize: '0.85rem' }}>
+            236 444 4444
+          </Typography>
+        </InfoItem>
+        <InfoItem component="p">
+          <LocationOn fontSize="small" />
+          <Typography component="span" variant="body2" sx={{ fontSize: '0.85rem' }}>
+            Hardbar, Junín, Buenos Aires
+          </Typography>
+        </InfoItem>
+      </Stack>
+
+      <DividerLine />
+
+      <Stack spacing={1.5} alignItems="center" width="100%">
+        <SectionTitle component="h6">Redes sociales</SectionTitle>
+        <SocialButton
+          component="a"
+          href="https://www.instagram.com/lagunaranchjunin"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Instagram"
+        >
+          <Instagram />
+        </SocialButton>
+      </Stack>
+
+      <DividerLine />
+
+      <Copyright component="small">
+        © 2025 Bar Laguna Ranch App. Desarrollado por TF&IMLabs.
+      </Copyright>
+    </FooterContent>
+  </FooterContainer>
+);
 
 export default Footer;

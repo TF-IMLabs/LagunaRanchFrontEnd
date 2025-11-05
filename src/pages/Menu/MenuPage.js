@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Container, Grid, Typography } from '@mui/material';
+import { Box, Container, Grid, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import backgroundImage from '../../assets/background8.jpg';
 import celiacoIcon from '../../assets/celiaco.png';
@@ -17,12 +17,15 @@ const MainContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  padding: theme.spacing(4),
+  padding: 'clamp(2.75rem, 6vw, 4rem) clamp(1rem, 4vw, 2.75rem)',
   minHeight: '100vh',
   boxSizing: 'border-box',
   overflow: 'hidden',
+  [theme.breakpoints.down('md')]: {
+    padding: 'clamp(2.25rem, 6vw, 3rem) clamp(0.9rem, 4vw, 2rem)',
+  },
   [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(2),
+    padding: 'clamp(1.8rem, 7vw, 2.5rem) clamp(0.75rem, 5vw, 1.5rem)',
   },
   '::before': {
     content: '""',
@@ -34,8 +37,9 @@ const MainContainer = styled(Box)(({ theme }) => ({
     backgroundImage: `url(${backgroundImage})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundAttachment: 'fixed',
+    backgroundAttachment: 'scroll',
     filter: 'blur(6px)',
+    transform: 'none',
     zIndex: 0,
   },
   '& > *': {
@@ -45,14 +49,20 @@ const MainContainer = styled(Box)(({ theme }) => ({
 }));
 
 const MenuContainer = styled(Container)(({ theme }) => ({
-  borderRadius: 12,
-  padding: theme.spacing(4),
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
-  maxWidth: 900,
+  borderRadius: 16,
+  padding: 'clamp(2.2rem, 4vw, 3.2rem)',
+  boxShadow: '0 12px 28px rgba(0, 0, 0, 0.35)',
+  width: '100%',
+  maxWidth: theme.breakpoints.values.lg,
   margin: '0 auto',
-  backgroundColor: alpha(theme.palette.background.paper, 0.92),
+  backgroundColor: alpha(theme.palette.background.paper, 0.88),
+  backdropFilter: 'blur(6px)',
+  [theme.breakpoints.down('md')]: {
+    padding: 'clamp(1.75rem, 5vw, 2.4rem)',
+  },
   [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(3),
+    padding: 'clamp(1.5rem, 6vw, 2rem)',
+    borderRadius: 12,
   },
 }));
 
@@ -60,55 +70,60 @@ const HighlightedText = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  padding: '8px 24px',
-  backgroundColor: alpha(theme.palette.background.default, 0.85),
+  padding: theme.spacing(1.2, 2.4),
+  backgroundColor: alpha(theme.palette.background.default, 0.7),
+  backdropFilter: 'blur(8px)',
   color: theme.palette.primary.contrastText,
-  borderRadius: 8,
-  marginBottom: theme.spacing(4),
+  borderRadius: 12,
+  marginBottom: theme.spacing(3),
+  boxShadow: 'inset 0 -8px 15px rgba(0, 0, 0, 0.25)',
   textAlign: 'center',
   width: '100%',
 }));
 
-const TitleTypography = styled(Typography)(({ theme }) => ({
-  fontSize: '1.8rem',
-  margin: 0,
-  [theme.breakpoints.down('sm')]: {
-    fontSize: '1.5rem',
-  },
-}));
-
 const InfoBox = styled(Box)(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.accent.main, 0.3),
-  borderRadius: 8,
-  padding: theme.spacing(2),
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-  marginTop: theme.spacing(4),
+  backgroundColor: alpha(theme.palette.accent.main, 0.28),
+  borderRadius: 12,
+  padding: theme.spacing(2.4, 2.1),
+  boxShadow: '0 6px 16px rgba(0, 0, 0, 0.25)',
+  marginTop: theme.spacing(3),
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
+  gap: theme.spacing(2),
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1.6, 1.8),
+    gap: theme.spacing(1.4),
+  },
 }));
 
-const IconContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
+const IconContainer = styled(Stack)(({ theme }) => ({
+  flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'center',
   textAlign: 'center',
-  marginBottom: theme.spacing(2),
+  gap: theme.spacing(1),
+  padding: theme.spacing(0.4, 0.75),
+  minHeight: 48,
   [theme.breakpoints.down('sm')]: {
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
 }));
 
 const Icon = styled('img')(({ theme }) => ({
-  width: 30,
-  height: 30,
-  marginRight: theme.spacing(1),
+  width: 'clamp(24px, 5vw, 32px)',
+  height: 'clamp(24px, 5vw, 32px)',
+  objectFit: 'contain',
+  [theme.breakpoints.down('sm')]: {
+    width: 'clamp(22px, 7vw, 28px)',
+    height: 'clamp(22px, 7vw, 28px)',
+  },
 }));
 
 const advantages = [
   { src: vegetarianoIcon, alt: 'Vegetariano', text: 'Apto vegetarianos' },
-  { src: celiacoIcon, alt: 'Celíaco', text: 'Apto celíacos' },
+  { src: celiacoIcon, alt: 'Celiaco', text: 'Apto cel\u00edacos' },
   { src: veganoIcon, alt: 'Vegano', text: 'Apto veganos' },
 ];
 
@@ -117,6 +132,8 @@ const MenuPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { combinedDialogOpen, closeCombinedDialog } = useCart();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleOpenDialog = (product) => {
     setSelectedProduct(product);
@@ -130,25 +147,41 @@ const MenuPage = () => {
 
   return (
     <MainContainer>
-      <MenuContainer>
-        <HighlightedText>
-          <TitleTypography variant="h4" gutterBottom>
-            {'NUESTRO MENÚ'}
-          </TitleTypography>
-        </HighlightedText>
-        <InfoBox>
-          <Grid container spacing={2} justifyContent="center">
-            {advantages.map((icon) => (
-              <Grid item xs={12} sm={4} key={icon.alt}>
-                <IconContainer>
-                  <Icon src={icon.src} alt={icon.alt} />
-                  <Typography color="text.primary">{icon.text}</Typography>
-                </IconContainer>
-              </Grid>
-            ))}
-          </Grid>
-        </InfoBox>
-        <CategoryAccordion onProductClick={handleOpenDialog} />
+      <MenuContainer disableGutters>
+        <Stack spacing={isSmallScreen ? 2.5 : 3.25}>
+          <HighlightedText>
+            <Typography variant="h3" component="h1" sx={{ fontWeight: 600 }}>
+              {'NUESTRO MEN\u00DA'}
+            </Typography>
+          </HighlightedText>
+
+          <InfoBox>
+            <Grid
+              container
+              spacing={{ xs: 1.5, sm: 2 }}
+              justifyContent="center"
+              alignItems="center"
+            >
+              {advantages.map((icon) => (
+                <Grid item xs={12} sm={6} md={4} key={icon.alt}>
+                  <IconContainer>
+                    <Icon src={icon.src} alt={icon.alt} loading="lazy" />
+                    <Typography
+                      color="text.primary"
+                      variant="body1"
+                      sx={{ fontWeight: 400, lineHeight: 1.4 }}
+                    >
+                      {icon.text}
+                    </Typography>
+                  </IconContainer>
+                </Grid>
+              ))}
+            </Grid>
+          </InfoBox>
+
+          <CategoryAccordion onProductClick={handleOpenDialog} />
+        </Stack>
+
         {selectedProduct && (
           <ProductDialog
             open={dialogOpen}

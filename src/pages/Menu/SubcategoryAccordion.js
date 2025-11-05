@@ -1,26 +1,53 @@
 import PropTypes from 'prop-types';
-import React, { useMemo, useRef, useState } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Skeleton, Typography } from '@mui/material';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Skeleton, Stack, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { styled } from '@mui/material/styles';
+import { alpha, styled } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { getSubcategoriesByCategoryId } from '../../services/menuService';
+import { queryKeys } from '../../lib/queryClient';
 import ProductList from './ProductList';
+
+const HEADER_FALLBACK_HEIGHT = 88;
+const COLLAPSE_DURATION = 320;
+
+const getHeaderHeight = () => {
+  const headerEl = document.querySelector('header.MuiAppBar-root');
+  return headerEl ? headerEl.getBoundingClientRect().height : HEADER_FALLBACK_HEIGHT;
+};
+
+const scrollToWithOffset = (element) => {
+  if (!element) return;
+  const offset = getHeaderHeight() + 12;
+  const targetPosition = element.getBoundingClientRect().top + window.scrollY;
+  window.scrollTo({
+    top: targetPosition - offset,
+    behavior: 'smooth',
+  });
+};
 
 const CustomAccordion = styled(Accordion)(({ theme }) => ({
   borderRadius: 12,
-  backgroundColor: 'transparent',
-  marginBottom: theme.spacing(2),
-  boxShadow: 'none',
+  backgroundColor: alpha(theme.palette.background.default, 0.6),
+  marginBottom: theme.spacing(1.2),
+  boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.04)',
+  transition: theme.transitions.create(['box-shadow', 'transform'], {
+    duration: theme.transitions.duration.shorter,
+  }),
+  overflow: 'hidden',
+  scrollMarginTop: '110px',
   '& .MuiSvgIcon-root': {
     color: theme.palette.primary.contrastText,
+  },
+  '&.Mui-expanded': {
+    boxShadow: '0 0 0 1px rgba(255, 140, 0, 0.28), 0 8px 22px rgba(0, 0, 0, 0.28)',
+    transform: 'translateY(-2px)',
   },
 }));
 
 const CustomAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
   textAlign: 'center',
-  fontSize: '1.7rem',
-  padding: theme.spacing(1.5, 2),
+  padding: theme.spacing(1, 1.6),
   backgroundColor: 'transparent',
   color: theme.palette.primary.contrastText,
   borderRadius: 11,
@@ -28,8 +55,14 @@ const CustomAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   textTransform: 'uppercase',
+  minHeight: 52,
+  '&.Mui-expanded': {
+    minHeight: 52,
+  },
   '& .MuiAccordionSummary-content': {
+    margin: 0,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   '& .MuiAccordionSummary-expandIconWrapper': {
     justifyContent: 'center',
@@ -37,10 +70,13 @@ const CustomAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
 }));
 
 const CustomAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
-  padding: theme.spacing(2),
+  padding: theme.spacing(1.5, 1.8),
   backgroundColor: 'transparent',
   color: theme.palette.text.primary,
   borderRadius: 12,
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1.25, 1.25, 1.6),
+  },
 }));
 
 const normalizeSubcategories = (data) => {
@@ -65,7 +101,7 @@ const SubcategoryAccordion = ({ categoryId, onProductClick, allProducts = [], pr
   const [expanded, setExpanded] = useState(false);
 
   const { data: subcategoriesData, isLoading, error } = useQuery({
-    queryKey: ['subcategories', categoryId],
+    queryKey: queryKeys.menu.subcategories(categoryId),
     queryFn: () => getSubcategoriesByCategoryId(categoryId),
   });
 
@@ -82,21 +118,31 @@ const SubcategoryAccordion = ({ categoryId, onProductClick, allProducts = [], pr
   );
 
   const accordionRefs = useRef({});
+  const scrollTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (panel) => (_event, isExpandedPanel) => {
     setExpanded(isExpandedPanel ? panel : false);
 
     if (isExpandedPanel) {
-      setTimeout(() => {
-        const element = accordionRefs.current[panel];
-        if (element) {
-          element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-            inline: 'nearest',
-          });
+      window.requestAnimationFrame(() => {
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
         }
-      }, 300);
+        scrollTimeoutRef.current = window.setTimeout(() => {
+          const element = accordionRefs.current[panel];
+          if (element) {
+            scrollToWithOffset(element);
+          }
+        }, COLLAPSE_DURATION);
+      });
     }
   };
 
@@ -109,7 +155,7 @@ const SubcategoryAccordion = ({ categoryId, onProductClick, allProducts = [], pr
   }
 
   return (
-    <div>
+    <Stack spacing={{ xs: 1.6, md: 2.4 }}>
       {subcategories.length > 0 ? (
         subcategories.map((subcategory) => {
           const panelId = `panel-${subcategory.id_subcategoria}`;
@@ -130,16 +176,13 @@ const SubcategoryAccordion = ({ categoryId, onProductClick, allProducts = [], pr
                 id={`${panelId}-header`}
               >
                 <Typography
-                  variant="h5"
+                  variant="h6"
                   sx={{
-                    fontSize: {
-                      xs: '1rem',
-                      sm: '1.2rem',
-                      md: '1.5rem',
-                      lg: '1.7rem',
-                    },
+                    fontWeight: 500,
+                    fontSize: 'clamp(0.95rem, 0.9rem + 0.4vw, 1.2rem)',
                     display: 'flex',
                     alignItems: 'center',
+                    letterSpacing: '0.04em',
                   }}
                   translate="no"
                 >
@@ -159,7 +202,7 @@ const SubcategoryAccordion = ({ categoryId, onProductClick, allProducts = [], pr
       ) : (
         <ProductList products={productsByCategory} onAddToCart={onProductClick} />
       )}
-    </div>
+    </Stack>
   );
 };
 

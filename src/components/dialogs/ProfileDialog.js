@@ -333,8 +333,14 @@ const ProfileDialog = ({ open, onClose }) => {
           )}
         </Grid>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="secondary" disabled={saving}>
+      <DialogActions sx={{ px: 3, pb: 3, gap: 2 }}>
+        <Button
+          onClick={onClose}
+          color="secondary"
+          variant="outlined"
+          disabled={saving}
+          sx={{ minWidth: 140 }}
+        >
           Cancelar
         </Button>
         {!isGuest && (
@@ -344,6 +350,7 @@ const ProfileDialog = ({ open, onClose }) => {
             variant="contained"
             color="primary"
             disabled={!canSave()}
+            sx={{ minWidth: 160 }}
           >
             Guardar cambios
           </Button>

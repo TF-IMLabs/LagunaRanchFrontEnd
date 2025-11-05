@@ -18,7 +18,10 @@ import {
   MenuItem,
   Skeleton,
   Tooltip,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
+import PropTypes from 'prop-types';
 import { Visibility, Delete } from '@mui/icons-material';
 import {
   getAllOrders,
@@ -57,7 +60,7 @@ const getOrderType = (cartInfo) => {
   return info?.tipo_pedido;
 };
 
-const OrdersDialog = ({ open, onClose, tipoPedido = 0 }) => {
+const OrdersDialog = ({ open, onClose, tipoPedido = '0' }) => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -73,6 +76,8 @@ const OrdersDialog = ({ open, onClose, tipoPedido = 0 }) => {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (!open) return;
@@ -207,12 +212,29 @@ const OrdersDialog = ({ open, onClose, tipoPedido = 0 }) => {
   const emptyState = useMemo(() => filteredOrders.length === 0, [filteredOrders]);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg" aria-labelledby="orders-dialog-title">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      fullScreen={isMobile}
+      maxWidth="lg"
+      aria-labelledby="orders-dialog-title"
+    >
       <DialogTitle id="orders-dialog-title">Pedidos</DialogTitle>
       <DialogContent dividers>
         <Box>
-          <TableContainer component={Paper} sx={{ maxHeight: 500 }}>
-            <Table stickyHeader aria-label="Listado de pedidos">
+          <TableContainer
+            component={Paper}
+            sx={{
+              maxHeight: 500,
+              overflowX: 'auto',
+            }}
+          >
+            <Table
+              stickyHeader
+              aria-label="Listado de pedidos"
+              sx={{ minWidth: { xs: 600, md: 'auto' } }}
+            >
               <TableHead>
                 <TableRow>
                   <TableCell>ID Pedido</TableCell>
@@ -317,3 +339,9 @@ const OrdersDialog = ({ open, onClose, tipoPedido = 0 }) => {
 };
 
 export default OrdersDialog;
+
+OrdersDialog.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  tipoPedido: PropTypes.string.isRequired,
+};

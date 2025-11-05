@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { createCategory, deleteCategory, getAllCategories } from '../../../services/menuService';
+import { queryKeys } from '../../../lib/queryClient';
 
 const CreateAndRemoveCategoriesDialog = ({ open, onClose }) => {
   const queryClient = useQueryClient();
@@ -17,7 +18,7 @@ const CreateAndRemoveCategoriesDialog = ({ open, onClose }) => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
 
   const { data: categories = [], isLoading: loadingCategories } = useQuery({
-    queryKey: ['categories'],
+    queryKey: queryKeys.menu.categories(),
     queryFn: getAllCategories,
   });
 
@@ -42,7 +43,9 @@ const CreateAndRemoveCategoriesDialog = ({ open, onClose }) => {
         if (category) await deleteCategory(category.id_categoria);
         setSnackbarMessage(`Categoría "${confirmationCategory}" eliminada.`);
       }
-      queryClient.invalidateQueries(['categories']);
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.menu.categories(),
+      });
       setNewCategoryName('');
       setCategoryToDelete('');
       onClose();
