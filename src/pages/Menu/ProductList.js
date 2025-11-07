@@ -11,11 +11,22 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { alpha, styled } from '@mui/material/styles';
+import { alpha, keyframes, styled } from '@mui/material/styles';
 import celiacoIcon from '../../assets/celiaco.png';
 import veganoIcon from '../../assets/vegano.png';
 import vegetarianoIcon from '../../assets/vegetariano.png';
 import ProductDialog from './ProductDialog';
+
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+`;
 
 const formatPrice = (value) => {
   const numericValue = Number.parseInt(`${value}`, 10);
@@ -30,14 +41,15 @@ const ProductCard = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   position: 'relative',
   height: '100%',
+  minHeight: 220,
+  transformOrigin: 'center',
   backgroundColor: alpha(theme.palette.background.default, 0.92),
   borderRadius: 14,
   border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
-  transition: theme.transitions.create(['transform', 'box-shadow'], {
-    duration: theme.transitions.duration.shorter,
-  }),
+  transition: 'transform 190ms ease-out, box-shadow 220ms ease',
   boxShadow: '0 6px 18px rgba(0, 0, 0, 0.24)',
   overflow: 'hidden',
+  willChange: 'transform, box-shadow',
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -45,10 +57,15 @@ const ProductCard = styled(Card)(({ theme }) => ({
     borderRadius: 'inherit',
     boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.04)',
     pointerEvents: 'none',
+    opacity: 0.55,
+    transition: 'opacity 200ms ease',
   },
-  '&:hover': {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 12px 26px rgba(0, 0, 0, 0.32)',
+  '&:hover, &:focus-within': {
+    transform: 'scale(1.02)',
+    boxShadow: '0 18px 36px rgba(190, 120, 55, 0.35)',
+  },
+  '&:hover::after, &:focus-within::after': {
+    opacity: 0.85,
   },
 }));
 
@@ -61,6 +78,7 @@ const ProductActionArea = styled(CardActionArea)(() => ({
   width: '100%',
   height: '100%',
   padding: 0,
+  justifyContent: 'space-between',
   '&::after': {
     pointerEvents: 'none',
   },
@@ -70,7 +88,6 @@ const ProductActionArea = styled(CardActionArea)(() => ({
 }));
 
 const BadgeText = styled(Typography)(({ theme }) => ({
-  alignSelf: 'flex-start',
   whiteSpace: 'nowrap',
   color: theme.palette.primary.contrastText,
   fontSize: '0.75rem',
@@ -86,6 +103,7 @@ const BadgeText = styled(Typography)(({ theme }) => ({
   display: 'inline-flex',
   alignItems: 'center',
   gap: theme.spacing(0.5),
+  flexShrink: 0,
 }));
 
 const PriceTag = styled(Typography)(({ theme }) => ({
@@ -93,6 +111,8 @@ const PriceTag = styled(Typography)(({ theme }) => ({
   fontSize: 'clamp(1rem, 0.95rem + 0.25vw, 1.25rem)',
   color: theme.palette.primary.main,
   whiteSpace: 'nowrap',
+  marginLeft: 'auto',
+  textAlign: 'right',
 }));
 
 const IconGroup = styled(Stack)(({ theme }) => ({
@@ -164,7 +184,6 @@ const ProductList = React.memo(
               src={vegetarianoIcon}
               alt="Vegetariano"
               loading="lazy"
-              style={{ filter: 'brightness(0) saturate(100%)' }}
             />
           </Tooltip>,
         );
@@ -190,11 +209,22 @@ const ProductList = React.memo(
       return <LoadingSkeleton />;
     }
 
-    return (
-      <>
-        <Grid container spacing={{ xs: 1.2, sm: 2 }} columns={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
-          {productList.length > 0 ? (
-            productList.map((product, index) => (
+    const renderedProducts =
+      productList.length > 0
+        ? productList.map((product, index) => {
+            const trimmedDescription = (product.descripcion ?? '').trim();
+            const hasDescription = Boolean(trimmedDescription);
+            const hasBadge = product.plato_del_dia === 1;
+            const iconElements = renderIcons(product);
+            const hasIcons = Boolean(iconElements);
+            const titleLength = (product.nombre ?? '').length;
+            const isCompact = !hasDescription && !hasBadge && !hasIcons && titleLength <= 20;
+            const cardPadding = isCompact ? { xs: 1.4, sm: 1.8 } : { xs: 2, sm: 2.25 };
+            const detailSpacing = hasDescription ? 1.1 : 0.5;
+            const footerSpacing = hasDescription ? { pt: 0.5 } : { pt: 0.4 };
+            const animationDelay = Math.min(index, 6) * 50;
+
+            return (
               <Grid
                 item
                 xs={12}
@@ -202,70 +232,122 @@ const ProductList = React.memo(
                 md={4}
                 lg={3}
                 key={product.id_producto}
+                sx={{
+                  opacity: 0,
+                  animation: `${fadeInUp} 260ms ease-out forwards`,
+                  animationDelay: `${animationDelay}ms`,
+                  '@media (prefers-reduced-motion: reduce)': {
+                    animation: 'none',
+                    opacity: 1,
+                  },
+                }}
               >
-                <ProductCard sx={{ mb: { xs: 1, sm: 0 } }}>
-                  <ProductActionArea onClick={() => handleClick(product)}>
+                <ProductCard sx={{ mb: { xs: 1, sm: 0 }, minHeight: isCompact ? 185 : 220 }}>
+                  <ProductActionArea
+                    onClick={() => handleClick(product)}
+                    sx={{ justifyContent: isCompact ? 'flex-start' : 'space-between' }}
+                  >
                     <CardContent
                       sx={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: 1.3,
-                        p: { xs: 2, sm: 2.25 },
+                        p: cardPadding,
                         flexGrow: 1,
                         width: '100%',
                       }}
                     >
                       <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        gap={1.2}
-                        flexWrap="wrap"
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          flexGrow: 1,
+                          gap: detailSpacing,
+                          minHeight: 0,
+                        }}
                       >
-                        <Typography
-                          variant="h6"
-                          component="h3"
-                          translate="no"
+                        <Box
                           sx={{
-                            fontWeight: 500,
-                            flex: '1 1 auto',
-                            lineHeight: 1.3,
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            justifyContent: 'space-between',
+                            gap: 0.75,
                           }}
                         >
-                          {product.nombre}
-                        </Typography>
-                        {renderIcons(product)}
-                        <PriceTag component="span">{formatPrice(product.precio)}</PriceTag>
+                          <Typography
+                            variant="h6"
+                            component="h3"
+                            translate="no"
+                            sx={{
+                              fontWeight: 500,
+                              fontSize: 'clamp(0.98rem, 0.93rem + 0.2vw, 1.15rem)',
+                              lineHeight: 1.25,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                            }}
+                          >
+                            {product.nombre}
+                          </Typography>
+                          {hasIcons && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
+                              {iconElements}
+                            </Box>
+                          )}
+                        </Box>
+
+                        {hasDescription && (
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: (theme) => alpha(theme.palette.text.primary, 0.72),
+                              lineHeight: 1.35,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 3,
+                              WebkitBoxOrient: 'vertical',
+                            }}
+                          >
+                            {trimmedDescription}
+                          </Typography>
+                        )}
                       </Box>
 
-                      {product.plato_del_dia === 1 && (
-                        <BadgeText component="span">PLATO DEL DÍA</BadgeText>
-                      )}
-
-                      {product.descripcion && (
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: (theme) => alpha(theme.palette.text.primary, 0.76),
-                            minHeight: 48,
-                            lineHeight: 1.35,
-                          }}
-                        >
-                          {product.descripcion}
-                        </Typography>
-                      )}
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'flex-end',
+                          width: '100%',
+                          columnGap: 1.5,
+                          mt: 'auto',
+                          ...footerSpacing,
+                        }}
+                      >
+                        {product.plato_del_dia === 1 && (
+                          <BadgeText component="span">PLATO DEL DÍA</BadgeText>
+                        )}
+                        <PriceTag component="span">{formatPrice(product.precio)}</PriceTag>
+                      </Box>
                     </CardContent>
                   </ProductActionArea>
                 </ProductCard>
               </Grid>
-            ))
-          ) : (
-            <Grid item xs={12}>
-              <Typography align="center" variant="body1" color="text.secondary">
-                No hay productos disponibles para esta categoría.
-              </Typography>
-            </Grid>
-          )}
+            );
+          })
+        : (
+          <Grid item xs={12}>
+            <Typography align="center" variant="body1" color="text.secondary">
+              No hay productos disponibles para esta categoría.
+            </Typography>
+          </Grid>
+        );
+
+    return (
+      <>
+        <Grid container spacing={{ xs: 1.2, sm: 2 }} columns={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
+          {renderedProducts}
         </Grid>
 
         {selectedProduct && (

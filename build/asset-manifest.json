@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.c0c1ae41.css",
-    "main.js": "/static/js/main.5d226be2.js",
+    "main.js": "/static/js/main.555195c9.js",
     "static/media/background8.jpg": "/static/media/background8.dbc96d0e031c566685b3.jpg",
     "static/media/logoranch.png": "/static/media/logoranch.3eed6185b3e146fed856.png",
     "static/media/RestoApp12.jpg": "/static/media/RestoApp12.eacdba46f29268d15d04.jpg",
@@ -21,19 +21,19 @@
     "static/media/RestoApp6.jpg": "/static/media/RestoApp6.f22da7481db46fe44cc5.jpg",
     "static/media/RestoApp3.jpg": "/static/media/RestoApp3.94732550cb98e73f994f.jpg",
     "static/media/RestoApp2.jpg": "/static/media/RestoApp2.1eb8348690320cb48a8b.jpg",
-    "static/media/vegano.png": "/static/media/vegano.9507a1d3efa3bbd90e72.png",
-    "static/media/celiaco.png": "/static/media/celiaco.04cb2a3da052bab93cb1.png",
-    "static/media/vegetariano.png": "/static/media/vegetariano.9215f9af45b9c5262bf5.png",
+    "static/media/vegano.png": "/static/media/vegano.72f869858e7f9a6c0c5a.png",
+    "static/media/celiaco.png": "/static/media/celiaco.52bcb964baa405ecb773.png",
+    "static/media/vegetariano.png": "/static/media/vegetariano.71c6cb103ec36970c3c1.png",
     "static/media/slick.svg": "/static/media/slick.2630a3e3eab21c607e21.svg",
     "static/media/slick.eot": "/static/media/slick.a4e97f5a2a64f0ab1323.eot",
     "static/media/slick.ttf": "/static/media/slick.c94f7671dcc99dce43e2.ttf",
     "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
     "index.html": "/index.html",
     "main.c0c1ae41.css.map": "/static/css/main.c0c1ae41.css.map",
-    "main.5d226be2.js.map": "/static/js/main.5d226be2.js.map"
+    "main.555195c9.js.map": "/static/js/main.555195c9.js.map"
   },
   "entrypoints": [
     "static/css/main.c0c1ae41.css",
-    "static/js/main.5d226be2.js"
+    "static/js/main.555195c9.js"
   ]
 }

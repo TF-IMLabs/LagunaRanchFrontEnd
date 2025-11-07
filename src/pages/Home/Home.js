@@ -5,7 +5,7 @@ import { alpha } from '@mui/material/styles';
 import Slider from 'react-slick';
 import images from '../../utils/imageLoader'; 
 import logo from '../../assets/logoranch.png'; 
-import background from '../../assets/backgroundandi2.jpg'; 
+import background from '../../assets/backgroundandi2.png'; 
 
 
 const settings = {
@@ -68,12 +68,11 @@ const MainContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const ContentWrapper = styled(Box)(({ theme }) => ({
+const ContentWrapper = styled(Box)(() => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  marginBottom: theme.spacing(5),
 }));
 
 const LogoContainer = styled(Box)(({ theme }) => ({
@@ -133,13 +132,36 @@ const CarouselImage = styled('img')(({ theme }) => ({
 
 const Home = () => (
   <MainContainer>
-    <Container>
-      <ContentWrapper>
+    <Container
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <ContentWrapper
+        sx={{
+          mt: { xs: 1, md: -1 },
+          mb: { xs: 1, md: 4 },
+          '@media (min-width:1024px)': {
+            mt: -2,
+            mb: 5,
+          },
+        }}
+      >
         <LogoContainer>
           <LogoImage src={logo} alt="Andi Restaurante Logo" />
         </LogoContainer>
       </ContentWrapper>
-      <CarouselContainer>
+      <CarouselContainer
+        sx={{
+          mt: { xs: 4, md: 6 },
+          '@media (min-width:1024px)': {
+            mt: 9,
+          },
+        }}
+      >
         <Slider {...settings}>
           {Object.values(images).map((src, index) => (
             <div key={index}>

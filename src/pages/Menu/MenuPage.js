@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Container, Grid, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
-import backgroundImage from '../../assets/background8.jpg';
+import backgroundImage from '../../assets/backgroundandi2.png';
 import celiacoIcon from '../../assets/celiaco.png';
 import veganoIcon from '../../assets/vegano.png';
 import vegetarianoIcon from '../../assets/vegetariano.png';
@@ -37,10 +37,11 @@ const MainContainer = styled(Box)(({ theme }) => ({
     backgroundImage: `url(${backgroundImage})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-    backgroundAttachment: 'scroll',
+    backgroundAttachment: 'fixed',
     filter: 'blur(6px)',
     transform: 'none',
     zIndex: 0,
+    pointerEvents: 'none',
   },
   '& > *': {
     position: 'relative',
@@ -123,7 +124,7 @@ const Icon = styled('img')(({ theme }) => ({
 
 const advantages = [
   { src: vegetarianoIcon, alt: 'Vegetariano', text: 'Apto vegetarianos' },
-  { src: celiacoIcon, alt: 'Celiaco', text: 'Apto cel\u00edacos' },
+  { src: celiacoIcon, alt: 'Celiaco', text: 'Apto celíacos' },
   { src: veganoIcon, alt: 'Vegano', text: 'Apto veganos' },
 ];
 
@@ -151,7 +152,7 @@ const MenuPage = () => {
         <Stack spacing={isSmallScreen ? 2.5 : 3.25}>
           <HighlightedText>
             <Typography variant="h3" component="h1" sx={{ fontWeight: 600 }}>
-              {'NUESTRO MEN\u00DA'}
+              NUESTRO MENÚ
             </Typography>
           </HighlightedText>
 
