@@ -28,41 +28,51 @@ const TakeAwaySection = () => {
 
   return (
     <Paper
-      elevation={3}
+      elevation={2}
       sx={{
-        p: 4,
-        mb: 4,
+        p: { xs: 2, md: 2.5 },
+        mb: 2.5,
         borderRadius: 2,
-        maxWidth: 600,
-        mx: "auto",
+        width: "100%",
         backgroundColor: theme.palette.background.paper,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
       }}
     >
-      <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-        <TakeoutDiningIcon color="primary" fontSize="large" />
-        <Typography variant="h4" component="h2" sx={{ fontWeight: "bold" }}>
-          Pedidos para llevar (Take Away)
-        </Typography>
-      </Stack>
-
-      <Typography variant="body1" color="text.secondary" mb={4}>
-        Aquí puedes ver y gestionar todos los pedidos para llevar
-      </Typography>
-
-      <Box textAlign="center">
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        justifyContent="space-between"
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <TakeoutDiningIcon color="primary" fontSize="large" />
+          <Box>
+            <Typography variant="h5" component="h2" sx={{ fontWeight: 700 }}>
+              Pedidos Take Away
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Visualiza y entrega los retiros programados rápidamente.
+            </Typography>
+          </Box>
+        </Box>
         <Button
           variant="contained"
           color="primary"
-          size="large"
-          fullWidth
+          size="medium"
           onClick={handleOpen}
           aria-label="Abrir lista de pedidos para llevar"
           disabled={loading}
-          sx={{ px: 4 }}
+          sx={{ minWidth: { xs: "100%", sm: 220 } }}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : "Listar pedidos take away"}
+          {loading ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : (
+            "Listar pedidos take away"
+          )}
         </Button>
-      </Box>
+      </Stack>
 
       <OrdersDialog open={open} onClose={handleClose} tipoPedido={2} />
     </Paper>

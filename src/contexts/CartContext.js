@@ -14,6 +14,8 @@ import useExistingOrder from '../hooks/useExistingOrder';
 import useOrderSubmit from '../hooks/useOrderSubmit';
 import useTableService from '../hooks/useTableService';
 import { ERROR_CODES } from '../services/apiErrorCodes';
+import { getUserById } from '../services/userService';
+import useVenueStatus from '../hooks/useVenueStatus';
 
 const CartContext = createContext(null);
 
@@ -37,7 +39,14 @@ const resolveFeedbackMessage = (error) => {
 };
 
 export const CartProvider = ({ children }) => {
-  const { tableId, clientId, orderType, token } = useAuth();
+  const {
+    tableId,
+    clientId,
+    orderType,
+    token,
+    setOrderType,
+    canUseTableOrders,
+  } = useAuth();
   const {
     cart: persistedCart,
     updateCart,
@@ -48,10 +57,97 @@ export const CartProvider = ({ children }) => {
     useExistingOrder();
   const { callWaiter, requestBill, updateNote, canUseTableService } =
     useTableService();
+  const { isOpen: venueOpenStatus } = useVenueStatus();
 
   const [combinedDialogOpen, setCombinedDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [addresses, setAddresses] = useState([]);
+  const [addressesLoading, setAddressesLoading] = useState(false);
+
+  const ORDER_PREFS_KEY = 'resto_order_prefs';
+
+  const readOrderPrefs = () => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const stored = window.localStorage.getItem(ORDER_PREFS_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch (error) {
+      console.error('Error reading order preferences:', error);
+      return {};
+    }
+  };
+
+  const initialPrefs = readOrderPrefs();
+  const [deliveryAddressId, setDeliveryAddressId] = useState(
+    initialPrefs.deliveryAddressId ?? null,
+  );
+  const [pickupTime, setPickupTime] = useState(initialPrefs.pickupTime ?? '');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(
+        ORDER_PREFS_KEY,
+        JSON.stringify({
+          deliveryAddressId,
+          pickupTime,
+        }),
+      );
+    } catch (error) {
+      console.error('Error saving order preferences:', error);
+    }
+  }, [deliveryAddressId, pickupTime]);
+
+  const fetchAddresses = useCallback(async (preferredAddressId = null) => {
+    if (!token) {
+      setAddresses([]);
+      setDeliveryAddressId(null);
+      setAddressesLoading(false);
+      return;
+    }
+
+    setAddressesLoading(true);
+    try {
+      const profile = await getUserById();
+      const list = Array.isArray(profile?.direcciones)
+        ? profile.direcciones
+        : [];
+      setAddresses(list);
+      const desiredId = preferredAddressId ?? deliveryAddressId;
+      if (!desiredId && list.length > 0) {
+        setDeliveryAddressId(list[0].id_direccion ?? list[0].id);
+      } else if (
+        desiredId &&
+        !list.some(
+          (addr) =>
+            String(addr.id_direccion ?? addr.id) ===
+            String(desiredId),
+        )
+      ) {
+        setDeliveryAddressId(list[0]?.id_direccion ?? list[0]?.id ?? null);
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+      setAddresses([]);
+    } finally {
+      setAddressesLoading(false);
+    }
+  }, [deliveryAddressId, token]);
+
+  useEffect(() => {
+    fetchAddresses();
+  }, [fetchAddresses]);
+
+  const selectedAddress = useMemo(() => {
+    if (!deliveryAddressId) return null;
+    return (
+      addresses.find(
+        (addr) =>
+          String(addr.id_direccion ?? addr.id) === String(deliveryAddressId),
+      ) ?? null
+    );
+  }, [addresses, deliveryAddressId]);
 
   const { submitOrder, isSubmitting } = useOrderSubmit({
     tableId,
@@ -59,6 +155,9 @@ export const CartProvider = ({ children }) => {
     cart: persistedCart,
     orderType,
     existingItems,
+    deliveryAddress: selectedAddress,
+    takeawaySlot: pickupTime,
+    venueOpen: venueOpenStatus,
     onSuccess: () => {
       clearPersistedCart();
       setSuccessDialogOpen(true);
@@ -81,6 +180,43 @@ export const CartProvider = ({ children }) => {
       loadExistingOrder(null);
     }
   }, [tableId, token, loadExistingOrder]);
+
+  useEffect(() => {
+    let active = true;
+    if (!token) {
+      setAddresses([]);
+      return () => {
+        active = false;
+      };
+    }
+    setAddressesLoading(true);
+    getUserById()
+      .then((profile) => {
+        if (!active) return;
+        const list = Array.isArray(profile?.direcciones)
+          ? profile.direcciones
+          : [];
+        setAddresses(list);
+        if (!deliveryAddressId && list.length > 0) {
+          setDeliveryAddressId(list[0].id_direccion ?? list[0].id);
+        }
+      })
+      .catch((error) => {
+        console.error('Error loading user addresses:', error);
+        if (active) {
+          setAddresses([]);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setAddressesLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [deliveryAddressId, token]);
 
   const addToCart = useCallback(
     (product, quantity) => {
@@ -194,6 +330,17 @@ export const CartProvider = ({ children }) => {
       requestBill,
       updateNote,
       canUseTableService,
+      addresses,
+      addressesLoading,
+      deliveryAddressId,
+      setDeliveryAddressId,
+      pickupTime,
+      setPickupTime,
+      selectedAddress,
+      setOrderType,
+      venueIsOpen: venueOpenStatus,
+      canUseTableOrders,
+      refreshAddresses: fetchAddresses,
     }),
     [
       addToCart,
@@ -212,6 +359,15 @@ export const CartProvider = ({ children }) => {
       sendOrder,
       updateItemQuantity,
       updateNote,
+      addresses,
+      addressesLoading,
+      deliveryAddressId,
+      pickupTime,
+      selectedAddress,
+      setOrderType,
+      venueOpenStatus,
+      canUseTableOrders,
+      fetchAddresses,
     ],
   );
 

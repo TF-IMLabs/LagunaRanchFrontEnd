@@ -185,7 +185,7 @@ const Footer = () => (
       <MobileIconsRow>
         <SocialButton
           component="a"
-          href="https://wa.me/542364444444"
+          href="https://wa.me/542364647469"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="WhatsApp"

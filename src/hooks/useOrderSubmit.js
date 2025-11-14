@@ -5,7 +5,6 @@ import {
   getOrderByTable,
   updateOrderStatus,
 } from '../services/cartService';
-import { getUserById } from '../services/userService';
 import { ERROR_CODES, resolveErrorCode } from '../services/apiErrorCodes';
 
 const ORDER_TYPE_MAP = {
@@ -14,7 +13,7 @@ const ORDER_TYPE_MAP = {
   takeaway: 2,
 };
 
-const VIRTUAL_TABLE = {
+export const VIRTUAL_TABLE = {
   delivery: 1000,
   takeaway: 2000,
 };
@@ -48,7 +47,9 @@ export const useOrderSubmit = ({
   clientId,
   cart,
   orderType,
-  existingItems = [],
+  deliveryAddress,
+  takeawaySlot,
+  venueOpen,
   onSuccess,
   onError,
 }) => {
@@ -82,29 +83,36 @@ export const useOrderSubmit = ({
         throw error;
       }
 
+      if (!venueOpen) {
+        const error = new Error('El restaurante esta cerrado ahora mismo');
+        error.code = ERROR_CODES.TABLE_CLOSED;
+        throw error;
+      }
+
       if (currentOrderType === 'dine-in' && !tableId) {
         const error = new Error('No se detecto una mesa valida');
         error.code = ERROR_CODES.TABLE_CLOSED;
         throw error;
       }
 
-      if (currentOrderType === 'delivery') {
-        const userData = await getUserById();
-        const direccion = userData?.direccion ?? userData?.Direccion;
+      if (currentOrderType === 'delivery' && !deliveryAddress) {
+        const error = new Error('Selecciona una direccion para delivery');
+        error.code = ERROR_CODES.MISSING_ADDRESS;
+        throw error;
+      }
 
-        if (!direccion || direccion.trim().length === 0) {
-          const error = new Error('Necesitamos una direccion para delivery');
-          error.code = ERROR_CODES.MISSING_ADDRESS;
-          throw error;
-        }
+      if (currentOrderType === 'takeaway' && !takeawaySlot) {
+        const error = new Error('Selecciona un horario de retiro para take away');
+        error.code = ERROR_CODES.VALIDATION_ERROR;
+        throw error;
       }
     },
-    [cart.length, orderType, tableId],
+    [cart.length, deliveryAddress, orderType, tableId, takeawaySlot, venueOpen],
   );
 
   const submitOrder = useCallback(async () => {
     const effectiveOrderType =
-      orderType === 'dine-in' || Boolean(tableId) ? 'dine-in' : orderType;
+      orderType === 'dine-in' ? 'dine-in' : orderType || 'takeaway';
 
     await validateRequirements(effectiveOrderType);
 
@@ -123,7 +131,7 @@ export const useOrderSubmit = ({
         const mesaId =
           effectiveOrderType === 'dine-in'
             ? tableId
-            : VIRTUAL_TABLE[effectiveOrderType] ?? tableId;
+            : VIRTUAL_TABLE[effectiveOrderType] ?? VIRTUAL_TABLE.takeaway;
 
         const orderPayload = {
           id_cliente: Number(clientId ?? 1),
@@ -147,10 +155,6 @@ export const useOrderSubmit = ({
         isNewOrder = true;
       }
 
-      const existingByProductId = new Map(
-        existingItems.map((item) => [item.product.id_producto, item]),
-      );
-
       for (const item of cart) {
         const productId = Number(item.product.id_producto);
         const cantidad = Number(item.cantidad);
@@ -173,18 +177,8 @@ export const useOrderSubmit = ({
           basePayload.precio = unitPrice;
         }
 
-        const previousQuantity = Number(
-          existingByProductId.get(productId)?.cantidad ?? 0,
-        );
-        const deltaQuantity =
-          previousQuantity > 0 ? cantidad - previousQuantity : cantidad;
-
-        if (deltaQuantity <= 0) {
-          continue;
-        }
-
-        basePayload.cantidad = deltaQuantity;
-        basePayload.nuevo = previousQuantity > 0 ? 0 : 1;
+        basePayload.cantidad = cantidad;
+        basePayload.nuevo = 1;
 
         await addProductToOrder(basePayload);
       }
@@ -211,7 +205,6 @@ export const useOrderSubmit = ({
   }, [
     cart,
     clientId,
-    existingItems,
     fetchExistingOrderId,
     onError,
     onSuccess,

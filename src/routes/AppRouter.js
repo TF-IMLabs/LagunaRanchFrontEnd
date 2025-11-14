@@ -10,16 +10,16 @@ import TableLoginDialog from '../components/dialogs/TableLoginDialog';
 import { useAuth } from '../contexts/AuthContext';
 
 const AppRouter = () => {
-  const { tableId, user } = useAuth();
+  const { user, requestedTableId } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (tableId && !user) {
+    if (requestedTableId && !user) {
       setDialogOpen(true);
     } else {
       setDialogOpen(false);
     }
-  }, [tableId, user]);
+  }, [requestedTableId, user]);
 
   return (
     <Box

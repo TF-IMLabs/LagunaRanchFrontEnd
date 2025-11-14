@@ -9,6 +9,7 @@ import theme from './theme/theme';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { CartProvider } from './contexts/CartContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { TableAccessProvider } from './contexts/TableAccessContext';
 import { BrowserRouter as Router } from 'react-router-dom';
 import queryClient from './lib/queryClient';
 
@@ -18,13 +19,15 @@ root.render(
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <CartProvider>
-            <Router>
-              <App />
-            </Router>
-          </CartProvider>
-        </AuthProvider>
+        <TableAccessProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Router>
+                <App />
+              </Router>
+            </CartProvider>
+          </AuthProvider>
+        </TableAccessProvider>
       </QueryClientProvider>
     </ThemeProvider>
   </React.StrictMode>

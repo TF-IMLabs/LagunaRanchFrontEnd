@@ -1,13 +1,10 @@
-import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, memo, useMemo, useRef } from 'react';
 import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Typography,
   Button,
   Card,
+  CardActionArea,
   CardContent,
-  CardActions,
   IconButton,
   List,
   ListItem,
@@ -16,12 +13,23 @@ import {
   Snackbar,
   Alert,
   Tooltip,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
   Print as PrintIcon,
-  ExpandMore as ExpandMoreIcon,
   PersonAdd as PersonAddIcon,
-  NotificationsOff as NotificationsOffIcon
+  NotificationsOff as NotificationsOffIcon,
+  Person as PersonIcon,
+  ReceiptLong as ReceiptLongIcon,
+  LocalDining as LocalDiningIcon,
+  Close as CloseIcon,
+  FiberManualRecord as FiberManualRecordIcon,
 } from '@mui/icons-material';
 import {
   updateNotifications
@@ -52,12 +60,68 @@ const TableCardDetail = ({
   handleOpenDialog,
 }) => {
   const [inProgressDisabled, setInProgressDisabled] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const validOrder = useMemo(() => (Array.isArray(order) ? order : []), [order]);
   const currentProducts = useMemo(() => validOrder.filter(({ nuevo }) => nuevo === 1), [validOrder]);
   const oldProducts = useMemo(() => validOrder.filter(({ nuevo }) => nuevo === 0), [validOrder]);
+  const tableState = (table.estado || '').toLowerCase();
+  const isAttentionState = table.callw === 1 || table.bill === 1 || currentProducts.length > 0;
+  const isFreeState = tableState === 'libre';
+  const displayState = isAttentionState ? 'Atención' : (isFreeState ? 'Libre' : 'Ocupada');
+  const statePaletteKey = isAttentionState ? 'warning' : isFreeState ? 'success' : 'error';
+  const stateColorMap = {
+    success: '#43A047',
+    error: '#E53935',
+    warning: '#FBC02D',
+  };
+  const stateColorHex = stateColorMap[statePaletteKey] || '#90CAF9';
+  const [isStatePulsing, setIsStatePulsing] = useState(false);
+  const previousDisplayStateRef = useRef(displayState);
+  const waiterName = table.nombre_mozo || 'Sin asignar';
+  const statusIndicators = useMemo(() => [
+    {
+      key: 'waiter',
+      active: table.callw === 1,
+      label: 'Llamado al mozo',
+      color: 'warning.main',
+      Icon: PersonIcon,
+    },
+    {
+      key: 'bill',
+      active: table.bill === 1,
+      label: 'Solicitó la cuenta',
+      color: 'info.main',
+      Icon: ReceiptLongIcon,
+    },
+    {
+      key: 'new',
+      active: currentProducts.length > 0,
+      label: 'Nuevos productos en la orden',
+      color: 'success.light',
+      Icon: LocalDiningIcon,
+    },
+  ], [table.callw, table.bill, currentProducts.length]);
+  const activeIndicators = statusIndicators.filter(({ active }) => active);
+  const hasTableAlerts = activeIndicators.length > 0;
+  const tableNote =
+    table?.nota ??
+    table?.notas ??
+    table?.note ??
+    orderInfo?.nota ??
+    orderInfo?.notas ??
+    '';
+
+  useEffect(() => {
+    if (previousDisplayStateRef.current !== displayState) {
+      setIsStatePulsing(true);
+      const timeout = setTimeout(() => setIsStatePulsing(false), 1600);
+      previousDisplayStateRef.current = displayState;
+      return () => clearTimeout(timeout);
+    }
+    return () => {};
+  }, [displayState]);
 
   const handleOrderInProgressClick = useCallback(async () => {
     try {
@@ -134,9 +198,30 @@ const TableCardDetail = ({
     }
   }, [table.callw, table.bill, currentProducts.length]);
 
-  const handleCollapse = useCallback(() => {
-    setExpanded(false);
-  }, []);
+  const handleOpenDetail = () => setDetailOpen(true);
+  const handleCloseDetail = () => setDetailOpen(false);
+
+  const handleAssignWaiter = () => {
+    handleCloseDetail();
+    handleOpenDialog(table);
+  };
+
+  const handleConfirmAndClose = useCallback(async () => {
+    await handleReceiveOrderClick();
+    handlePrintNewProducts();
+    handleCloseDetail();
+  }, [handleReceiveOrderClick, handlePrintNewProducts]);
+
+  const handleInProgressAndClose = useCallback(async () => {
+    await handleOrderInProgressClick();
+    handleCloseDetail();
+  }, [handleOrderInProgressClick]);
+
+  const handleFinalizeAndClose = useCallback(async () => {
+    await handleFinalizeOrderClick();
+    handlePrintFullOrder();
+    handleCloseDetail();
+  }, [handleFinalizeOrderClick, handlePrintFullOrder]);
 
   const handleCloseFeedback = (_event, reason) => {
     if (reason === 'clickaway') return;
@@ -146,180 +231,384 @@ const TableCardDetail = ({
   return (
     <Card
       sx={{
-        m: 1,
-        border: (table.callw || table.bill || currentProducts.length) ? '2px solid yellow' : 'none',
+        m: 0.5,
+        borderRadius: 2.5,
+        border: '1px solid',
+        borderColor: 'divider',
+        borderLeftWidth: 4,
+        borderLeftColor: (theme) => theme.palette[statePaletteKey].main,
         position: 'relative',
-        animation: (table.callw || table.bill || currentProducts.length) ? 'borderBlink 2s infinite' : 'none',
+        backgroundColor: (theme) => theme.palette.background.paper,
+        backgroundImage: (theme) =>
+          `linear-gradient(135deg, ${alpha(theme.palette[statePaletteKey].main, 0.08)}, ${alpha(
+            theme.palette.background.paper,
+            0.95
+          )})`,
+        boxShadow: (theme) =>
+          hasTableAlerts || isStatePulsing
+            ? `0 0 20px ${alpha(theme.palette[statePaletteKey].main, 0.35)}`
+            : `0 0 12px ${alpha(theme.palette[statePaletteKey].main, 0.2)}`,
+        animation: isStatePulsing ? 'statePulse 1.5s ease-out' : 'none',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        '&:hover': {
+          transform: 'translateY(-3px)',
+          boxShadow: (theme) => `0 0 24px ${alpha(theme.palette[statePaletteKey].main, 0.4)}`,
+        },
       }}
     >
       <style>{`
-        @keyframes borderBlink {
-          0%, 100% { box-shadow: 0 0 10px yellow; }
-          50% { box-shadow: 0 0 20px yellow; }
+        @keyframes borderPulse {
+          0%, 100% { box-shadow: 0 0 8px rgba(255, 213, 79, 0.15); }
+          50% { box-shadow: 0 0 18px rgba(255, 213, 79, 0.45); }
         }
-        @keyframes textBlink {
-          0%, 100% { color: yellow; text-shadow: 0 0 10px yellow, 0 0 20px yellow; }
-          50% { color: transparent; text-shadow: none; }
+        @keyframes iconPulse {
+          0%, 100% { transform: scale(1); opacity: 0.85; }
+          50% { transform: scale(1.1); opacity: 1; }
+        }
+        @keyframes statePulse {
+          0% { box-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+          60% { box-shadow: 0 0 24px rgba(255, 255, 255, 0.25); }
+          100% { box-shadow: 0 0 12px rgba(0, 0, 0, 0.15); }
         }
       `}</style>
 
-      <Accordion expanded={expanded} onChange={() => setExpanded(prev => !prev)}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
+      <CardActionArea
+        onClick={handleOpenDetail}
+        sx={{
+          borderRadius: 2,
+          alignItems: 'stretch',
+          display: 'block',
+          height: '100%',
+        }}
+      >
+        <CardContent
           sx={{
-            backgroundColor: table.estado === 'ocupada' ? 'rgba(139, 0, 0, 0.8)' : 'rgba(34, 139, 34, 0.8)',
-            color: 'white',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
           }}
         >
-          <Typography variant="h6" align="center">
-            Mesa {table.n_mesa}
-            {table.callw === 1 && <span style={{ marginLeft: 10, animation: 'textBlink 2s infinite' }}>Mozo!</span>}
-            {table.bill === 1 && <span style={{ marginLeft: 10, animation: 'textBlink 2s infinite' }}>Cuenta!</span>}
-            {currentProducts.length > 0 && <span style={{ marginLeft: 10, animation: 'textBlink 2s infinite' }}>Nuevo!</span>}
-          </Typography>
-        </AccordionSummary>
-
-        <AccordionDetails>
-          <CardContent>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Box>
-                <Typography variant="body2">
-                  Estado de la mesa: <strong>{table.estado}</strong>
-                </Typography>
-                <Typography variant="body2">
-                  Mozo: <strong>{table.nombre_mozo}</strong>
-                </Typography>
-                {orderInfo.fecha_pedido && (
-                  <Typography variant="body2">
-                    Fecha y hora: <strong>{new Date(orderInfo.fecha_pedido).toLocaleString()}</strong>
-                  </Typography>
-                )}
-              </Box>
-              <Box>
-                <Tooltip title="Imprimir ticket completo">
-                  <IconButton onClick={handlePrintFullOrder} color="inherit" aria-label={`Imprimir ticket completo de la mesa ${table.n_mesa}`}>
-                    <PrintIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Limpiar notificaciones">
-                  <span>
-                    <IconButton
-                      onClick={handleClearNotifications}
-                      disabled={isClearNotificationsDisabled}
-                      aria-label={`Limpiar notificaciones de la mesa ${table.n_mesa}`}
-                      sx={{ color: isClearNotificationsDisabled ? 'grey' : 'red' }}
-                    >
-                      <NotificationsOffIcon />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-                <Tooltip title="Asignar mozo">
-                  <IconButton
-                    onClick={() => handleOpenDialog(table)}
-                    color="inherit"
-                    aria-label={`Asignar mozo a la mesa ${table.n_mesa}`}
-                  >
-                    <PersonAddIcon />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Typography variant="body2" fontWeight="bold" mb={1}>
-              Pedido Actual:
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 1,
+            }}
+          >
+            <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+              Mesa {table.n_mesa}
             </Typography>
-
-            <List>
-              {oldProducts.map(({ id_producto, nombre, cantidad, precio }) => (
-                <ListItem key={id_producto} sx={{ justifyContent: 'space-between', px: 1 }}>
-                  <Typography variant="body2" sx={{ flex: 2 }}>{nombre}</Typography>
-                  <Typography variant="body2" sx={{ flex: 1, textAlign: 'center' }}>{cantidad}x</Typography>
-                  <Typography variant="body2" sx={{ flex: 1, textAlign: 'right' }}>${precio}</Typography>
-                </ListItem>
-              ))}
-              <Divider />
-            </List>
-
-            {currentProducts.length > 0 && (
-              <>
-                <Typography variant="body2" fontWeight="bold" mb={1}>
-                  Productos Agregados:
+            <Stack direction="row" spacing={0.75}>
+              {activeIndicators.length ? (
+                activeIndicators.map(({ key, Icon, label, color }) => (
+                  <Tooltip title={label} key={key}>
+                    <Box
+                      component={Icon}
+                      sx={{
+                        color,
+                        fontSize: '1.4rem',
+                        animation: 'iconPulse 2.4s ease-in-out infinite',
+                      }}
+                    />
+                  </Tooltip>
+                ))
+              ) : (
+                <Typography variant="caption" color="text.secondary">
+                  Sin alertas
                 </Typography>
-                <List>
-                  {currentProducts.map(({ id_producto, nombre, cantidad, precio }) => (
-                    <ListItem key={id_producto} sx={{ justifyContent: 'space-between', px: 1 }}>
-                      <Typography variant="body2" sx={{ flex: 2, color: 'green' }}>{nombre}</Typography>
-                      <Typography variant="body2" sx={{ flex: 1, textAlign: 'center', color: 'green' }}>{cantidad}x</Typography>
-                      <Typography variant="body2" sx={{ flex: 1, textAlign: 'right', color: 'green' }}>${precio}</Typography>
-                      <Typography variant="caption" sx={{ color: 'orange', fontWeight: 'bold', ml: 1 }}>
-                        Nuevo!
-                      </Typography>
-                    </ListItem>
-                  ))}
-                  <Divider />
-                </List>
-              </>
-            )}
-          </CardContent>
+              )}
+            </Stack>
+          </Box>
 
-          <CardActions sx={{ justifyContent: 'space-between', px: 1 }}>
+          <Stack spacing={0.5}>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <FiberManualRecordIcon sx={{ fontSize: 14, color: stateColorHex }} />
+              <Typography
+                variant="body2"
+                sx={{
+                  color: stateColorHex,
+                  fontWeight: 600,
+                }}
+              >
+                {displayState}
+              </Typography>
+            </Stack>
+            <Typography
+              variant="body2"
+              sx={{ color: (theme) => alpha(theme.palette.text.secondary, 0.8) }}
+            >
+              Mozo: <strong>{waiterName}</strong>
+            </Typography>
+          </Stack>
+        </CardContent>
+      </CardActionArea>
+
+      <Dialog
+        open={detailOpen}
+        onClose={handleCloseDetail}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            backgroundColor: (theme) => theme.palette.background.paper,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            pb: 1,
+            backgroundColor: (theme) => alpha(theme.palette[statePaletteKey].main, 0.15),
+            borderBottom: (theme) => `1px solid ${alpha(theme.palette[statePaletteKey].main, 0.3)}`,
+          }}
+        >
+          <Box>
+            <Typography variant="h5" component="div" sx={{ fontWeight: 700 }}>
+              Mesa {table.n_mesa}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Estado actual: <strong>{displayState}</strong>
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                backgroundColor: (theme) => theme.palette[statePaletteKey].main,
+                boxShadow: (theme) => `0 0 10px ${alpha(theme.palette[statePaletteKey].main, 0.7)}`,
+              }}
+            />
+            {activeIndicators.length ? (
+              activeIndicators.map(({ key, Icon, label, color }) => (
+                <Tooltip title={label} key={`dialog-${key}`}>
+                  <Box
+                    component={Icon}
+                    sx={{
+                      color,
+                      fontSize: '1.5rem',
+                      animation: 'iconPulse 2.4s ease-in-out infinite',
+                    }}
+                  />
+                </Tooltip>
+              ))
+            ) : (
+              <Typography variant="caption" color="text.secondary">
+                Sin alertas
+              </Typography>
+            )}
+            <IconButton onClick={handleCloseDetail} aria-label="Cerrar detalle de mesa">
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        <DialogContent
+          dividers
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
+            justifyContent="space-between"
+            alignItems={{ xs: 'flex-start', md: 'center' }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.4 }}>
+              <Typography variant="body2">
+                Mozo asignado: <strong>{table.nombre_mozo || 'Sin asignar'}</strong>
+              </Typography>
+              {orderInfo.fecha_pedido && (
+                <Typography variant="body2">
+                  Fecha y hora: <strong>{new Date(orderInfo.fecha_pedido).toLocaleString()}</strong>
+                </Typography>
+              )}
+            </Box>
+            <Stack direction="row" spacing={1}>
+              <Tooltip title="Imprimir ticket completo">
+                <IconButton onClick={handlePrintFullOrder} color="inherit">
+                  <PrintIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Limpiar notificaciones">
+                <span>
+                  <IconButton
+                    onClick={handleClearNotifications}
+                    disabled={isClearNotificationsDisabled}
+                    sx={{ color: isClearNotificationsDisabled ? 'action.disabled' : 'warning.main' }}
+                  >
+                    <NotificationsOffIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <Tooltip title="Asignar mozo">
+                <IconButton onClick={handleAssignWaiter} color="inherit">
+                  <PersonAddIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Stack>
+
+          <Divider />
+
+          {tableNote && (
+            <>
+              <Typography variant="subtitle2" color="warning.main">
+                Nota del pedido
+              </Typography>
+              <Box
+                sx={{
+                  p: 1.5,
+                  borderRadius: 2,
+                  border: (theme) => `1px dashed ${theme.palette.warning.main}`,
+                  backgroundColor: (theme) => alpha(theme.palette.warning.main, 0.08),
+                }}
+              >
+                <Typography variant="body2">{tableNote}</Typography>
+              </Box>
+
+              <Divider />
+            </>
+          )}
+
+          <Box>
+            <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: 0.6, mb: 1 }}>
+              Pedido actual
+            </Typography>
+            <Box sx={{ maxHeight: 260, overflowY: 'auto', pr: 1 }}>
+              <List dense disablePadding>
+                {oldProducts.map(({ id_producto, nombre, cantidad, precio }) => (
+                  <ListItem key={id_producto} sx={{ justifyContent: 'space-between', px: 0.5, py: 0.5 }}>
+                    <Typography variant="body2" sx={{ flex: 2 }}>{nombre}</Typography>
+                    <Typography variant="body2" sx={{ flex: 1, textAlign: 'center' }}>{cantidad}x</Typography>
+                    <Typography variant="body2" sx={{ flex: 1, textAlign: 'right' }}>${precio}</Typography>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          </Box>
+
+          {currentProducts.length > 0 && (
+            <>
+              <Divider />
+              <Box>
+                <Typography variant="subtitle2" sx={{ textTransform: 'uppercase', letterSpacing: 0.6, mb: 1 }}>
+                  Productos agregados
+                </Typography>
+                <Box sx={{ maxHeight: 200, overflowY: 'auto', pr: 1 }}>
+                  <List dense disablePadding>
+                    {currentProducts.map(({ id_producto, nombre, cantidad, precio }) => (
+                      <ListItem key={id_producto} sx={{ justifyContent: 'space-between', px: 0.5, py: 0.5 }}>
+                        <Typography variant="body2" sx={{ flex: 2, color: 'success.light' }}>{nombre}</Typography>
+                        <Typography variant="body2" sx={{ flex: 1, textAlign: 'center', color: 'success.light' }}>{cantidad}x</Typography>
+                        <Typography variant="body2" sx={{ flex: 1, textAlign: 'right', color: 'success.light' }}>${precio}</Typography>
+                        <Chip label="Nuevo" size="small" color="success" variant="outlined" sx={{ ml: 1 }} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              </Box>
+            </>
+          )}
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.25}
+            width="100%"
+            alignItems="stretch"
+          >
             <Tooltip title="Confirmar productos nuevos">
-              <span>
+              <span style={{ width: '100%' }}>
                 <Button
                   variant="contained"
-                  color="success"
-                  onClick={() => {
-                    handleReceiveOrderClick();
-                    handlePrintNewProducts();
-                    handleCollapse();
-                  }}
+                  onClick={handleConfirmAndClose}
                   disabled={isReceiveButtonDisabled}
+                  fullWidth
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    backgroundColor: '#43A047',
+                    color: 'common.white',
+                    borderRadius: 1.5,
+                    '&:hover': { backgroundColor: '#388E3C' },
+                    '&:disabled': {
+                      backgroundColor: 'action.disabledBackground',
+                      color: 'action.disabled',
+                    },
+                  }}
                 >
                   Confirmar
                 </Button>
               </span>
             </Tooltip>
-
             <Tooltip title="Marcar pedido en curso">
-              <span>
+              <span style={{ width: '100%' }}>
                 <Button
                   variant="contained"
-                  sx={{
-                    backgroundColor: (validOrder[0]?.estado_pedido === 'En curso' || inProgressDisabled) ? 'grey' : 'orange',
-                    color: '#fff'
-                  }}
-                  onClick={() => {
-                    handleOrderInProgressClick();
-                    handleCollapse();
-                  }}
+                  onClick={handleInProgressAndClose}
                   disabled={isActionButtonsDisabled || inProgressDisabled || orderInfo.estado_pedido === 'En curso'}
+                  fullWidth
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    color: '#1f1f1f',
+                    backgroundColor: (validOrder[0]?.estado_pedido === 'En curso' || inProgressDisabled)
+                      ? '#616161'
+                      : '#FFA726',
+                    borderRadius: 1.5,
+                    '&:hover': {
+                      backgroundColor: (validOrder[0]?.estado_pedido === 'En curso' || inProgressDisabled)
+                        ? '#545454'
+                        : '#FB8C00',
+                    },
+                    '&:disabled': {
+                      backgroundColor: 'action.disabledBackground',
+                      color: 'action.disabled',
+                    },
+                  }}
                 >
                   En curso
                 </Button>
               </span>
             </Tooltip>
-
-            <Tooltip title="Finalizar pedido">
-              <span>
+            <Tooltip title="Finalizar pedido y liberar mesa">
+              <span style={{ width: '100%' }}>
                 <Button
                   variant="contained"
-                  color="error"
-                  onClick={() => {
-                    handleFinalizeOrderClick();
-                    handlePrintFullOrder();
-                    handleCollapse();
-                  }}
+                  onClick={handleFinalizeAndClose}
                   disabled={isActionButtonsDisabled}
+                  fullWidth
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    backgroundColor: '#E53935',
+                    color: 'common.white',
+                    borderRadius: 1.5,
+                    '&:hover': { backgroundColor: '#C62828' },
+                    '&:disabled': {
+                      backgroundColor: 'action.disabledBackground',
+                      color: 'action.disabled',
+                    },
+                  }}
                 >
                   Finalizar
                 </Button>
               </span>
             </Tooltip>
-          </CardActions>
-        </AccordionDetails>
-      </Accordion>
+          </Stack>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar
         open={Boolean(feedback)}
         autoHideDuration={5000}

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Box, Container, Grid, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Alert, Box, Container, Grid, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import backgroundImage from '../../assets/backgroundandi2.png';
 import celiacoIcon from '../../assets/celiaco.png';
 import veganoIcon from '../../assets/vegano.png';
 import vegetarianoIcon from '../../assets/vegetariano.png';
 import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
 import CategoryAccordion from './CategoryAccordion';
 import CombinedDialog from './CombinedDialog';
 import ProductDialog from './ProductDialog';
@@ -133,8 +134,17 @@ const MenuPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const { combinedDialogOpen, closeCombinedDialog } = useCart();
+  const { isAuthenticated, requestedTableId, tableValidation } = useAuth();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const resolvedTableId =
+    tableValidation?.tableId ?? requestedTableId ?? null;
+  const showLoginReminder = !isAuthenticated && !requestedTableId;
+  const tableBlocked = requestedTableId && tableValidation?.state === 'blocked';
+  const tableNotFound =
+    requestedTableId &&
+    (tableValidation?.state === 'not-found' ||
+      tableValidation?.state === 'invalid-format');
 
   const handleOpenDialog = (product) => {
     setSelectedProduct(product);
@@ -150,6 +160,22 @@ const MenuPage = () => {
     <MainContainer>
       <MenuContainer disableGutters>
         <Stack spacing={isSmallScreen ? 2.5 : 3.25}>
+          {showLoginReminder && (
+            <Alert severity="info">
+              Inicia sesion para realizar pedidos de delivery o take away. Si
+              estas en el local, escanea el QR de tu mesa para ordenar como invitado.
+            </Alert>
+          )}
+          {tableBlocked && (
+            <Alert severity="warning">
+              La mesa {resolvedTableId} esta bloqueada temporalmente. Pedi ayuda a tu mozo para habilitarla.
+            </Alert>
+          )}
+          {tableNotFound && (
+            <Alert severity="error">
+              No encontramos la mesa {requestedTableId}. Verifica el QR o consulta al mozo.
+            </Alert>
+          )}
           <HighlightedText>
             <Typography variant="h3" component="h1" sx={{ fontWeight: 600 }}>
               NUESTRO MENÚ

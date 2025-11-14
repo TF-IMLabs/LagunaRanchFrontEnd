@@ -1,5 +1,6 @@
 // src/components/dialogs/OrdersDialog.jsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
   DialogTitle,
@@ -22,7 +23,7 @@ import {
   useTheme,
 } from '@mui/material';
 import PropTypes from 'prop-types';
-import { Visibility, Delete } from '@mui/icons-material';
+import { Visibility, Delete, Close } from '@mui/icons-material';
 import {
   getAllOrders,
   getCartInfo,
@@ -30,6 +31,7 @@ import {
   removeOrder,
 } from '../../../services/cartService';
 import { getAllTables } from '../../../services/tableService';
+import { queryKeys } from '../../../lib/queryClient';
 import ConfirmDeleteDialog from './ConfirmDeleteDialog';
 import OrderDetailsDialog from './OrderDetailsDialog';
 
@@ -61,65 +63,77 @@ const getOrderType = (cartInfo) => {
 };
 
 const OrdersDialog = ({ open, onClose, tipoPedido = '0' }) => {
-  const [orders, setOrders] = useState([]);
-  const [filteredOrders, setFilteredOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderDetails, setOrderDetails] = useState([]);
   const [orderDetailIds, setOrderDetailIds] = useState([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [orderInfo, setOrderInfo] = useState(null);
-  const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
-  const [ordersLoading, setOrdersLoading] = useState(false);
-  const [fetchError, setFetchError] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!open) return;
+  const ordersQueryKey = useMemo(
+    () => [...queryKeys.orders.list({ tipoPedido }), tipoPedido],
+    [tipoPedido],
+  );
 
-    const fetchData = async () => {
-      setOrdersLoading(true);
-      setFetchError(null);
-      try {
-        const [ordersData, tablesData] = await Promise.all([getAllOrders(), getAllTables()]);
+  const {
+    data: ordersData,
+    isLoading: isOrdersLoading,
+    isFetching: isOrdersFetching,
+    error: ordersError,
+  } = useQuery({
+    queryKey: ordersQueryKey,
+    enabled: open,
+    staleTime: 30_000,
+    cacheTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const [ordersResponse, tablesResponse] = await Promise.all([getAllOrders(), getAllTables()]);
 
-        const cartInfoList = await Promise.all(
-          ordersData.map((order) =>
-            getCartInfo(order.id_pedido)
-              .then((data) => normalizeCartInfo(data))
-              .catch((error) => {
-                console.error(`Error al obtener el carrito para el pedido ${order.id_pedido}:`, error);
-                return null;
-              }),
-          ),
-        );
+      const detailedOrders = await Promise.all(
+        ordersResponse.map(async (order) => {
+          try {
+            const cartInfo = normalizeCartInfo(await getCartInfo(order.id_pedido));
+            if (String(getOrderType(cartInfo)) !== String(tipoPedido)) {
+              return null;
+            }
+            return { ...order, cartInfo };
+          } catch (error) {
+            console.error(`Error al obtener el carrito para el pedido ${order.id_pedido}:`, error);
+            return null;
+          }
+        }),
+      );
 
-        const enrichedOrders = ordersData.reduce((acc, order, idx) => {
-          const cartInfo = cartInfoList[idx];
-          if (!cartInfo) return acc;
-          if (String(getOrderType(cartInfo)) !== String(tipoPedido)) return acc;
-          acc.push({ ...order, cartInfo });
-          return acc;
-        }, []);
+      return {
+        orders: detailedOrders.filter(Boolean),
+        tables: tablesResponse,
+      };
+    },
+  });
 
-        setOrders(enrichedOrders);
-        setFilteredOrders(enrichedOrders);
-        setTables(tablesData);
-      } catch (error) {
-        console.error('Error al obtener pedidos o mesas:', error);
-        setFetchError('No se pudieron cargar los pedidos. Intentá nuevamente.');
-      } finally {
-        setOrdersLoading(false);
-      }
-    };
+  const orders = useMemo(() => ordersData?.orders ?? [], [ordersData]);
+  const tables = useMemo(() => ordersData?.tables ?? [], [ordersData]);
+  const ordersLoading = isOrdersLoading || isOrdersFetching;
+  const fetchError =
+    ordersError?.message ||
+    (ordersError ? 'No se pudieron cargar los pedidos. Intenta nuevamente.' : null);
 
-    fetchData();
-  }, [open, tipoPedido]);
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const matchesTable =
+        selectedTable === '' ? true : String(order.id_mesa) === String(selectedTable);
+      const matchesStatus = selectedStatus === '' ? true : order.estado === selectedStatus;
+      return matchesTable && matchesStatus;
+    });
+  }, [orders, selectedTable, selectedStatus]);
+
+
 
   const handleOrderClick = async (id_pedido) => {
     setDetailsDialogOpen(true);
@@ -128,24 +142,25 @@ const OrdersDialog = ({ open, onClose, tipoPedido = '0' }) => {
       const currentOrder = orders.find((order) => order.id_pedido === id_pedido);
       const cachedCartInfo = currentOrder?.cartInfo;
 
-      const [cartInfoResponse, detailsResponse] = await Promise.all([
-        cachedCartInfo ? Promise.resolve(cachedCartInfo) : getCartInfo(id_pedido).then(normalizeCartInfo),
+      const [resolvedCartInfo, detailsResponse] = await Promise.all([
+        cachedCartInfo
+          ? Promise.resolve(cachedCartInfo)
+          : getCartInfo(id_pedido).then((data) => normalizeCartInfo(data)),
         getOrderDetailByOrderId(id_pedido),
       ]);
 
-      const normalizedCartInfo = cachedCartInfo ? cachedCartInfo : normalizeCartInfo(cartInfoResponse);
+      const normalizedCartInfo = resolvedCartInfo;
 
       if (!cachedCartInfo) {
-        setOrders((prev) =>
-          prev.map((order) =>
+        queryClient.setQueryData(ordersQueryKey, (previous) => {
+          if (!previous?.orders) {
+            return previous;
+          }
+          const updatedOrders = previous.orders.map((order) =>
             order.id_pedido === id_pedido ? { ...order, cartInfo: normalizedCartInfo } : order,
-          ),
-        );
-        setFilteredOrders((prev) =>
-          prev.map((order) =>
-            order.id_pedido === id_pedido ? { ...order, cartInfo: normalizedCartInfo } : order,
-          ),
-        );
+          );
+          return { ...previous, orders: updatedOrders };
+        });
       }
 
       const detailIds = (detailsResponse?.detalles ?? []).map((detail) => detail.id_detalle);
@@ -172,25 +187,11 @@ const OrdersDialog = ({ open, onClose, tipoPedido = '0' }) => {
   const handleTableChange = (event) => setSelectedTable(event.target.value);
   const handleStatusChange = (event) => setSelectedStatus(event.target.value);
 
-  useEffect(() => {
-    let computed = orders;
-    if (selectedTable) {
-      computed = computed.filter((order) => order.id_mesa === selectedTable);
-    }
-    if (selectedStatus) {
-      computed = computed.filter((order) => order.estado === selectedStatus);
-    }
-    setFilteredOrders(computed);
-  }, [selectedTable, selectedStatus, orders]);
-
   const handleDeleteOrder = async () => {
+    if (!orderToDelete) return;
     try {
-      if (orderToDelete) {
-        await removeOrder(orderToDelete);
-        const updated = orders.filter((order) => order.id_pedido !== orderToDelete);
-        setOrders(updated);
-        setFilteredOrders(updated);
-      }
+      await removeOrder(orderToDelete);
+      await queryClient.invalidateQueries({ queryKey: ordersQueryKey });
     } catch (error) {
       console.error('Error al eliminar el pedido:', error);
     } finally {
@@ -209,7 +210,7 @@ const OrdersDialog = ({ open, onClose, tipoPedido = '0' }) => {
     setOrderToDelete(null);
   };
 
-  const emptyState = useMemo(() => filteredOrders.length === 0, [filteredOrders]);
+  const emptyState = !ordersLoading && filteredOrders.length === 0;
 
   return (
     <Dialog
@@ -220,7 +221,15 @@ const OrdersDialog = ({ open, onClose, tipoPedido = '0' }) => {
       maxWidth="lg"
       aria-labelledby="orders-dialog-title"
     >
-      <DialogTitle id="orders-dialog-title">Pedidos</DialogTitle>
+      <DialogTitle
+        id="orders-dialog-title"
+        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 1 }}
+      >
+        Pedidos
+        <IconButton aria-label="Cerrar listado de pedidos" onClick={onClose}>
+          <Close />
+        </IconButton>
+      </DialogTitle>
       <DialogContent dividers>
         <Box>
           <TableContainer
@@ -255,6 +264,7 @@ const OrdersDialog = ({ open, onClose, tipoPedido = '0' }) => {
                       <Select value={selectedStatus} onChange={handleStatusChange} displayEmpty inputProps={{ 'aria-label': 'Filtrar por estado' }}>
                         <MenuItem value="">Todos</MenuItem>
                         <MenuItem value="En Curso">En curso</MenuItem>
+                        <MenuItem value="Recibido">Recibido</MenuItem>
                         <MenuItem value="Iniciado">Iniciado</MenuItem>
                         <MenuItem value="Actualizado">Actualizado</MenuItem>
                         <MenuItem value="Finalizado">Finalizado</MenuItem>
@@ -343,5 +353,9 @@ export default OrdersDialog;
 OrdersDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  tipoPedido: PropTypes.string.isRequired,
+  tipoPedido: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+};
+
+OrdersDialog.defaultProps = {
+  tipoPedido: '0',
 };

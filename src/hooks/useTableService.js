@@ -8,11 +8,14 @@ import {
 import { ERROR_CODES } from '../services/apiErrorCodes';
 
 export const useTableService = () => {
-  const { tableId, orderType } = useAuth();
+  const { tableId, orderType, tableValidation } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const canUseTableService = orderType === 'dine-in' && Boolean(tableId);
+  const canUseTableService =
+    orderType === 'dine-in' &&
+    Boolean(tableId) &&
+    tableValidation?.state === 'valid';
 
   const ensureAvailability = useCallback(() => {
     if (!canUseTableService) {

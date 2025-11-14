@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
+  Alert,
   Typography,
   Divider,
   Box,
   Button,
   Snackbar,
   useMediaQuery,
+  Chip,
+  Stack,
 } from '@mui/material';
-import { Timeline, TimelineItem, TimelineSeparator, TimelineDot } from '@mui/lab';
 import { useTheme } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
@@ -20,34 +22,45 @@ import { callWaiter, requestBill } from '../../services/waiterService';
 const UNASSIGNED_TABLE_MESSAGE =
   'No hay mesas asignadas, no se puede realizar un pedido.';
 const EMPTY_ORDER_MESSAGE =
-  'Aun no pediste nada, hace tu pedido utilizando el carrito!';
+  'Aún no pediste nada, hace tu pedido utilizando el carrito!';
 const LOADING_ORDER_MESSAGE = 'Cargando el pedido...';
 const AUTH_REQUIRED_MESSAGE =
-  'Necesitas iniciar sesion para usar este servicio.';
+  'Necesitas iniciar sesión para usar este servicio.';
 
 const STATUS_LABELS = {
   Actualizado: 'Actualizado',
   Iniciado: 'Pendiente',
   Recibido: 'Confirmado',
-  'En curso': 'En preparacion',
+  'En curso': 'En preparación',
 };
 
 const Order = ({ onClose }) => {
-  const { tableId, token, loginGuest } = useAuth();
+  const {
+    tableId,
+    token,
+    loginGuest,
+    tableValidation,
+    isVenueOpen,
+    isAuthenticated,
+  } = useAuth();
   const [order, setOrder] = useState([]);
   const [waiterName, setWaiterName] = useState('');
   const [orderStatus, setOrderStatus] = useState('');
   const [notification, setNotification] = useState({ open: false, message: '' });
+  const [callRequested, setCallRequested] = useState(false);
+  const [billRequested, setBillRequested] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  useEffect(() => {
-    if (!tableId || !token) {
-      setOrder([]);
-      setWaiterName('');
-      setOrderStatus('');
-      return;
-    }
+useEffect(() => {
+  if (!tableId || !token) {
+    setOrder([]);
+    setWaiterName('');
+    setOrderStatus('');
+    setCallRequested(false);
+    setBillRequested(false);
+    return;
+  }
 
     let mounted = true;
 
@@ -97,23 +110,77 @@ const Order = ({ onClose }) => {
     };
   }, [tableId, token]);
 
-  if (!tableId) {
-    return (
-      <Box display="flex" justifyContent="center" mt={2}>
-        <Typography variant="body1" color="error">
-          {UNASSIGNED_TABLE_MESSAGE}
-        </Typography>
-      </Box>
-    );
-  }
-
   const totalAmount = order.reduce((sum, item) => {
     const price = Number(item?.precio ?? 0);
     const quantity = Number(item?.cantidad ?? 0);
     return sum + price * quantity;
   }, 0);
 
+  const aggregatedItems = useMemo(() => {
+    const map = new Map();
+    order.forEach((item = {}) => {
+      const key = item.id_producto ?? item.nombre;
+      if (!key) return;
+      const existing = map.get(key) ?? {
+        nombre: item.nombre,
+        descripcion: item.descripcion,
+        precio: Number(item.precio ?? 0),
+        cantidad: 0,
+      };
+      existing.cantidad += Number(item.cantidad ?? 0);
+      map.set(key, existing);
+    });
+    return Array.from(map.values());
+  }, [order]);
+
+  const tableState = tableValidation?.state ?? 'missing';
+  useEffect(() => {
+    if (!order.length) {
+      setCallRequested(false);
+      setBillRequested(false);
+    }
+  }, [order.length]);
+
+  if (!isVenueOpen) {
+    return (
+      <Box display="flex" justifyContent="center" mt={2}>
+        <Alert severity="warning">
+          El restaurante está cerrado. Podras seguir tus pedidos cuando vuelva a abrir.
+        </Alert>
+      </Box>
+    );
+  }
+
+  if (!tableId) {
+    if (!isAuthenticated) {
+      return (
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Typography variant="body1" color="error">
+            {UNASSIGNED_TABLE_MESSAGE}
+          </Typography>
+        </Box>
+      );
+    }
+    return null;
+  }
+
   const handleAction = async (actionFn) => {
+    if (!isVenueOpen) {
+      setNotification({
+        open: true,
+        message: 'El restaurante esta cerrado. Intentalo cuando este abierto.',
+      });
+      return;
+    }
+
+    if (tableState !== 'valid') {
+      setNotification({
+        open: true,
+        message: 'La mesa ya no esta habilitada. Pide ayuda al mozo.',
+      });
+      return;
+    }
+
     if (!token) {
       if (!tableId) {
         setNotification({ open: true, message: AUTH_REQUIRED_MESSAGE });
@@ -130,10 +197,21 @@ const Order = ({ onClose }) => {
     }
 
     try {
-      const { message } = await actionFn(Number(tableId));
+      const response = await actionFn(Number(tableId));
+      if (actionFn === callWaiter) {
+        setCallRequested(true);
+      } else if (actionFn === requestBill) {
+        setBillRequested(true);
+      }
       setNotification({
         open: true,
-        message: message ?? 'Accion realizada correctamente.',
+        message:
+          response?.message ??
+          (actionFn === callWaiter
+            ? 'Avisamos al mozo. Ya va en camino.'
+            : actionFn === requestBill
+            ? 'Solicitud de cuenta enviada.'
+            : 'Acción realizada correctamente.'),
       });
     } catch (error) {
       console.error('Error al ejecutar la accion de mesa:', error);
@@ -150,10 +228,36 @@ const Order = ({ onClose }) => {
       ? ['Iniciado', 'Actualizado'].includes(orderStatus)
       : orderStatus === stepKey;
 
+  const statusSteps = [
+    {
+      key: 'Iniciado',
+      label: 'Pedido enviado',
+      description: 'Estamos revisando tu orden.',
+      Icon: ArrowRightAltIcon,
+    },
+    {
+      key: 'Recibido',
+      label: 'Confirmado',
+      description: 'Vimos tu pedido, ya lo estamos gestionando.',
+      Icon: CheckCircleIcon,
+    },
+    {
+      key: 'En curso',
+      label: 'En preparacion',
+      description: 'Tu comida esta en curso.',
+      Icon: RestaurantIcon,
+    },
+  ];
+
   return (
     <Box>
-      <Typography variant='h6' textAlign='center' mb={2}>
-        Estas pidiendo en la Mesa {tableId}
+      <Typography
+        variant='h5'
+        textAlign='center'
+        mb={2}
+        sx={{ fontWeight: 700, letterSpacing: 0.5 }}
+      >
+        Estás pidiendo en la Mesa {tableId}
       </Typography>
 
       {order.length === 0 ? (
@@ -199,62 +303,99 @@ const Order = ({ onClose }) => {
             <strong>Estado:</strong> {statusMessage}
           </Typography>
 
-          <Timeline
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              overflowX: 'auto',
-              whiteSpace: 'nowrap',
-              mx: 'auto',
-            }}
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            justifyContent='center'
+            alignItems='stretch'
+            sx={{ mb: 2 }}
           >
-            {[
-              { icon: ArrowRightAltIcon, key: 'Iniciado' },
-              { icon: CheckCircleIcon, key: 'Recibido' },
-              { icon: RestaurantIcon, key: 'En curso' },
-            ].map(({ icon: Icon, key }) => (
-              <TimelineItem
-                key={key}
-                sx={{
-                  px: isMobile ? '2px' : '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <TimelineSeparator>
-                  <TimelineDot
+            {statusSteps.map(({ key, label, description, Icon }) => {
+              const active = isStepActive(key);
+              return (
+                <Box
+                  key={key}
+                  sx={{
+                    flex: 1,
+                    minWidth: 160,
+                    borderRadius: 2,
+                    border: (theme) =>
+                      `1px solid ${
+                        active ? theme.palette.warning.main : theme.palette.divider
+                      }`,
+                    backgroundColor: (theme) =>
+                      active
+                        ? theme.palette.action.selected
+                        : theme.palette.background.paper,
+                    p: 1.5,
+                    textAlign: 'center',
+                  }}
+                >
+                  <Icon
                     sx={{
-                      backgroundColor: 'white',
-                      boxShadow: isStepActive(key) ? '0 0 20px black' : 'none',
-                      transition: 'all 0.3s',
+                      fontSize: 28,
+                      color: active ? 'warning.main' : 'text.secondary',
                     }}
-                  >
-                    <Icon
-                      sx={{ color: isStepActive(key) ? 'black' : 'grey.500' }}
-                    />
-                  </TimelineDot>
-                </TimelineSeparator>
-              </TimelineItem>
-            ))}
-          </Timeline>
+                  />
+                  <Typography sx={{ fontWeight: 600, mt: 1 }}>{label}</Typography>
+                  <Typography variant='caption' color='text.secondary'>
+                    {description}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Stack>
+
+          <Stack direction='row' spacing={1} justifyContent='center' mb={2}>
+            {callRequested && (
+              <Chip label='Llamado enviado' size='small' color='warning' />
+            )}
+            {billRequested && (
+              <Chip label='Cuenta solicitada' size='small' color='info' />
+            )}
+          </Stack>
 
           <Divider sx={{ my: 2 }} />
 
-          {order.map((item) => (
-            <Box
-              key={item.id_producto}
-              display='flex'
-              justifyContent='space-between'
-              mb={1}
-            >
-              <Typography>{item.nombre}</Typography>
-              <Typography>
-                ${Number(item.precio ?? 0)} x {Number(item.cantidad ?? 0)}
-              </Typography>
-            </Box>
-          ))}
+          <Typography variant='subtitle2' color='text.secondary' gutterBottom>
+            Resumen del pedido
+          </Typography>
+
+          <Stack spacing={1}>
+            {aggregatedItems.map((item) => (
+              <Box
+                key={`${item.nombre}-${item.precio}`}
+                display='flex'
+                justifyContent='space-between'
+                alignItems='center'
+                sx={{
+                  backgroundColor: theme.palette.background.paper,
+                  borderRadius: 2,
+                  px: 1.25,
+                  py: 1,
+                }}
+              >
+                <Box>
+                  <Typography fontWeight={600}>{item.nombre}</Typography>
+                  {item.descripcion && (
+                    <Typography variant='caption' color='text.secondary'>
+                      {item.descripcion}
+                    </Typography>
+                  )}
+                </Box>
+                <Typography fontWeight={600}>
+                  ${(item.precio * item.cantidad).toFixed(2)}{' '}
+                  <Typography
+                    component='span'
+                    variant='caption'
+                    color='text.secondary'
+                  >
+                    ({item.cantidad}x)
+                  </Typography>
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
 
           <Divider sx={{ my: 1 }} />
 

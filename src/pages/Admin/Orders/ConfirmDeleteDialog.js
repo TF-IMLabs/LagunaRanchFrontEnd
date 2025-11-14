@@ -1,4 +1,4 @@
-// ConfirmDeleteDialog.js
+﻿// ConfirmDeleteDialog.js
 import React from 'react';
 import {
   Dialog,
@@ -11,28 +11,31 @@ import {
 
 const ConfirmDeleteDialog = ({ open, onClose, onConfirm }) => {
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle
-        sx={{
-          color: 'primary.main',
-          bgcolor: 'background.default',
-          textAlign: 'center',
-        }}
-      >
+    <Dialog
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        sx: {
+          bgcolor: (theme) => theme.palette.background.paper,
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+        },
+      }}
+    >
+      <DialogTitle sx={{ color: 'primary.main', fontWeight: 600, textAlign: 'center' }}>
         ¿Estás seguro de que deseas eliminar este pedido?
       </DialogTitle>
 
-      <DialogContent sx={{ bgcolor: 'primary.light' }}>
-        <Typography variant="body1" color="text.primary">
+      <DialogContent sx={{ textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary">
           Esta acción no se puede deshacer.
         </Typography>
       </DialogContent>
 
-      <DialogActions sx={{ bgcolor: 'background.default', justifyContent: 'center' }}>
-        <Button onClick={onClose} variant="outlined" color="primary">
+      <DialogActions sx={{ justifyContent: 'center', gap: 1.5, pb: 3 }}>
+        <Button onClick={onClose} variant="outlined" color="inherit">
           Cancelar
         </Button>
-        <Button onClick={onConfirm} variant="outlined" color="error">
+        <Button onClick={onConfirm} variant="contained" color="error">
           Eliminar
         </Button>
       </DialogActions>

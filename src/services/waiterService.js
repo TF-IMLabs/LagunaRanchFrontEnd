@@ -69,3 +69,22 @@ export const updateNotifications = async (id_mesa) => {
     throw error;
   }
 };
+
+export const deleteWaiter = async (id_mozo) => {
+  try {
+    const response = await apiClient.delete('/waiter/delete', {
+      data: { id_mozo },
+    });
+    return response?.data ?? response ?? null;
+  } catch (error) {
+    console.error('Error al eliminar el mozo:', error);
+    throw error;
+  }
+};
+
+export const waiterService = {
+  getAll: getAllWaiters,
+  create: (data) => createWaiter(data.nombre, data.turno),
+  update: (data) => updateWaiter(data.id_mozo, data.nombre, data.turno),
+  delete: deleteWaiter,
+};

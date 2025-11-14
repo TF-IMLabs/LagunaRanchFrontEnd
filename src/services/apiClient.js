@@ -5,7 +5,7 @@ const DEFAULT_TIMEOUT = 10000;
 const AUTH_STORAGE_KEY = 'resto_auth';
 const LEGACY_AUTH_KEY = 'auth';
 const API_BASE_URL =
-  import.meta.env?.VITE_API_BASE_URL || 'https://amelieapp.alwaysdata.net/api';
+  process.env.REACT_APP_API_BASE_URL || 'https://amelieapp.alwaysdata.net/api';
 
 const isBrowser =
   typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';

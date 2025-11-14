@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -8,6 +8,7 @@ import {
   Typography,
   Divider,
   CircularProgress,
+  Alert,
 } from '@mui/material';
 import {
   Info as InfoIcon,
@@ -33,13 +34,27 @@ const STRINGS = {
 };
 
 const TableLoginDialog = ({ open, onClose }) => {
-  const { tableId, loginGuest, isLoading: authLoading, token } = useAuth();
+  const {
+    tableId,
+    loginGuest,
+    isLoading: authLoading,
+    token,
+    requestedTableId,
+    tableValidation,
+  } = useAuth();
   const { openCombinedDialog } = useCart();
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [error, setError] = useState('');
   const [waiterMessage, setWaiterMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [callingWaiter, setCallingWaiter] = useState(false);
+
+  const resolvedTableId =
+    tableValidation?.tableId ?? requestedTableId ?? tableId;
+  const validationState = tableValidation?.state ?? 'missing';
+  const isValidTable = validationState === 'valid';
+  const hasDetectedTable =
+    typeof resolvedTableId === 'number' && !Number.isNaN(resolvedTableId);
 
   const handleGuestLoginError = (loginError) => {
     if (loginError.code === ERROR_CODES.TABLE_CLOSED) {
@@ -52,7 +67,7 @@ const TableLoginDialog = ({ open, onClose }) => {
   };
 
   const handleGuest = async () => {
-    if (!tableId) {
+    if (!resolvedTableId || !isValidTable) {
       setError(STRINGS.invalidTable);
       return;
     }
@@ -61,7 +76,7 @@ const TableLoginDialog = ({ open, onClose }) => {
     setError('');
 
     try {
-      await loginGuest(tableId);
+      await loginGuest(resolvedTableId);
       onClose();
       openCombinedDialog();
     } catch (loginError) {
@@ -72,7 +87,7 @@ const TableLoginDialog = ({ open, onClose }) => {
   };
 
   const handleCallWaiter = async () => {
-    if (!tableId) {
+    if (!resolvedTableId || !isValidTable) {
       setError(STRINGS.invalidTable);
       return;
     }
@@ -83,13 +98,13 @@ const TableLoginDialog = ({ open, onClose }) => {
     try {
       if (!token) {
         try {
-          await loginGuest(tableId);
+          await loginGuest(resolvedTableId);
         } catch (loginError) {
           handleGuestLoginError(loginError);
           return;
         }
       }
-      const response = await callWaiter(tableId);
+      const response = await callWaiter(resolvedTableId);
       const message = response?.message || 'El mozo fue notificado correctamente.';
       setWaiterMessage(message);
       setTimeout(() => setWaiterMessage(''), 3000);
@@ -101,6 +116,46 @@ const TableLoginDialog = ({ open, onClose }) => {
   };
 
   const isBusy = loading || callingWaiter || authLoading;
+  const guestDisabled = !isValidTable || isBusy;
+  const waiterDisabled = guestDisabled;
+
+  const tableAlert = useMemo(() => {
+    if (!hasDetectedTable) {
+      return {
+        severity: 'info',
+        message: 'Escane�� el c��digo QR de tu mesa para ordenar sin registrarte.',
+      };
+    }
+
+    switch (validationState) {
+      case 'loading':
+        return { severity: 'info', message: 'Validando la mesa...' };
+      case 'blocked':
+        return {
+          severity: 'warning',
+          message:
+            'Esta mesa esta temporalmente bloqueada. Consulta a tu mozo para habilitarla.',
+        };
+      case 'not-found':
+      case 'invalid-format':
+        return {
+          severity: 'error',
+          message: 'Mesa inv��lida. Revisa que el QR corresponda a este local.',
+        };
+      case 'error':
+        return {
+          severity: 'warning',
+          message: 'No pudimos validar la mesa. Intenta nuevamente en unos segundos.',
+        };
+      case 'valid':
+        return {
+          severity: 'success',
+          message: `Mesa ${resolvedTableId} lista para tomar pedidos.`,
+        };
+      default:
+        return null;
+    }
+  }, [hasDetectedTable, resolvedTableId, validationState]);
 
   return (
     <Dialog
@@ -110,7 +165,9 @@ const TableLoginDialog = ({ open, onClose }) => {
       maxWidth="sm"
       aria-labelledby="table-login-dialog-title"
     >
-      <DialogTitle id="table-login-dialog-title">{`Mesa ${tableId ?? ''}`}</DialogTitle>
+      <DialogTitle id="table-login-dialog-title">
+        {resolvedTableId ? `Mesa ${resolvedTableId}` : 'Mesa no detectada'}
+      </DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {!showLoginForm ? (
           <Box display="flex" flexDirection="column" gap={2} mt={1}>
@@ -123,13 +180,17 @@ const TableLoginDialog = ({ open, onClose }) => {
 
             <Divider />
 
+            {tableAlert && (
+              <Alert severity={tableAlert.severity}>{tableAlert.message}</Alert>
+            )}
+
             <Button
               variant="outlined"
               startIcon={
                 isBusy ? <CircularProgress size={20} color="inherit" /> : <GroupIcon />
               }
               onClick={handleGuest}
-              disabled={isBusy}
+              disabled={guestDisabled}
               fullWidth
             >
               {loading ? 'Ingresando...' : 'Ingresar como invitado'}
@@ -152,7 +213,7 @@ const TableLoginDialog = ({ open, onClose }) => {
                 callingWaiter ? <CircularProgress size={20} color="inherit" /> : <RoomServiceIcon />
               }
               onClick={handleCallWaiter}
-              disabled={isBusy}
+              disabled={waiterDisabled}
               fullWidth
             >
               {callingWaiter ? 'Llamando al mozo...' : 'Llamar al mozo'}

@@ -94,7 +94,12 @@ const ProductDialog = ({ open, onClose, product }) => {
   const [quantity, setQuantity] = useState(1);
   const [feedback, setFeedback] = useState(null);
   const { addToCart, openCombinedDialog } = useCart();
-  const { user } = useAuth();
+  const { canAddToCart, isVenueOpen } = useAuth();
+  const addDisabledReason = !isVenueOpen
+    ? 'El restaurante esta cerrado por el momento.'
+    : !canAddToCart
+    ? 'Inicia sesion o escanea tu mesa para sumar productos.'
+    : '';
 
   const handleAddToCart = () => {
     const quantityNumber = Number(quantity);
@@ -204,26 +209,19 @@ const ProductDialog = ({ open, onClose, product }) => {
       </AnimatedDialogContent>
 
       <AnimatedDialogActions>
-        <Button
-          onClick={() => {
-            openCombinedDialog();
-            onClose();
-          }}
-          variant="outlined"
-          fullWidth
-          sx={{ flex: { xs: '1 1 100%', sm: '1 1 auto' } }}
-        >
-          Ver pedido
-        </Button>
-        <Button
-          onClick={handleAddToCart}
-          variant="contained"
-          disabled={!user}
-          fullWidth
-          sx={{ flex: { xs: '1 1 100%', sm: '0 1 auto' } }}
-        >
-          Añadir al pedido
-        </Button>
+        <Tooltip title={addDisabledReason || 'Agregar este producto al pedido'}>
+          <span style={{ width: '100%' }}>
+            <Button
+              onClick={handleAddToCart}
+              variant="contained"
+              disabled={!canAddToCart}
+              fullWidth
+              sx={{ flex: { xs: '1 1 100%', sm: '0 1 auto' } }}
+            >
+              A??adir al pedido
+            </Button>
+          </span>
+        </Tooltip>
       </AnimatedDialogActions>
 
       <Snackbar

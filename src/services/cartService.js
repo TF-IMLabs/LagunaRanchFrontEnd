@@ -151,9 +151,12 @@ export const updateOrderDetail = async ({ id_pedido, id_producto, cantidad, nuev
   }
 };
 
-export const putProductsAsOld = async (id_pedido) => {
+export const putProductsAsOld = async (orderId) => {
   try {
-    const response = await apiClient.put('/cart/putProductsAsOld', { id_pedido });
+    if (!orderId) {
+      throw new Error('orderId es requerido para confirmar productos');
+    }
+    const response = await apiClient.put('/cart/putProductsAsOld', { orderId });
     return unwrapResponse(response);
   } catch (error) {
     console.error('Error al marcar los productos como antiguos:', error);

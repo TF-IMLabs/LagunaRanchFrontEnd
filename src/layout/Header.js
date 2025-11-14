@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -112,6 +112,14 @@ const Header = () => {
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
+  useEffect(() => {
+    const handleAuthRequest = () => setAuthDialogOpen(true);
+    window.addEventListener('auth:open', handleAuthRequest);
+    return () => {
+      window.removeEventListener('auth:open', handleAuthRequest);
+    };
+  }, []);
+
   const totalItems = cart.reduce((t, item) => t + item.cantidad, 0);
 
   const handleLoginSuccess = (loggedUser) => {
@@ -168,7 +176,7 @@ const Header = () => {
           <NavButton onClick={() => setProfileDialogOpen(true)} aria-label="Perfil">
             <AccountCircleIcon fontSize="small" />
           </NavButton>
-          <NavButton onClick={() => setConfirmLogoutOpen(true)} aria-label="Cerrar sesi\u00f3n">
+          <NavButton onClick={() => setConfirmLogoutOpen(true)} aria-label="Cerrar sesión">
             <LogoutIcon fontSize="small" />
           </NavButton>
         </>
@@ -214,7 +222,7 @@ const Header = () => {
           </Box>
           <Divider sx={{ borderColor: alpha(theme.palette.primary.main, 0.2) }} />
           <List sx={{ flexGrow: 1 }}>
-            {mobileListItem(<MenuBookIcon fontSize="small" />, 'Men\u00fa', null, '/menu')}
+            {mobileListItem(<MenuBookIcon fontSize="small" />, 'Menú', null, '/menu')}
             {mobileListItem(
               <CustomBadge badgeContent={totalItems} showZero={false}>
                 <CartIcon fontSize="small" />
@@ -223,7 +231,7 @@ const Header = () => {
               openCombinedDialog,
             )}
             {!user &&
-              mobileListItem(<LoginIcon fontSize="small" />, 'Iniciar sesi\u00f3n', () =>
+              mobileListItem(<LoginIcon fontSize="small" />, 'Iniciar sesión', () =>
                 setAuthDialogOpen(true),
               )}
             {user && (
@@ -242,7 +250,7 @@ const Header = () => {
                 )}
                 {mobileListItem(
                   <LogoutIcon fontSize="small" />,
-                  'Cerrar sesi\u00f3n',
+                  'Cerrar sesión',
                   () => setConfirmLogoutOpen(true),
                 )}
               </>
@@ -261,7 +269,7 @@ const Header = () => {
       <Dialog open={confirmLogoutOpen} onClose={() => setConfirmLogoutOpen(false)}>
         <DialogTitle sx={{ textAlign: 'center', fontWeight: 600 }}>Confirmar salida</DialogTitle>
         <DialogContent sx={{ textAlign: 'center' }}>
-          \u00bfEst\u00e1s seguro de que quer\u00e9s cerrar sesi\u00f3n?
+          ¿Estás seguro de que querés cerrar la sesión?
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
           <Button onClick={() => setConfirmLogoutOpen(false)} variant="outlined">

@@ -12,6 +12,8 @@ import apiClient, {
 } from '../services/apiClient';
 import useAuthPersistence from '../hooks/useAuthPersistence';
 import useTableDetection from '../hooks/useTableDetection';
+import { useTableAccess } from './TableAccessContext';
+import useVenueStatus from '../hooks/useVenueStatus';
 
 const AuthContext = createContext(null);
 
@@ -29,9 +31,22 @@ export const AuthProvider = ({ children }) => {
     tableId: detectedTableId,
     isDetecting: isDetectingTable,
   } = useTableDetection();
+  const {
+    validateTable,
+    isLoading: isTableRegistryLoading,
+    error: tableRegistryError,
+    refetchTables,
+  } = useTableAccess();
+  const { isOpen: isVenueOpen } = useVenueStatus();
 
   const [isLoading, setIsLoading] = useState(false);
   const [orderType, setOrderTypeState] = useState('takeaway');
+  const [tableValidation, setTableValidation] = useState({
+    state: 'missing',
+    tableId: null,
+    table: null,
+    status: null,
+  });
 
   const tableId = authState.tableId;
   const token = authState.token;
@@ -45,28 +60,88 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   useEffect(() => {
-    if (detectedTableId && detectedTableId !== tableId) {
-      setTableId(detectedTableId);
-      setOrderTypeState('dine-in');
+    if (!detectedTableId) {
+      setTableValidation({
+        state: 'missing',
+        tableId: null,
+        table: null,
+        status: null,
+      });
+      if (tableId) {
+        setTableId(null);
+      }
+      if (orderType === 'dine-in') {
+        setOrderTypeState('takeaway');
+      }
+      return;
     }
 
-    if (!detectedTableId && !tableId && orderType === 'dine-in') {
-      setOrderTypeState('takeaway');
+    if (isTableRegistryLoading) {
+      setTableValidation({
+        state: 'loading',
+        tableId: detectedTableId,
+        table: null,
+        status: null,
+      });
+      return;
     }
-  }, [detectedTableId, tableId, orderType, setTableId]);
+
+    if (tableRegistryError) {
+      setTableValidation({
+        state: 'error',
+        tableId: detectedTableId,
+        table: null,
+        status: null,
+      });
+      return;
+    }
+
+    const validation = validateTable(detectedTableId);
+    setTableValidation(validation);
+
+    if (validation.state === 'valid' && isVenueOpen) {
+      if (tableId !== detectedTableId) {
+        setTableId(detectedTableId);
+      }
+      if (orderType !== 'dine-in') {
+        setOrderTypeState('dine-in');
+      }
+    } else if (tableId) {
+      setTableId(null);
+      if (orderType === 'dine-in') {
+        setOrderTypeState('takeaway');
+      }
+    }
+  }, [
+    detectedTableId,
+    isTableRegistryLoading,
+    isVenueOpen,
+    orderType,
+    setOrderTypeState,
+    setTableId,
+    tableId,
+    tableRegistryError,
+    validateTable,
+  ]);
 
   const isAuthenticated = useMemo(
     () => Boolean(authState.user && token),
     [authState.user, token],
   );
 
+  const canUseTableOrders = tableValidation.state === 'valid' && isVenueOpen;
+
   const canAddToCart = useMemo(() => {
+    if (!isVenueOpen) {
+      return false;
+    }
+
     if (isAuthenticated) {
       return true;
     }
 
     return orderType === 'dine-in' && Boolean(tableId);
-  }, [isAuthenticated, orderType, tableId]);
+  }, [isAuthenticated, isVenueOpen, orderType, tableId]);
 
   const register = useCallback(async (userData) => {
     return apiClient.post('/user/create', userData);
@@ -105,10 +180,31 @@ export const AuthProvider = ({ children }) => {
 
   const loginGuest = useCallback(
     async (incomingTableId) => {
-      const targetTableId = incomingTableId ?? tableId;
+      const targetTableId = incomingTableId ?? detectedTableId ?? tableId;
 
       if (!targetTableId) {
         const error = new Error('Se necesita un ID de mesa para el login invitado');
+        error.code = ERROR_CODES.TABLE_CLOSED;
+        throw error;
+      }
+
+      let validation = validateTable(targetTableId);
+      if (validation.state === 'not-found' || validation.state === 'error') {
+        await refetchTables();
+        validation = validateTable(targetTableId);
+      }
+      if (validation.state !== 'valid') {
+        const error = new Error(
+          validation.state === 'blocked'
+            ? 'Esta mesa esta bloqueada. Pide ayuda a tu mozo.'
+            : 'No encontramos una mesa habilitada para este codigo.',
+        );
+        error.code = ERROR_CODES.TABLE_CLOSED;
+        throw error;
+      }
+
+      if (!isVenueOpen) {
+        const error = new Error('El restaurante esta cerrado en este momento.');
         error.code = ERROR_CODES.TABLE_CLOSED;
         throw error;
       }
@@ -161,7 +257,17 @@ export const AuthProvider = ({ children }) => {
         setIsLoading(false);
       }
     },
-    [authState.clientId, register, setTableId, setUser, tableId],
+    [
+      authState.clientId,
+      detectedTableId,
+      isVenueOpen,
+      refetchTables,
+      register,
+      setTableId,
+      setUser,
+      tableId,
+      validateTable,
+    ],
   );
 
   const logout = useCallback(
@@ -214,6 +320,12 @@ export const AuthProvider = ({ children }) => {
     };
   }, [extendSession, token]);
 
+  useEffect(() => {
+    if (!isVenueOpen && orderType === 'dine-in') {
+      setOrderTypeState('takeaway');
+    }
+  }, [isVenueOpen, orderType]);
+
   const setOrderType = useCallback((type) => {
     setOrderTypeState(type);
   }, []);
@@ -227,7 +339,7 @@ export const AuthProvider = ({ children }) => {
       isAdmin: authState.isAdmin,
       isGuest: authState.isGuest,
       isAuthenticated,
-      isLoading: isLoading || isDetectingTable,
+      isLoading: isLoading || isDetectingTable || isTableRegistryLoading,
       orderType,
       canAddToCart,
       register,
@@ -237,24 +349,35 @@ export const AuthProvider = ({ children }) => {
       setTableId,
       setOrderType,
       extendSession,
+      requestedTableId: detectedTableId,
+      tableValidation,
+      canUseTableOrders,
+      refetchTables,
+      isVenueOpen,
     }),
     [
       authState.clientId,
       authState.isAdmin,
       authState.isGuest,
       authState.user,
+      canUseTableOrders,
       canAddToCart,
+      detectedTableId,
       extendSession,
       isAuthenticated,
       isDetectingTable,
+      isTableRegistryLoading,
       isLoading,
       login,
       loginGuest,
       logout,
+      refetchTables,
       orderType,
       register,
       setOrderType,
       setTableId,
+      isVenueOpen,
+      tableValidation,
       tableId,
       token,
     ],

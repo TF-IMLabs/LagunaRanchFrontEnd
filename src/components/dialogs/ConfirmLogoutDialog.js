@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+﻿import PropTypes from 'prop-types';
 import React from 'react';
 import {
   Button,
@@ -15,15 +15,26 @@ const ConfirmLogoutDialog = ({ open, onClose, onConfirm }) => (
     onClose={onClose}
     aria-labelledby="confirm-logout-title"
     aria-describedby="confirm-logout-description"
+    PaperProps={{
+      sx: {
+        bgcolor: (theme) => theme.palette.background.paper,
+        border: (theme) => `1px solid ${theme.palette.divider}`,
+      },
+    }}
   >
-    <DialogTitle id="confirm-logout-title">Confirmar salida</DialogTitle>
-    <DialogContent>
-      <DialogContentText id="confirm-logout-description">
-        ¿Estás seguro de que querés cerrar sesión?
+    <DialogTitle
+      id="confirm-logout-title"
+      sx={{ color: 'primary.main', fontWeight: 600, textAlign: 'center' }}
+    >
+      Confirmar salida
+    </DialogTitle>
+    <DialogContent sx={{ textAlign: 'center' }}>
+      <DialogContentText id="confirm-logout-description" color="text.secondary">
+        ¿Estás seguro de que quieres cerrar sesión?
       </DialogContentText>
     </DialogContent>
-    <DialogActions sx={{ justifyContent: 'flex-end', gap: 1 }}>
-      <Button onClick={onClose} color="primary" variant="outlined">
+    <DialogActions sx={{ justifyContent: 'center', gap: 1.5, pb: 3 }}>
+      <Button onClick={onClose} color="inherit" variant="outlined">
         Cancelar
       </Button>
       <Button onClick={onConfirm} color="primary" variant="contained" autoFocus>

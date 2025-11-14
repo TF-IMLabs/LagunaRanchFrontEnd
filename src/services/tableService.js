@@ -70,6 +70,18 @@ export const createTable = async (tableData) => {
   }
 };
 
+export const deleteTable = async (id_mesa) => {
+  try {
+    const response = await apiClient.delete('/table/delete', {
+      data: { id_mesa },
+    });
+    return response?.data ?? response ?? null;
+  } catch (error) {
+    console.error('Error al eliminar la mesa:', error);
+    throw error;
+  }
+};
+
 export const updateTableNote = async (id_mesa, nota) => {
   try {
     const response = await apiClient.put('/table/update/note', { id_mesa, nota });
@@ -78,6 +90,12 @@ export const updateTableNote = async (id_mesa, nota) => {
     console.error('Error al actualizar la nota de la mesa:', error);
     throw error;
   }
+};
+
+export const tableService = {
+  getAll: getAllTables,
+  create: createTable,
+  delete: deleteTable,
 };
 
 export const deleteTableNote = async (id_mesa) => {
