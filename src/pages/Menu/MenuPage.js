@@ -162,13 +162,13 @@ const MenuPage = () => {
         <Stack spacing={isSmallScreen ? 2.5 : 3.25}>
           {showLoginReminder && (
             <Alert severity="info">
-              Inicia sesion para realizar pedidos de delivery o take away. Si
-              estas en el local, escanea el QR de tu mesa para ordenar como invitado.
+              Inicia sesión para realizar pedidos de delivery o take away. Si
+              estás en el local, escanea el QR de tu mesa para ordenar como invitado.
             </Alert>
           )}
           {tableBlocked && (
             <Alert severity="warning">
-              La mesa {resolvedTableId} esta bloqueada temporalmente. Pedi ayuda a tu mozo para habilitarla.
+              La mesa {resolvedTableId} está bloqueada temporalmente. Pedí ayuda a tu mozo para habilitarla.
             </Alert>
           )}
           {tableNotFound && (

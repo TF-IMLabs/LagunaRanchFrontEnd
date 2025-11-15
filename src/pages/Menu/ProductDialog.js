@@ -96,9 +96,9 @@ const ProductDialog = ({ open, onClose, product }) => {
   const { addToCart, openCombinedDialog } = useCart();
   const { canAddToCart, isVenueOpen } = useAuth();
   const addDisabledReason = !isVenueOpen
-    ? 'El restaurante esta cerrado por el momento.'
+    ? 'El restaurante está cerrado por el momento.'
     : !canAddToCart
-    ? 'Inicia sesion o escanea tu mesa para sumar productos.'
+    ? 'Inicia sesión o escanea tu mesa para agregar productos'
     : '';
 
   const handleAddToCart = () => {
@@ -218,7 +218,7 @@ const ProductDialog = ({ open, onClose, product }) => {
               fullWidth
               sx={{ flex: { xs: '1 1 100%', sm: '0 1 auto' } }}
             >
-              A??adir al pedido
+              Añadir al pedido
             </Button>
           </span>
         </Tooltip>

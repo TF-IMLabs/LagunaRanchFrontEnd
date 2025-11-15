@@ -253,11 +253,6 @@ const Cart = ({ onClose }) => {
         gap: 2,
       }}
     >
-      {!venueIsOpen && (
-        <Alert severity="warning">
-          El restaurante está cerrado. Podes explorar el menú pero no realizar pedidos.
-        </Alert>
-      )}
       {orderType === 'dine-in' && tableUnavailable && (
         <Alert severity="warning">
           La mesa detectada ya no esta habilitada para nuevos pedidos. Consulta al mozo o inicia sesión para otra modalidad.
@@ -408,7 +403,7 @@ const Cart = ({ onClose }) => {
             fullWidth
             sx={{ maxWidth: 320 }}
           >
-            Suma productos
+        Agregar productos
           </Button>
         </Box>
       ) : (

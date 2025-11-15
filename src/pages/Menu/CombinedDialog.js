@@ -71,11 +71,20 @@ const CombinedDialog = () => {
         p: { xs: 2, sm: 3 },
       }}
     >
-        {!venueIsOpen && (
-          <Alert severity="warning">
-            El restaurante esta cerrado. Podes explorar el menu pero no realizar pedidos.
-          </Alert>
-        )}
+       {!venueIsOpen && (
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '100%',
+    }}
+  >
+    <Alert severity="warning" sx={{ width: 'fit-content' }}>
+      El restaurante está cerrado. Podés explorar el menú pero no realizar pedidos.
+    </Alert>
+  </Box>
+)}
         <Box>
           <Order onClose={closeCombinedDialog} />
         </Box>

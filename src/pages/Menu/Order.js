@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Alert,
   Typography,
   Divider,
   Box,
@@ -20,7 +19,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { callWaiter, requestBill } from '../../services/waiterService';
 
 const UNASSIGNED_TABLE_MESSAGE =
-  'No hay mesas asignadas, no se puede realizar un pedido.';
+  '';
 const EMPTY_ORDER_MESSAGE =
   'Aún no pediste nada, hace tu pedido utilizando el carrito!';
 const LOADING_ORDER_MESSAGE = 'Cargando el pedido...';
@@ -140,16 +139,6 @@ useEffect(() => {
       setBillRequested(false);
     }
   }, [order.length]);
-
-  if (!isVenueOpen) {
-    return (
-      <Box display="flex" justifyContent="center" mt={2}>
-        <Alert severity="warning">
-          El restaurante está cerrado. Podras seguir tus pedidos cuando vuelva a abrir.
-        </Alert>
-      </Box>
-    );
-  }
 
   if (!tableId) {
     if (!isAuthenticated) {
